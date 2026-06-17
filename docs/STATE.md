@@ -50,6 +50,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Added Hungarian `/help` and `/sugo` commands with short command list and detailed per-command help through the `parancs` option.
 - Extended `/doctor` with message prompt mode diagnostics for slash-only versus Message Content intent operation.
 - Added optional startup notifications through `DISCORD_NOTIFICATION_CHANNEL_ID`, without printing secrets or raw Discord IDs.
+- Added `/doctor` diagnostics for duplicate Discord channel mappings that point at the same local project path.
 
 ## Open Work
 

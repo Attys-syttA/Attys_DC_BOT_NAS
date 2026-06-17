@@ -69,6 +69,12 @@ export function getAllProjects(guildId: string): Project[] {
     .all(guildId) as Project[];
 }
 
+export function getProjectsByPath(guildId: string, projectPath: string): Project[] {
+  return db
+    .prepare("SELECT * FROM projects WHERE guild_id = ? AND project_path = ?")
+    .all(guildId, projectPath) as Project[];
+}
+
 export function setAutoApprove(
   channelId: string,
   autoApprove: boolean,

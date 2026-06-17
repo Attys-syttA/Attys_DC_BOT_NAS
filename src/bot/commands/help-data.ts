@@ -52,6 +52,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
     details: [
       "Titkok kiirasa nelkul ellenorzi a Discord configot, allowed principalokat es BASE_PROJECT_DIR-t.",
       "Megnezi, hogy a channel regisztralt-e, elerheto-e a Codex CLI, es mukodik-e a `codex login status`.",
+      "Jelzi, ha ugyanahhoz a project path-hoz tobb Discord channel mapping tartozik, peldaul regi forum/thread maradvany miatt.",
     ],
   },
   {

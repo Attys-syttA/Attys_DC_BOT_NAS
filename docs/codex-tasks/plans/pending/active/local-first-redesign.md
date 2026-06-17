@@ -41,6 +41,7 @@ Discord
 - Added Hungarian `/help` and `/sugo` command help.
 - Extended `/doctor` with message prompt mode diagnostics.
 - Added optional public-safe startup notifications through `DISCORD_NOTIFICATION_CHANNEL_ID`.
+- Added `/doctor` diagnostics for duplicate Discord channel mappings on the same local project path.
 
 ## Open
 

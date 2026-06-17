@@ -3,7 +3,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import fs from "node:fs";
-import { getProject } from "../../db/database.js";
+import { getProject, getProjectsByPath } from "../../db/database.js";
 import { resolveCodexCommand } from "../../codex/command-resolver.js";
 import { getConfig } from "../../utils/config.js";
 import { runLocalCommand } from "./local-command.js";
@@ -43,6 +43,14 @@ export async function execute(
 
   const project = getProject(interaction.channelId);
   lines.push(project ? ok("this channel is registered") : fail("channel registration", "run /register first"));
+  if (project) {
+    const projectMappings = getProjectsByPath(project.guild_id, project.project_path);
+    lines.push(
+      projectMappings.length > 1
+        ? info(`project has ${projectMappings.length} channel mappings; old forum/thread mappings may still exist`)
+        : ok("project has one channel mapping"),
+    );
+  }
 
   const codexCommand = resolveCodexCommand();
   const version = await runLocalCommand(codexCommand, ["--version"], process.cwd(), 10_000);

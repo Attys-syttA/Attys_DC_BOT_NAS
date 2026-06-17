@@ -126,6 +126,7 @@ No remote execution keys are required. Do not add custom execution-agent secrets
 - local Codex session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
 - message-based prompts require Discord's privileged Message Content intent; slash commands work with `DISCORD_ENABLE_MESSAGE_PROMPTS=false`
 - `/doctor` reports whether message prompt mode is enabled or slash-command-only mode is active
+- `/doctor` warns when one local project still has multiple Discord channel mappings, such as old forum/thread leftovers
 - startup notifications go only to `DISCORD_NOTIFICATION_CHANNEL_ID` when it is configured, and the message does not include secrets or raw IDs
 
 ## Validation

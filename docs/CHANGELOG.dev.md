@@ -27,3 +27,4 @@
 - Help command: bekerult a magyar `/help` es `/sugo`, rovid parancslistaval es `parancs` opcional keresztuli reszletes leirassal.
 - Doctor diagnostics: a `/doctor` most jelzi, hogy message prompt mod aktiv-e, es figyelmeztet a Discord Message Content intent szuksegessegre.
 - Startup notification: opcionális `DISCORD_NOTIFICATION_CHANNEL_ID` kulcs kerult be, amellyel a bot public-safe indulasi statuszt kuldhet egy operatori Discord csatornaba.
+- Mapping diagnostics: a `/doctor` most jelzi, ha ugyanahhoz a local project path-hoz tobb Discord channel mapping tartozik, peldaul regi forum/thread maradvany miatt.

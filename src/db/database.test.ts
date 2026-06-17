@@ -17,6 +17,7 @@ import {
   unregisterProject,
   getProject,
   getAllProjects,
+  getProjectsByPath,
   setAutoApprove,
   upsertSession,
   getSession,
@@ -59,6 +60,16 @@ describe("database", () => {
       expect(getAllProjects("guild1")).toHaveLength(2);
       expect(getAllProjects("guild2")).toHaveLength(1);
       expect(getAllProjects("guild3")).toHaveLength(0);
+    });
+
+    it("getProjectsByPath finds duplicate channel mappings for one project", () => {
+      registerProject("ch1", "/p1", "guild1");
+      registerProject("ch2", "/p1", "guild1");
+      registerProject("ch3", "/p1", "guild2");
+      registerProject("ch4", "/p2", "guild1");
+
+      const projects = getProjectsByPath("guild1", "/p1");
+      expect(projects.map((project) => project.channel_id).sort()).toEqual(["ch1", "ch2"]);
     });
 
     it("unregisterProject removes project and cascades to sessions", () => {
