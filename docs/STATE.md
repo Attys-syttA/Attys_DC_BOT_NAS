@@ -36,12 +36,12 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Added `DISCORD_APPLICATION_ID` and `DISCORD_ENABLE_RUN_TESTS` to config and `.env.example`.
 - Hardened attachment filename handling before files are saved under project-local `.codex-uploads/`.
 - Added CI/lint/security automation: GitHub Actions CI, SQLite check, GitGuardian/ggshield secret scan, Dependabot, SECURITY.md, and ESLint.
-- Added focused command tests for `/ask`, `/dashboard`, `/doctor`, and `/run-tests`.
+- Added focused command tests for `/ask`, `/dashboard`, `/doctor`, `/git-status`, and `/run-tests`.
 
 ## Open Work
 
 1. Review whether `/usage` and `/auto-approve` should stay or be removed from the canonical command set.
-2. Add broader command integration tests for `/git-status` and Discord interaction button flows.
+2. Add broader command integration tests for Discord interaction button flows.
 3. Remove remaining non-Windows launcher references if they are not needed.
 4. Initialize or reconcile local git state against `Attys-syttA/Attys_DC_BOT` only after review.
 5. Run the full validation and secret scan before any commit.
