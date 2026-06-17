@@ -57,6 +57,6 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 
 ## Open Work
 
-1. Remove remaining non-Windows launcher references if they are not needed.
-2. Initialize or reconcile local git state against `Attys-syttA/Attys_DC_BOT` only after review.
-3. Run the full validation and secret scan before any commit.
+1. Decide whether to remove the remaining legacy forum/thread mappings through `/mappings` cleanup buttons.
+2. Continue operator UX improvements under `docs/codex-tasks/plans/pending/active/ujratervezes.md`.
+3. Move `ujratervezes.md` to `done` only after the current local-first control-center baseline is accepted as complete.

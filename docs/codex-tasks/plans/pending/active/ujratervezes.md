@@ -2,6 +2,22 @@
 
 Status: active public-safe redesign plan
 
+## Elkeszult reszek
+
+- Local-first Discord-Codex alaparchitektura mukodik ugyanazon a Windows gepen.
+- Public-safe `.env` modell es ignore policy ervenyben van.
+- CI, lint, build, test, SQLite check, GitGuardian/ggshield es Dependabot be van kotve.
+- Canonical slash command keszlet mukodo alapja elkeszult.
+- Magyar `/help` es `/sugo` elerheto.
+- `/doctor`, `/mappings`, `/unregister channel:` es mapping cleanup gombok segitik a regi forum/thread mappingek kezeleset.
+- Bot notification az aktualis repo text csatornara megy, nem kulon direkt csatornara.
+
+## Nyitott reszek
+
+- Legacy forum/thread mappingek tenyleges torleserol operatori dontes kell Discord oldalon.
+- Tovabbi operator UX fejlesztesek nyitottak, ha a control center baseline mar elfogadott.
+- A fo ujratervezesi terv akkor kerulhet `done` ala, ha a bot mukodesi baseline-t a user lezartnak tekinti.
+
 ## Cel
 
 Az `Attys_DC_BOT` egy local-first Discord-Codex bot legyen, amely ugyanazon a Windows gepen fut, ahol a Codex CLI, a `codex login` allapot es a helyi projektek is elerhetok.

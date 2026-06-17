@@ -1,6 +1,6 @@
 # Local-First Redesign Plan
 
-Status: active / partly implemented
+Status: done / implemented baseline
 
 ## Current Context
 
@@ -46,11 +46,11 @@ Discord
 - Added read-only `/mappings` overview for all project-channel mappings and duplicate project path groups.
 - Added `/mappings` cleanup buttons for duplicate mapping entries.
 
-## Open
+## Closed
 
-- Decide whether the legacy forum/thread mappings should be removed now or kept as archival Discord-side history.
-- Decide which operator UX improvements should be added next.
-- Move this plan to `done` after the user accepts the current local-first control-center baseline.
+- Real Discord app and local `.env` smoke testing were completed during implementation.
+- Legacy forum/thread mapping cleanup is now supported through `/mappings` and `/unregister channel:`.
+- Further operator UX work continues under `ujratervezes.md`.
 
 ## Constraints
 
