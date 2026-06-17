@@ -62,11 +62,16 @@ npm run dev
 - `/register <path>`: link the current channel to a local project folder
 - `/unregister`: remove the channel mapping
 - `/status`: show registered project status
+- `/dashboard`: show the channel's local Codex control center
+- `/doctor`: check local Codex, config, and channel readiness without printing secrets
 - `/sessions`: show known local Codex sessions for the registered project
 - `/last`: show the last known assistant response
 - `/stop`: interrupt the current Codex turn
 - `/queue list`: show queued prompts
 - `/queue clear`: clear queued prompts
+- `/git-status`: run `git status --short --branch` in the registered local project
+- `/run-tests`: run `npm test` in the registered local project when `DISCORD_ENABLE_RUN_TESTS=true`
+- `/ask <prompt>`: send an explicit prompt to the registered local Codex session
 - `/auto-approve`: toggle approval bypass for the current channel
 
 The current baseline also includes `/usage` from the local-first reference implementation. Treat it as optional; it may depend on what the local Codex app-server exposes.
@@ -76,6 +81,7 @@ The current baseline also includes `/usage` from the local-first reference imple
 Important `.env` keys:
 
 - `DISCORD_BOT_TOKEN`
+- `DISCORD_APPLICATION_ID`
 - `DISCORD_GUILD_ID`
 - `ALLOWED_USER_IDS`
 - `ALLOWED_ROLE_IDS`
@@ -88,6 +94,7 @@ Important `.env` keys:
 - `DISCORD_EPHEMERAL_RESPONSES`
 - `SHOW_COST`
 - `DISCORD_REGISTER_COMMANDS`
+- `DISCORD_ENABLE_RUN_TESTS`
 
 No remote execution keys are required. Do not add custom execution-agent secrets, private hostnames, private IPs, or machine-specific private examples to tracked files.
 
@@ -104,9 +111,17 @@ No remote execution keys are required. Do not add custom execution-agent secrets
 ## Validation
 
 ```powershell
+npm run lint
 npm run typecheck
 npm test
 npm run build
 npm run check
 ggshield secret scan path --recursive --yes --use-gitignore .
 ```
+
+## Repository Protection
+
+- GitHub Actions CI runs lint, typecheck, tests, and build on Node.js 20 and 22.
+- SQLite Check verifies the native `better-sqlite3` dependency in CI.
+- Secret Scan runs `ggshield` when `GITGUARDIAN_API_KEY` is configured as a repository secret.
+- Dependabot checks npm and GitHub Actions dependencies weekly.

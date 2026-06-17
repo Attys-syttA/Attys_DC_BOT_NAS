@@ -31,11 +31,16 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Set package metadata to `attys-dc-bot`.
 - Added `typecheck`, `check`, and `secret:scan` npm scripts.
 - Changed the SQLite default path to `.discord-bot-state/bridge.sqlite` through `DISCORD_DATABASE_PATH`.
+- Added chadingTV-style local-first slash controls: `/ask`, `/doctor`, `/git-status`, and env-gated `/run-tests`.
+- Added `/dashboard` as a safe Discord control-center view for the registered local project.
+- Added `DISCORD_APPLICATION_ID` and `DISCORD_ENABLE_RUN_TESTS` to config and `.env.example`.
+- Hardened attachment filename handling before files are saved under project-local `.codex-uploads/`.
+- Added CI/lint/security automation: GitHub Actions CI, SQLite check, GitGuardian/ggshield secret scan, Dependabot, SECURITY.md, and ESLint.
 
 ## Open Work
 
-1. Review whether `/usage` should stay or be removed from the canonical command set.
-2. Add or adapt explicit tests for `DISCORD_DATABASE_PATH`, role checks, queue limits, and final command naming.
+1. Review whether `/usage` and `/auto-approve` should stay or be removed from the canonical command set.
+2. Add broader command integration tests for `/ask`, `/doctor`, `/git-status`, and `/run-tests`.
 3. Remove remaining non-Windows launcher references if they are not needed.
 4. Initialize or reconcile local git state against `Attys-syttA/Attys_DC_BOT` only after review.
 5. Run the full validation and secret scan before any commit.

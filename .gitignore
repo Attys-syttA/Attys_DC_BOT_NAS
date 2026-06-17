@@ -6,6 +6,7 @@ node_modules/
 dist/
 coverage/
 .cache/
+.cache_ggshield/
 .turbo/
 
 .discord-bot-state/

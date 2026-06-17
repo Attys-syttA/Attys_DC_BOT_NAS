@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Mock better-sqlite3 to always use :memory:
 vi.mock("better-sqlite3", async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const actual = await vi.importActual("better-sqlite3") as any;
   const RealDatabase = actual.default;
   return {

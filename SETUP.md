@@ -22,7 +22,7 @@ Create a Discord application and bot in the Discord Developer Portal.
 Required values for `.env`:
 
 - bot token
-- application/server information needed by Discord command registration
+- application ID and server ID needed by Discord command registration
 - your allowed Discord user ID
 
 Enable Message Content Intent only if normal Discord messages should be accepted as prompts. Slash commands remain the safer default control surface.
@@ -63,11 +63,19 @@ npm run dev
 1. In a Discord channel, run `/register`.
 2. Select or type a folder under `BASE_PROJECT_DIR`.
 3. Send a normal message or use the available slash commands.
-4. Use `/sessions`, `/last`, `/queue list`, and `/stop` to inspect or control the local Codex work.
+4. Use `/dashboard`, `/sessions`, `/last`, `/queue list`, and `/stop` to inspect or control the local Codex work.
+5. Use `/doctor` if the bot starts but Codex or channel routing does not behave as expected.
+
+Optional local commands:
+
+- `/ask` gives a slash-command prompt path in addition to normal messages.
+- `/git-status` reports the registered local project's git state.
+- `/run-tests` is disabled unless `DISCORD_ENABLE_RUN_TESTS=true` is set in `.env`.
 
 ## 6. Validate Before Commit
 
 ```powershell
+npm run lint
 npm run typecheck
 npm test
 npm run build

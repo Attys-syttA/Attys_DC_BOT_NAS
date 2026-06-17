@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DISCORD_BOT_TOKEN: z.string().min(1, "DISCORD_BOT_TOKEN is required"),
+  DISCORD_APPLICATION_ID: z.string().default(""),
   DISCORD_GUILD_ID: z.string().min(1, "DISCORD_GUILD_ID is required"),
   ALLOWED_USER_IDS: z
     .string()
@@ -25,6 +26,10 @@ const envSchema = z.object({
     .default("true")
     .transform((v) => v === "true"),
   DISCORD_REGISTER_COMMANDS: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  DISCORD_ENABLE_RUN_TESTS: z
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),

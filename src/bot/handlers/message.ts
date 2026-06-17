@@ -21,19 +21,30 @@ function messageRoleIds(message: Message): string[] {
   return message.member ? [...message.member.roles.cache.keys()] : [];
 }
 
+export function safeAttachmentFileName(name: string | null | undefined): string {
+  const baseName = path.basename(name ?? "attachment");
+  const cleaned = baseName
+    .replace(/[\x00-\x1f<>:"/\\|?*]+/g, "_")
+    .replace(/\s+/g, "_")
+    .replace(/^\.+/, "")
+    .slice(0, 120);
+  return cleaned || "attachment";
+}
+
 async function downloadAttachment(
   attachment: Attachment,
   projectPath: string,
 ): Promise<{ filePath: string; isImage: boolean } | { skipped: string } | null> {
-  const ext = path.extname(attachment.name ?? "").toLowerCase();
+  const safeName = safeAttachmentFileName(attachment.name);
+  const ext = path.extname(safeName).toLowerCase();
 
   if (BLOCKED_EXTENSIONS.has(ext)) {
-    return { skipped: L(`Blocked: \`${attachment.name}\` (dangerous file type)`, `차단됨: \`${attachment.name}\` (위험한 파일 형식)`) };
+    return { skipped: L(`Blocked: \`${safeName}\` (dangerous file type)`, `차단됨: \`${safeName}\` (위험한 파일 형식)`) };
   }
 
   if (attachment.size > MAX_FILE_SIZE) {
     const sizeMB = (attachment.size / 1024 / 1024).toFixed(1);
-    return { skipped: L(`Skipped: \`${attachment.name}\` (${sizeMB}MB exceeds 25MB limit)`, `건너뜀: \`${attachment.name}\` (${sizeMB}MB, 25MB 제한 초과)`) };
+    return { skipped: L(`Skipped: \`${safeName}\` (${sizeMB}MB exceeds 25MB limit)`, `건너뜀: \`${safeName}\` (${sizeMB}MB, 25MB 제한 초과)`) };
   }
 
   const uploadDir = path.join(projectPath, ".codex-uploads");
@@ -41,7 +52,7 @@ async function downloadAttachment(
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  const fileName = `${Date.now()}-${attachment.name}`;
+  const fileName = `${Date.now()}-${safeName}`;
   const filePath = path.join(uploadDir, fileName);
 
   try {

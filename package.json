@@ -10,8 +10,9 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm test && npm run build",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "secret:scan": "ggshield secret scan path --recursive --yes --use-gitignore ."
   },
   "dependencies": {
@@ -21,14 +22,21 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.0.0",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
     "tsup": "^8.0.0",
     "tsx": "^4.0.0",
     "typescript": "^5.5.0",
+    "typescript-eslint": "^8.61.1",
     "vitest": "^4.1.9"
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
   }
 }

@@ -25,12 +25,18 @@ Discord
 - Runtime files, secrets, SQLite databases, logs, and build output are ignored.
 - README, setup guide, local `AGENTS.md`, state, and changelog were rewritten for the local-first direction.
 - Validation scripts are present: `typecheck`, `test`, `build`, `check`, and `secret:scan`.
+- Added chadingTV-style local-first controls: `/ask`, `/doctor`, `/git-status`, and env-gated `/run-tests`.
+- Added `/dashboard` as a Discord-native local Codex control center for the current channel.
+- Added `DISCORD_APPLICATION_ID` and `DISCORD_ENABLE_RUN_TESTS` config keys.
+- Hardened attachment storage by sanitizing Discord filenames before writing into `.codex-uploads/`.
+- Added repo hygiene workflows: CI, SQLite native dependency check, GitGuardian/ggshield secret scan, Dependabot, SECURITY.md, and ESLint.
 
 ## Open
 
 - Configure a real Discord application and local `.env`.
 - Run a private Discord smoke test with a test guild.
 - Decide which operator UX improvements should be added next.
+- Decide whether `/usage` and `/auto-approve` should remain in the long-term canonical command set.
 - Commit and push only after the user explicitly approves publication.
 
 ## Constraints

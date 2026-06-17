@@ -22,8 +22,29 @@ import * as clearSessionsCmd from "./commands/clear-sessions.js";
 import * as lastCmd from "./commands/last.js";
 import * as queueCmd from "./commands/queue.js";
 import * as usageCmd from "./commands/usage.js";
+import * as askCmd from "./commands/ask.js";
+import * as doctorCmd from "./commands/doctor.js";
+import * as gitStatusCmd from "./commands/git-status.js";
+import * as runTestsCmd from "./commands/run-tests.js";
+import * as dashboardCmd from "./commands/dashboard.js";
 
-const commands = [registerCmd, unregisterCmd, statusCmd, stopCmd, autoApproveCmd, sessionsCmd, clearSessionsCmd, lastCmd, queueCmd, usageCmd];
+const commands = [
+  registerCmd,
+  unregisterCmd,
+  statusCmd,
+  stopCmd,
+  autoApproveCmd,
+  sessionsCmd,
+  clearSessionsCmd,
+  lastCmd,
+  queueCmd,
+  usageCmd,
+  askCmd,
+  doctorCmd,
+  gitStatusCmd,
+  runTestsCmd,
+  dashboardCmd,
+];
 const commandMap = new Collection<
   string,
   { execute: (interaction: ChatInputCommandInteraction) => Promise<void> }
@@ -61,9 +82,12 @@ export async function startBot(): Promise<Client> {
     try {
       const rest = new REST({ version: "10" }).setToken(config.DISCORD_BOT_TOKEN);
       const commandData = commands.map((c) => c.data.toJSON());
+      const applicationId =
+        config.DISCORD_APPLICATION_ID ||
+        (await rest.get(Routes.currentApplication()) as { id: string }).id;
       await rest.put(
         Routes.applicationGuildCommands(
-          (await rest.get(Routes.currentApplication()) as { id: string }).id,
+          applicationId,
           config.DISCORD_GUILD_ID,
         ),
         { body: commandData },

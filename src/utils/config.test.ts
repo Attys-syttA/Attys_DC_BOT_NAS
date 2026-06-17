@@ -7,6 +7,7 @@ describe("config", () => {
     vi.resetModules();
     // Set valid env vars
     process.env.DISCORD_BOT_TOKEN = "test-token";
+    delete process.env.DISCORD_APPLICATION_ID;
     process.env.DISCORD_GUILD_ID = "test-guild";
     process.env.ALLOWED_USER_IDS = "user1,user2";
     delete process.env.ALLOWED_ROLE_IDS;
@@ -19,6 +20,7 @@ describe("config", () => {
     delete process.env.DISCORD_ENABLE_MESSAGE_PROMPTS;
     delete process.env.DISCORD_EPHEMERAL_RESPONSES;
     delete process.env.DISCORD_REGISTER_COMMANDS;
+    delete process.env.DISCORD_ENABLE_RUN_TESTS;
     delete process.env.SHOW_COST;
   });
 
@@ -30,6 +32,7 @@ describe("config", () => {
     const { loadConfig } = await import("./config.js");
     const config = loadConfig();
     expect(config.DISCORD_BOT_TOKEN).toBe("test-token");
+    expect(config.DISCORD_APPLICATION_ID).toBe("");
     expect(config.DISCORD_GUILD_ID).toBe("test-guild");
     expect(config.ALLOWED_USER_IDS).toEqual(["user1", "user2"]);
     expect(config.ALLOWED_ROLE_IDS).toEqual([]);
@@ -46,7 +49,15 @@ describe("config", () => {
     expect(config.DISCORD_ENABLE_MESSAGE_PROMPTS).toBe(true);
     expect(config.DISCORD_EPHEMERAL_RESPONSES).toBe(true);
     expect(config.DISCORD_REGISTER_COMMANDS).toBe(false);
+    expect(config.DISCORD_ENABLE_RUN_TESTS).toBe(false);
     expect(config.SHOW_COST).toBe(false);
+  });
+
+  it("parses DISCORD_APPLICATION_ID when provided", async () => {
+    process.env.DISCORD_APPLICATION_ID = "app-id";
+    const { loadConfig } = await import("./config.js");
+    const config = loadConfig();
+    expect(config.DISCORD_APPLICATION_ID).toBe("app-id");
   });
 
   it("parses ALLOWED_USER_IDS with spaces", async () => {

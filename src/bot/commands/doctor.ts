@@ -1,0 +1,47 @@
+import {
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+import fs from "node:fs";
+import { getProject } from "../../db/database.js";
+import { resolveCodexCommand } from "../../codex/command-resolver.js";
+import { getConfig } from "../../utils/config.js";
+import { runLocalCommand } from "./local-command.js";
+
+function ok(label: string): string {
+  return `OK ${label}`;
+}
+
+function fail(label: string, detail: string): string {
+  return `FAIL ${label}: ${detail}`;
+}
+
+export const data = new SlashCommandBuilder()
+  .setName("doctor")
+  .setDescription("Check local bot, Codex, and registered project readiness");
+
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  const config = getConfig();
+  const lines: string[] = [];
+
+  lines.push(config.DISCORD_APPLICATION_ID ? ok("DISCORD_APPLICATION_ID configured") : ok("DISCORD_APPLICATION_ID omitted, bot will query Discord when registering commands"));
+  lines.push(config.DISCORD_GUILD_ID ? ok("DISCORD_GUILD_ID configured") : fail("DISCORD_GUILD_ID", "missing"));
+  lines.push(config.ALLOWED_USER_IDS.length > 0 || config.ALLOWED_ROLE_IDS.length > 0 ? ok("allowed principals configured") : fail("allowed principals", "no users or roles configured"));
+  lines.push(fs.existsSync(config.BASE_PROJECT_DIR) ? ok("BASE_PROJECT_DIR exists") : fail("BASE_PROJECT_DIR", "path does not exist"));
+
+  const project = getProject(interaction.channelId);
+  lines.push(project ? ok("this channel is registered") : fail("channel registration", "run /register first"));
+
+  const codexCommand = resolveCodexCommand();
+  const version = await runLocalCommand(codexCommand, ["--version"], process.cwd(), 10_000);
+  lines.push(version.exitCode === 0 ? ok("Codex CLI resolves") : fail("Codex CLI", "command failed"));
+
+  const login = await runLocalCommand(codexCommand, ["login", "status"], process.cwd(), 10_000);
+  lines.push(login.exitCode === 0 ? ok("codex login status") : fail("codex login status", "not logged in or command failed"));
+
+  await interaction.editReply({
+    content: `**Local Codex Doctor**\n\`\`\`text\n${lines.join("\n")}\n\`\`\``,
+  });
+}
