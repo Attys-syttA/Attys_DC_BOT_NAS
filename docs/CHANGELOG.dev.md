@@ -33,3 +33,4 @@
 - Mapping cleanup UX: a `/mappings` duplikalt mappingeknel Remove gombokat ad, amelyek leallitjak az adott channel sessionjet, torlik a mappinget, majd frissitik az attekintest.
 - Plan hygiene: a local-first redesign reszterv `done` ala kerult; az aktiv `ujratervezes.md` geppel ellenorizheto elkeszult/nyitott allapotblokkot kapott.
 - Plan check gate: az `npm run check` es a GitHub CI is futtatja a `plans:check` ellenorzest az aktiv tervfajlokra.
+- Mapping cleanup safety: a `/mappings` Remove gombokat csak a nem aktualis duplikalt mappingekre ad, az aktualis munkacsatornat `current` jelolessel mutatja.

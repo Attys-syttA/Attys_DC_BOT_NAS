@@ -24,6 +24,7 @@ function project(channelId: string, projectPath: string, autoApprove = 0): Proje
 function makeInteraction() {
   return {
     guildId: "guild-id",
+    channelId: "current-channel",
     editReply: vi.fn(),
   };
 }
@@ -62,9 +63,9 @@ describe("/mappings", () => {
     expect(embed.data.description).toContain("Duplicate project paths");
     expect(embed.data.description).toContain("**1**");
     expect(embed.data.fields[0].name).toContain("DUPLICATE");
-    expect(embed.data.fields[0].value).toContain("1. <#current-channel>");
+    expect(embed.data.fields[0].value).toContain("1. <#current-channel> current");
     expect(embed.data.fields[0].value).toContain("2. <#legacy-forum>");
-    expect(components[0].components[0].data.custom_id).toBe("mapping-remove:current-channel");
+    expect(components[0].components[0].data.custom_id).toBe("mapping-remove:legacy-forum");
   });
 
   it("renders single mappings and auto-approve markers", () => {
@@ -82,11 +83,11 @@ describe("/mappings", () => {
       project("current-channel", "/projects/app"),
       project("legacy-forum", "/projects/app"),
       project("other-channel", "/projects/other"),
-    ]);
+    ], "current-channel");
 
     expect(components).toHaveLength(1);
-    expect(components[0].components).toHaveLength(2);
-    expect((components[0].components[0].data as { label?: string }).label).toBe("Remove 1");
-    expect((components[0].components[1].data as { custom_id?: string }).custom_id).toBe("mapping-remove:legacy-forum");
+    expect(components[0].components).toHaveLength(1);
+    expect((components[0].components[0].data as { label?: string }).label).toBe("Remove 2");
+    expect((components[0].components[0].data as { custom_id?: string }).custom_id).toBe("mapping-remove:legacy-forum");
   });
 });

@@ -177,6 +177,9 @@ kulon jelezze a duplikalt local project path csoportokat.
 Duplikalt mappingeknel a `/mappings` adhat Remove gombokat, amelyek csak a
 lokalis SQLite mappinget es a kapcsolodo session allapotot torlik, Discord
 csatornat vagy uzenetet nem torolnek.
+A gombos cleanup ne ajanljon egykattintasos torlest az aktualis munkacsatornara;
+azt `current` jelolessel mutassa, es a kezi `/unregister channel:` maradjon
+az explicit operatori escape hatch.
 
 ## Kodmentesi Szabaly
 

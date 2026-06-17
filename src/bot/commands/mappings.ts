@@ -40,14 +40,18 @@ function truncate(value: string, maxLength: number): string {
   return `${value.slice(0, maxLength - 3)}...`;
 }
 
-export function renderMappingFields(projects: Project[]) {
+export function renderMappingFields(projects: Project[], currentChannelId?: string) {
   let duplicateIndex = 0;
   return groupProjects(projects).slice(0, 25).map((group) => {
     const duplicate = group.projects.length > 1;
     const channels = group.projects
       .map((project) => {
         const prefix = duplicate ? `${++duplicateIndex}. ` : "";
-        return `${prefix}<#${project.channel_id}>${project.auto_approve ? " auto-approve" : ""}`;
+        const markers = [
+          project.channel_id === currentChannelId ? "current" : "",
+          project.auto_approve ? "auto-approve" : "",
+        ].filter(Boolean);
+        return `${prefix}<#${project.channel_id}>${markers.length > 0 ? ` ${markers.join(", ")}` : ""}`;
       })
       .join("\n");
 
@@ -65,13 +69,14 @@ export function renderMappingFields(projects: Project[]) {
   });
 }
 
-export function renderMappingComponents(projects: Project[]) {
+export function renderMappingComponents(projects: Project[], currentChannelId?: string) {
   let duplicateIndex = 0;
   const buttons: ButtonBuilder[] = [];
   for (const group of groupProjects(projects)) {
     if (group.projects.length <= 1) continue;
     for (const project of group.projects) {
       duplicateIndex += 1;
+      if (project.channel_id === currentChannelId) continue;
       buttons.push(
         new ButtonBuilder()
           .setCustomId(`mapping-remove:${project.channel_id}`)
@@ -90,7 +95,7 @@ export function renderMappingComponents(projects: Project[]) {
   return rows;
 }
 
-export function renderMappingsPayload(projects: Project[]) {
+export function renderMappingsPayload(projects: Project[], currentChannelId?: string) {
   const duplicateGroups = groupProjects(projects).filter((group) => group.projects.length > 1).length;
   const embed = new EmbedBuilder()
     .setTitle(L("Project Channel Mappings", "프로젝트 채널 매핑"))
@@ -103,11 +108,11 @@ export function renderMappingsPayload(projects: Project[]) {
     ].join("\n"))
     .setColor(duplicateGroups > 0 ? 0xf59e0b : 0x10b981)
     .setTimestamp()
-    .addFields(renderMappingFields(projects));
+    .addFields(renderMappingFields(projects, currentChannelId));
 
   return {
     embeds: [embed],
-    components: renderMappingComponents(projects),
+    components: renderMappingComponents(projects, currentChannelId),
   };
 }
 
@@ -128,5 +133,5 @@ export async function execute(
     return;
   }
 
-  await interaction.editReply(renderMappingsPayload(projects));
+  await interaction.editReply(renderMappingsPayload(projects, interaction.channelId));
 }

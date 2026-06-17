@@ -241,7 +241,7 @@ export async function handleButtonInteraction(
       const projects = getAllProjects(interaction.guildId!);
       await interaction.update({
         content: L("This mapping is already removed.", "이 매핑은 이미 제거되었습니다."),
-        ...renderMappingsPayload(projects),
+        ...renderMappingsPayload(projects, interaction.channelId),
       });
       return;
     }
@@ -251,7 +251,7 @@ export async function handleButtonInteraction(
     const projects = getAllProjects(interaction.guildId!);
     await interaction.update({
       content: L(`Removed mapping for <#${channelId}>.`, `<#${channelId}> 매핑을 제거했습니다.`),
-      ...renderMappingsPayload(projects),
+      ...renderMappingsPayload(projects, interaction.channelId),
     });
     return;
   }
