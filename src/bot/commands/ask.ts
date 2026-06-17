@@ -18,6 +18,11 @@ export const data = new SlashCommandBuilder()
       .setRequired(true),
   );
 
+function formatPromptForDiscord(prompt: string): string {
+  const normalized = prompt.replace(/```/g, "'''");
+  return normalized.length > 1_400 ? `${normalized.slice(0, 1_400)}...` : normalized;
+}
+
 export async function execute(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
@@ -48,7 +53,12 @@ export async function execute(
   }
 
   await interaction.editReply({
-    content: L("Prompt sent to local Codex.", "로컬 Codex로 프롬프트를 보냈습니다."),
+    content: [
+      L("Prompt sent to local Codex.", "로컬 Codex로 프롬프트를 보냈습니다."),
+      "```text",
+      formatPromptForDiscord(prompt),
+      "```",
+    ].join("\n"),
   });
   await sessionManager.sendMessage(interaction.channel as TextChannel, prompt);
 }

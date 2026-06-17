@@ -62,8 +62,19 @@ describe("/ask", () => {
     await execute(interaction as never);
 
     expect(interaction.editReply).toHaveBeenCalledWith({
-      content: "Prompt sent to local Codex.",
+      content: "Prompt sent to local Codex.\n```text\ninspect this repo\n```",
     });
     expect(mocks.sendMessage).toHaveBeenCalledWith(interaction.channel, "inspect this repo");
+  });
+
+  it("escapes code fences in the visible prompt echo", async () => {
+    const interaction = makeInteraction("show ``` fenced");
+
+    await execute(interaction as never);
+
+    expect(interaction.editReply).toHaveBeenCalledWith({
+      content: "Prompt sent to local Codex.\n```text\nshow ''' fenced\n```",
+    });
+    expect(mocks.sendMessage).toHaveBeenCalledWith(interaction.channel, "show ``` fenced");
   });
 });
