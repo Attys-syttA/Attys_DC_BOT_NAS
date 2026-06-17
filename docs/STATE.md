@@ -45,6 +45,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Hardened session selection so failed Codex thread reads return a Discord error instead of throwing through the handler.
 - Fixed attachment filename sanitization to strip Windows and POSIX path traversal separators consistently in CI.
 - Added `npm run doctor:local` for secret-safe local preflight before live Discord smoke testing.
+- Made Discord message intents conditional so slash-command-only mode can run without the privileged Message Content intent.
 
 ## Open Work
 

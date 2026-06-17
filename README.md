@@ -121,6 +121,7 @@ No remote execution keys are required. Do not add custom execution-agent secrets
 - no network-share or portable-drive workflow is part of the target architecture
 - command and file-change auto-approval is disabled unless `DISCORD_ENABLE_AUTO_APPROVE=true`
 - local Codex session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
+- message-based prompts require Discord's privileged Message Content intent; slash commands work with `DISCORD_ENABLE_MESSAGE_PROMPTS=false`
 
 ## Validation
 

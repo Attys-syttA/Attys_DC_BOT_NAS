@@ -66,13 +66,13 @@ function interactionRoleIds(interaction: Interaction): string[] {
 
 export async function startBot(): Promise<Client> {
   const config = getConfig();
+  const intents = [GatewayIntentBits.Guilds];
+  if (config.DISCORD_ENABLE_MESSAGE_PROMPTS) {
+    intents.push(GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent);
+  }
 
   const client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-    ],
+    intents,
   });
 
   client.on("ready", async () => {
