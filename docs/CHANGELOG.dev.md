@@ -14,3 +14,4 @@
 - Command tests: bekerult celzott Vitest lefedes a `/ask`, `/dashboard`, `/doctor`, es `/run-tests` parancsokra, kulon figyelve arra, hogy a diagnosztika ne irjon ki config ertekeket.
 - Command tests folytatas: bekerult a `/git-status` tesztlefedese regisztralatlan channelre, normal git statusra es timeout jelzesre.
 - Interaction tests: bekerult a Discord button/select handler celzott lefedese authorization, stop, queue confirm, approval, uj session es ask-select flow-ra.
+- Dependency refresh: frissult a `tsx`, `zod`, `dotenv`, es `@types/node` a jelenlegi major agon belul; `npm run check`, `ggshield`, es audit zold.

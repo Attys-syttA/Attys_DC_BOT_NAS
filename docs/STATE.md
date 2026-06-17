@@ -37,6 +37,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Hardened attachment filename handling before files are saved under project-local `.codex-uploads/`.
 - Added CI/lint/security automation: GitHub Actions CI, SQLite check, GitGuardian/ggshield secret scan, Dependabot, SECURITY.md, and ESLint.
 - Added focused command tests for `/ask`, `/dashboard`, `/doctor`, `/git-status`, and `/run-tests`.
+- Refreshed npm dependencies within current major lines for Dependabot follow-up: `tsx`, `zod`, `dotenv`, and `@types/node`.
 
 ## Open Work
 
