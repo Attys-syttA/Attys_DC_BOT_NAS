@@ -36,13 +36,13 @@ Discord
 - Added `/session current/new/stop` and `/queue remove <number>` operator controls with focused tests.
 - Gated `/auto-approve` and session-wide automatic approval behind explicit `DISCORD_ENABLE_AUTO_APPROVE=true`.
 - Gated local Codex session deletion behind explicit `DISCORD_ENABLE_SESSION_DELETE=true`.
+- Promoted `/usage` into the canonical local-first command set with live-fetch/cache/failure tests.
 
 ## Open
 
 - Configure a real Discord application and local `.env`.
 - Run a private Discord smoke test with a test guild.
 - Decide which operator UX improvements should be added next.
-- Decide whether `/usage` should remain in the long-term canonical command set.
 - Commit and push only after the user explicitly approves publication.
 
 ## Constraints

@@ -138,10 +138,10 @@ Canonical vagy celhoz kozeli parancsok:
 - `/git-status`
 - `/run-tests`
 - `/ask`
+- `/usage`
 
 Meglevo optional parancsok, amelyeket kulon el kell donteni:
 
-- `/usage`
 - `/clear-sessions`
 
 A `/run-tests` csak explicit env engedellyel mukodjon, mert lokalis scriptet indit.

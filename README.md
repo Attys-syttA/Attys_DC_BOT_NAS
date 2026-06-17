@@ -76,10 +76,9 @@ npm run dev
 - `/queue remove <number>`: remove one queued prompt by its list number
 - `/git-status`: run `git status --short --branch` in the registered local project
 - `/run-tests`: run `npm test` in the registered local project when `DISCORD_ENABLE_RUN_TESTS=true`
+- `/usage`: show local Codex account usage when the app-server exposes rate limits
 - `/ask <prompt>`: send an explicit prompt to the registered local Codex session
 - `/auto-approve`: toggle approval bypass for the current channel when `DISCORD_ENABLE_AUTO_APPROVE=true`
-
-The current baseline also includes `/usage` from the local-first reference implementation. Treat it as optional; it may depend on what the local Codex app-server exposes.
 
 ## Configuration
 
