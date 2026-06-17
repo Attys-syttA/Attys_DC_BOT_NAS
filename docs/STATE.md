@@ -41,7 +41,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 ## Open Work
 
 1. Review whether `/usage` and `/auto-approve` should stay or be removed from the canonical command set.
-2. Add broader command integration tests for Discord interaction button flows.
+2. Add broader command integration tests for session delete/resume and queue remove edge cases.
 3. Remove remaining non-Windows launcher references if they are not needed.
 4. Initialize or reconcile local git state against `Attys-syttA/Attys_DC_BOT` only after review.
 5. Run the full validation and secret scan before any commit.

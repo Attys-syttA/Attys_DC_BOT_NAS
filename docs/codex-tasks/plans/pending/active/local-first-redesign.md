@@ -31,6 +31,7 @@ Discord
 - Hardened attachment storage by sanitizing Discord filenames before writing into `.codex-uploads/`.
 - Added repo hygiene workflows: CI, SQLite native dependency check, GitGuardian/ggshield secret scan, Dependabot, SECURITY.md, and ESLint.
 - Added focused command tests for `/ask`, `/dashboard`, `/doctor`, `/git-status`, and `/run-tests`.
+- Added focused Discord interaction tests for authorization, stop, queue confirm, approval, new-session, and ask-select flows.
 
 ## Open
 
