@@ -153,6 +153,8 @@ A `/auto-approve` maradhat operatori convenience parancs, de csak explicit
 fajlmodositas-jovahagyast kerul meg.
 A `/clear-sessions` es az egyedi session delete csak explicit
 `DISCORD_ENABLE_SESSION_DELETE=true` mellett torolhet lokalis Codex sessiont.
+A `/unregister` opcionális channel targetet is elfogadhat, hogy regi forum/thread
+mappingek az aktualis operatori csatornabol is takarithatok legyenek.
 
 ## Kodmentesi Szabaly
 

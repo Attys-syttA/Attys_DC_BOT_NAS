@@ -42,6 +42,7 @@ Discord
 - Extended `/doctor` with message prompt mode diagnostics.
 - Added optional public-safe startup notifications through `DISCORD_NOTIFICATION_CHANNEL_ID`.
 - Added `/doctor` diagnostics for duplicate Discord channel mappings on the same local project path.
+- Extended `/unregister` so an admin can remove selected legacy channel mappings without leaving the current operator channel.
 
 ## Open
 

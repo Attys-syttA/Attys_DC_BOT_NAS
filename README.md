@@ -66,7 +66,7 @@ npm run doctor:local
 ## Commands
 
 - `/register <path>`: link the current channel to a local project folder
-- `/unregister`: remove the channel mapping
+- `/unregister [channel]`: remove the current channel mapping, or a selected legacy channel mapping
 - `/status`: show registered project status
 - `/dashboard`: show the channel's local Codex control center
 - `/doctor`: check local Codex, config, and channel readiness without printing secrets

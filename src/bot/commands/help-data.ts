@@ -161,10 +161,11 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "unregister",
-    usage: "/unregister",
-    short: "Torli a jelenlegi channel es project kozotti kapcsolatot.",
+    usage: "/unregister channel: <opcionalis>",
+    short: "Torli a jelenlegi vagy kivalasztott channel es project kozotti kapcsolatot.",
     details: [
-      "A channel ezutan nem lesz projecthez rendelve.",
+      "Argumentum nelkul az aktualis channel mappinget torli.",
+      "A `channel` opcioval regi forum/thread vagy mas legacy mapping is torolheto az aktualis operatori csatornabol.",
       "A kapcsolodo local session mapping is torlodik az alkalmazas SQLite allapotabol.",
     ],
   },
