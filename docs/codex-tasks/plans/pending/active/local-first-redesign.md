@@ -39,6 +39,7 @@ Discord
 - Promoted `/usage` into the canonical local-first command set with live-fetch/cache/failure tests.
 - Hardened session selection against failed Codex thread reads.
 - Added Hungarian `/help` and `/sugo` command help.
+- Extended `/doctor` with message prompt mode diagnostics.
 
 ## Open
 

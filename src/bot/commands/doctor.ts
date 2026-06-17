@@ -16,6 +16,10 @@ function fail(label: string, detail: string): string {
   return `FAIL ${label}: ${detail}`;
 }
 
+function info(label: string): string {
+  return `INFO ${label}`;
+}
+
 export const data = new SlashCommandBuilder()
   .setName("doctor")
   .setDescription("Check local bot, Codex, and registered project readiness");
@@ -30,6 +34,11 @@ export async function execute(
   lines.push(config.DISCORD_GUILD_ID ? ok("DISCORD_GUILD_ID configured") : fail("DISCORD_GUILD_ID", "missing"));
   lines.push(config.ALLOWED_USER_IDS.length > 0 || config.ALLOWED_ROLE_IDS.length > 0 ? ok("allowed principals configured") : fail("allowed principals", "no users or roles configured"));
   lines.push(fs.existsSync(config.BASE_PROJECT_DIR) ? ok("BASE_PROJECT_DIR exists") : fail("BASE_PROJECT_DIR", "path does not exist"));
+  lines.push(
+    config.DISCORD_ENABLE_MESSAGE_PROMPTS
+      ? info("message prompts enabled; Discord Message Content intent must be enabled in Developer Portal")
+      : info("message prompts disabled; slash commands work without Message Content intent"),
+  );
 
   const project = getProject(interaction.channelId);
   lines.push(project ? ok("this channel is registered") : fail("channel registration", "run /register first"));

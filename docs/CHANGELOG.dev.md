@@ -25,3 +25,4 @@
 - Discord intents: a bot csak akkor ker `GuildMessages` es `MessageContent` intentet, ha `DISCORD_ENABLE_MESSAGE_PROMPTS=true`; slash command uzemhez eleg a `Guilds` intent.
 - Prompt visibility: a `/ask` visszaigazolo uzenet most a konkret prompt szoveget is megmutatja roviditett, Discord-safe code blockban.
 - Help command: bekerult a magyar `/help` es `/sugo`, rovid parancslistaval es `parancs` opcional keresztuli reszletes leirassal.
+- Doctor diagnostics: a `/doctor` most jelzi, hogy message prompt mod aktiv-e, es figyelmeztet a Discord Message Content intent szuksegessegre.
