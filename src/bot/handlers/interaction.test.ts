@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   getAllProjects: vi.fn(),
   unregisterProject: vi.fn(),
   readThread: vi.fn(),
+  readLastResponseWithFallback: vi.fn(),
   deleteStoredThread: vi.fn(),
 }));
 
@@ -45,6 +46,10 @@ vi.mock("../../codex/app-server-client.js", () => ({
 
 vi.mock("../../codex/storage.js", () => ({
   deleteStoredThread: mocks.deleteStoredThread,
+}));
+
+vi.mock("../commands/last.js", () => ({
+  readLastResponseWithFallback: mocks.readLastResponseWithFallback,
 }));
 
 vi.mock("../../utils/config.js", () => ({
@@ -120,6 +125,7 @@ describe("interaction handlers", () => {
         },
       ],
     });
+    mocks.readLastResponseWithFallback.mockResolvedValue("Last answer");
   });
 
   it("rejects unauthorized button interactions", async () => {
@@ -210,23 +216,21 @@ describe("interaction handlers", () => {
     await handleSelectMenuInteraction(interaction as never);
 
     expect(interaction.deferUpdate).toHaveBeenCalled();
-    expect(mocks.readThread).toHaveBeenCalledWith("thread-1", true);
+    expect(mocks.readLastResponseWithFallback).toHaveBeenCalledWith("thread-1");
     const payload = interaction.editReply.mock.calls[0][0];
     expect(payload.embeds[0].description).toContain("Last response");
     expect(payload.components[0].components[1].data.disabled).toBe(true);
   });
 
-  it("reports selected session read failures without throwing", async () => {
-    mocks.readThread.mockRejectedValue(new Error("missing thread"));
+  it("shows selected session controls even when no last response is available", async () => {
+    mocks.readLastResponseWithFallback.mockResolvedValue("");
     const interaction = makeSelect("session-select", ["thread-1"]);
 
     await handleSelectMenuInteraction(interaction as never);
 
-    expect(interaction.editReply).toHaveBeenCalledWith({
-      content: "Failed to read selected Codex session: missing thread",
-      embeds: [],
-      components: [],
-    });
+    const payload = interaction.editReply.mock.calls[0][0];
+    expect(payload.embeds[0].description).toContain("No assistant response yet.");
+    expect(payload.components).toHaveLength(1);
   });
 
   it("rejects session delete when disabled in config", async () => {

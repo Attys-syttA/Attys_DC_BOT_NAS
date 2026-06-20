@@ -75,6 +75,7 @@ Confirm the panel shows:
 - `/last` falls back to local rollout JSONL only when live thread reading is unavailable or empty
 - `/sessions query/source/limit` filters large local session lists without changing stored session state
 - `/health` shows the package version without reading or printing private config values
+- `/sessions` selected-session inspection reuses `/last` rollout fallback and does not print raw app-server errors
 
 `Safe Update` must stay guarded:
 

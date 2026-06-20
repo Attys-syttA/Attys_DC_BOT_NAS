@@ -25,7 +25,7 @@ vi.mock("../../codex/storage.js", () => ({
   getStoredThread: mocks.getStoredThread,
 }));
 
-import { execute, lastResponseFromThread } from "./last.js";
+import { execute, lastResponseFromThread, readLastResponseWithFallback } from "./last.js";
 
 const tempFiles: string[] = [];
 
@@ -89,6 +89,16 @@ describe("/last", () => {
     await execute(interaction as never);
 
     expect(interaction.editReply).toHaveBeenCalledWith({ content: "Stored answer" });
+  });
+
+  it("exposes the same fallback helper for session inspection", async () => {
+    mocks.readThread.mockRejectedValue(new Error("app-server unavailable"));
+    const rolloutPath = makeRolloutFile([
+      { type: "item_completed", item: { type: "agentMessage", text: "Inspectable stored answer" } },
+    ]);
+    mocks.getStoredThread.mockReturnValue({ id: "thread-1", rollout_path: rolloutPath });
+
+    await expect(readLastResponseWithFallback("thread-1")).resolves.toBe("Inspectable stored answer");
   });
 
   it("reports no response when neither live nor stored sources have output", async () => {

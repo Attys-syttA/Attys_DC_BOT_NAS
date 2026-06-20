@@ -8,9 +8,9 @@ import {
 import { isAllowedPrincipal } from "../../security/guard.js";
 import { sessionManager } from "../../codex/session-manager.js";
 import { upsertSession, getSession, getProject, getAllProjects, unregisterProject } from "../../db/database.js";
-import { codexAppServer } from "../../codex/app-server-client.js";
 import { deleteStoredThread } from "../../codex/storage.js";
 import { renderMappingsPayload } from "../commands/mappings.js";
+import { readLastResponseWithFallback } from "../commands/last.js";
 import { L } from "../../utils/i18n.js";
 import { getConfig } from "../../utils/config.js";
 
@@ -393,29 +393,7 @@ export async function handleSelectMenuInteraction(
   }
 
   await interaction.deferUpdate();
-  let thread;
-  try {
-    thread = await codexAppServer.readThread(selectedSessionId, true);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await interaction.editReply({
-      content: L(
-        `Failed to read selected Codex session: ${message}`,
-        `선택한 Codex 세션을 읽지 못했습니다: ${message}`,
-      ),
-      embeds: [],
-      components: [],
-    });
-    return;
-  }
-  let lastMessage = "";
-  for (const turn of thread.turns ?? []) {
-    for (const item of turn.items ?? []) {
-      if (item.type === "agentMessage" && typeof item.text === "string" && item.text.trim()) {
-        lastMessage = item.text.trim();
-      }
-    }
-  }
+  const lastMessage = await readLastResponseWithFallback(selectedSessionId);
 
   const deleteEnabled = getConfig().DISCORD_ENABLE_SESSION_DELETE;
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

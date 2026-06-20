@@ -25,7 +25,7 @@ export function lastResponseFromThread(thread: { turns?: Array<{ items?: Array<{
   return lastMessage;
 }
 
-async function lastResponseFromStoredThread(sessionId: string): Promise<string> {
+export async function lastResponseFromStoredThread(sessionId: string): Promise<string> {
   const stored = getStoredThread(sessionId);
   if (!stored?.rollout_path) return "";
   try {
@@ -34,6 +34,18 @@ async function lastResponseFromStoredThread(sessionId: string): Promise<string> 
   } catch {
     return "";
   }
+}
+
+export async function readLastResponseWithFallback(sessionId: string): Promise<string> {
+  let lastMessage = "";
+  try {
+    const thread = await codexAppServer.readThread(sessionId, true);
+    lastMessage = lastResponseFromThread(thread);
+  } catch {
+    // Fallback to the local rollout log below.
+  }
+
+  return lastMessage || await lastResponseFromStoredThread(sessionId);
 }
 
 export async function execute(
@@ -57,17 +69,7 @@ export async function execute(
     return;
   }
 
-  let lastMessage = "";
-  try {
-    const thread = await codexAppServer.readThread(session.session_id, true);
-    lastMessage = lastResponseFromThread(thread);
-  } catch {
-    // Fallback to the local rollout log below.
-  }
-
-  if (!lastMessage) {
-    lastMessage = await lastResponseFromStoredThread(session.session_id);
-  }
+  const lastMessage = await readLastResponseWithFallback(session.session_id);
 
   if (!lastMessage) {
     await interaction.editReply({
