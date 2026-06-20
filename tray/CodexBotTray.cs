@@ -50,11 +50,40 @@ internal sealed class CodexBotTray : Form
     private Form controlPanel;
     private Label statusLabel;
     private Panel statusDot;
+    private Panel lifecyclePanel;
     private Panel usagePanel;
     private Label usageStatusLabel;
     private DateTime lastUsageRefresh = DateTime.MinValue;
     private Dictionary<string, object> usageData;
     private long usageFetchedAt;
+
+    private sealed class CommandResult
+    {
+        public int ExitCode;
+        public string Output;
+        public string Error;
+        public bool TimedOut;
+    }
+
+    private sealed class GitSnapshot
+    {
+        public string Version = "unknown";
+        public string Status = "Git unavailable";
+        public string Detail = "";
+        public string LocalCommit = "unknown";
+        public string UpstreamName = "origin/main";
+        public string UpstreamCommit = "unknown";
+        public int Ahead;
+        public int Behind;
+        public bool Dirty;
+        public bool GitAvailable;
+        public bool FetchFailed;
+        public string FetchMessage = "";
+        public bool CanSafeUpdate
+        {
+            get { return GitAvailable && !Dirty && Behind > 0 && Ahead == 0; }
+        }
+    }
 
     [STAThread]
     private static void Main(string[] args)
@@ -205,8 +234,8 @@ internal sealed class CodexBotTray : Form
         controlPanel = new Form();
         controlPanel.Text = "Attys DC BOT Control Panel";
         controlPanel.StartPosition = FormStartPosition.CenterScreen;
-        controlPanel.Size = new Size(520, 640);
-        controlPanel.MinimumSize = new Size(480, 560);
+        controlPanel.Size = new Size(560, 760);
+        controlPanel.MinimumSize = new Size(520, 660);
         controlPanel.BackColor = Color.FromArgb(24, 28, 36);
         controlPanel.ForeColor = Color.White;
         controlPanel.FormClosed += delegate { controlPanel = null; };
@@ -292,7 +321,18 @@ internal sealed class CodexBotTray : Form
         refreshUsage.Click += delegate { RefreshUsage(true); };
         controlPanel.Controls.Add(refreshUsage);
 
-        y += 66;
+        y += 58;
+        lifecyclePanel = new Panel();
+        lifecyclePanel.Left = 25;
+        lifecyclePanel.Top = y;
+        lifecyclePanel.Width = controlPanel.ClientSize.Width - 50;
+        lifecyclePanel.Height = 184;
+        lifecyclePanel.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        lifecyclePanel.BackColor = Color.FromArgb(31, 36, 46);
+        controlPanel.Controls.Add(lifecyclePanel);
+        RenderLifecyclePanel(false);
+
+        y += 202;
         usageStatusLabel = MakeLabel("", 25, y, 450, 22, 10, FontStyle.Regular);
         controlPanel.Controls.Add(usageStatusLabel);
 
@@ -318,6 +358,112 @@ internal sealed class CodexBotTray : Form
 
         UpdateStatus();
         RenderUsagePanel();
+    }
+
+    private void RenderLifecyclePanel(bool fetch)
+    {
+        if (lifecyclePanel == null || lifecyclePanel.IsDisposed) return;
+        lifecyclePanel.Controls.Clear();
+
+        GitSnapshot snapshot = GetGitSnapshot(fetch);
+        Label title = MakeLabel("Desktop lifecycle", 14, 12, lifecyclePanel.Width - 28, 22, 10, FontStyle.Bold);
+        title.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        lifecyclePanel.Controls.Add(title);
+
+        Label version = MakeLabel(
+            "Version: " + snapshot.Version + "  |  Local: " + snapshot.LocalCommit + "  |  Upstream: " + snapshot.UpstreamCommit,
+            14,
+            38,
+            lifecyclePanel.Width - 28,
+            20,
+            9,
+            FontStyle.Regular);
+        version.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        version.ForeColor = Color.FromArgb(210, 220, 235);
+        lifecyclePanel.Controls.Add(version);
+
+        Label repo = MakeLabel(
+            "Repository: " + snapshot.Status,
+            14,
+            62,
+            lifecyclePanel.Width - 28,
+            22,
+            10,
+            FontStyle.Bold);
+        repo.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        repo.ForeColor = snapshot.Behind > 0 ? Color.FromArgb(245, 158, 11) : snapshot.Dirty ? Color.FromArgb(250, 204, 21) : Color.FromArgb(16, 185, 129);
+        lifecyclePanel.Controls.Add(repo);
+
+        Label detail = MakeLabel(snapshot.Detail, 14, 86, lifecyclePanel.Width - 28, 20, 9, FontStyle.Regular);
+        detail.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+        detail.ForeColor = Color.FromArgb(180, 190, 205);
+        lifecyclePanel.Controls.Add(detail);
+
+        Button check = MakeButton("Check Updates", 14, 114, 122, 30);
+        check.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        check.Click += delegate { RenderLifecyclePanel(true); };
+        lifecyclePanel.Controls.Add(check);
+
+        Button github = MakeButton("GitHub", 146, 114, 86, 30);
+        github.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        github.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT"); };
+        lifecyclePanel.Controls.Add(github);
+
+        Button releases = MakeButton("Releases", 242, 114, 86, 30);
+        releases.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        releases.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT/releases"); };
+        lifecyclePanel.Controls.Add(releases);
+
+        Button safeUpdate = MakeButton("Safe Update", 338, 114, 94, 30);
+        safeUpdate.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        safeUpdate.Enabled = snapshot.CanSafeUpdate;
+        safeUpdate.BackColor = snapshot.CanSafeUpdate ? Color.FromArgb(55, 110, 80) : Color.FromArgb(55, 58, 66);
+        safeUpdate.Click += delegate
+        {
+            RunSafeUpdateFromPanel();
+            RenderLifecyclePanel(false);
+        };
+        lifecyclePanel.Controls.Add(safeUpdate);
+
+        Button setup = MakeButton("Setup", 440, 114, 62, 30);
+        setup.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        setup.Click += delegate { OpenLocalFile(Path.Combine(botDir, "SETUP.md")); };
+        lifecyclePanel.Controls.Add(setup);
+
+        CheckBox autostart = new CheckBox();
+        autostart.Text = "Launch on login";
+        autostart.Left = 14;
+        autostart.Top = 150;
+        autostart.Width = lifecyclePanel.Width - 28;
+        autostart.Height = 22;
+        autostart.Anchor = AnchorStyles.Left | AnchorStyles.Top;
+        autostart.ForeColor = Color.White;
+        autostart.BackColor = Color.Transparent;
+        autostart.Checked = IsAutostartEnabled();
+        autostart.CheckedChanged += delegate
+        {
+            try
+            {
+                SetAutostartEnabled(autostart.Checked);
+            }
+            catch (Exception ex)
+            {
+                autostart.CheckedChanged -= delegate { };
+                MessageBox.Show(
+                    "Could not change Windows startup setting. Open the Startup folder and create/remove the shortcut manually.\n\n" + SafeError(ex.Message),
+                    "Autostart",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                OpenStartupFolder();
+                RenderLifecyclePanel(false);
+            }
+        };
+        lifecyclePanel.Controls.Add(autostart);
+
+        if (snapshot.FetchFailed)
+        {
+            MessageBox.Show(snapshot.FetchMessage, "Check for Updates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
     }
 
     private Label MakeLabel(string text, int left, int top, int width, int height, int size, FontStyle style)
@@ -616,6 +762,338 @@ internal sealed class CodexBotTray : Form
         File.WriteAllText(envPath, output.ToString(), new UTF8Encoding(false));
     }
 
+    private GitSnapshot GetGitSnapshot(bool fetch)
+    {
+        GitSnapshot snapshot = new GitSnapshot();
+        snapshot.Version = ReadPackageVersion();
+
+        if (fetch)
+        {
+            CommandResult fetchResult = RunCommand("git", "fetch --prune origin", 20000);
+            if (fetchResult.ExitCode != 0 || fetchResult.TimedOut)
+            {
+                snapshot.FetchFailed = true;
+                snapshot.FetchMessage = fetchResult.TimedOut
+                    ? "Git fetch timed out. Local repository state was not changed."
+                    : "Git fetch failed. Local repository state was not changed.";
+            }
+        }
+
+        CommandResult head = RunCommand("git", "rev-parse --short HEAD", 8000);
+        if (head.ExitCode != 0)
+        {
+            snapshot.Detail = "Git is unavailable or this folder is not a git repository.";
+            return snapshot;
+        }
+
+        snapshot.GitAvailable = true;
+        snapshot.LocalCommit = FirstLine(head.Output);
+
+        CommandResult upstream = RunCommand("git", "rev-parse --abbrev-ref --symbolic-full-name @{u}", 8000);
+        if (upstream.ExitCode == 0 && !string.IsNullOrWhiteSpace(upstream.Output))
+        {
+            snapshot.UpstreamName = FirstLine(upstream.Output);
+        }
+
+        CommandResult upstreamCommit = RunCommand("git", "rev-parse --short " + snapshot.UpstreamName, 8000);
+        if (upstreamCommit.ExitCode == 0)
+        {
+            snapshot.UpstreamCommit = FirstLine(upstreamCommit.Output);
+        }
+
+        CommandResult shortStatus = RunCommand("git", "status --short", 8000);
+        snapshot.Dirty = shortStatus.ExitCode == 0 && !string.IsNullOrWhiteSpace(shortStatus.Output);
+
+        CommandResult counts = RunCommand("git", "rev-list --left-right --count " + snapshot.UpstreamName + "...HEAD", 8000);
+        if (counts.ExitCode == 0)
+        {
+            string[] parts = FirstLine(counts.Output).Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length >= 2)
+            {
+                int behind;
+                int ahead;
+                if (int.TryParse(parts[0], out behind)) snapshot.Behind = behind;
+                if (int.TryParse(parts[1], out ahead)) snapshot.Ahead = ahead;
+            }
+        }
+
+        if (snapshot.Dirty)
+        {
+            snapshot.Status = "Local changes present";
+        }
+        else if (snapshot.Ahead > 0 && snapshot.Behind > 0)
+        {
+            snapshot.Status = "Diverged";
+        }
+        else if (snapshot.Behind > 0)
+        {
+            snapshot.Status = "Behind origin";
+        }
+        else if (snapshot.Ahead > 0)
+        {
+            snapshot.Status = "Ahead of origin";
+        }
+        else
+        {
+            snapshot.Status = "Clean and synced";
+        }
+
+        snapshot.Detail = "Upstream: " + snapshot.UpstreamName
+            + "  |  ahead " + snapshot.Ahead.ToString(CultureInfo.InvariantCulture)
+            + " / behind " + snapshot.Behind.ToString(CultureInfo.InvariantCulture);
+        if (snapshot.Dirty)
+        {
+            snapshot.Detail += "  |  update actions stay read-only";
+        }
+        return snapshot;
+    }
+
+    private string ReadPackageVersion()
+    {
+        try
+        {
+            string packagePath = Path.Combine(botDir, "package.json");
+            if (!File.Exists(packagePath)) return "unknown";
+            Dictionary<string, object> packageJson = json.Deserialize<Dictionary<string, object>>(File.ReadAllText(packagePath));
+            if (packageJson != null && packageJson.ContainsKey("version"))
+            {
+                return Convert.ToString(packageJson["version"], CultureInfo.InvariantCulture);
+            }
+        }
+        catch
+        {
+        }
+        return "unknown";
+    }
+
+    private void RunSafeUpdateFromPanel()
+    {
+        GitSnapshot snapshot = GetGitSnapshot(true);
+        if (!snapshot.GitAvailable)
+        {
+            MessageBox.Show("Git is unavailable, so safe update cannot run.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        if (snapshot.Dirty)
+        {
+            MessageBox.Show("Local changes are present. Safe update stops here and does not stash or reset your work.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+        if (snapshot.Ahead > 0 && snapshot.Behind > 0)
+        {
+            MessageBox.Show("The repository has diverged from origin. Safe update stops here for manual review.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        if (snapshot.Behind <= 0)
+        {
+            MessageBox.Show("No newer origin commit is available.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        DialogResult confirm = MessageBox.Show(
+            "Run safe update now?\n\nThis will run git pull --ff-only, install dependencies only if package files changed, run build/check, and restart the bot. It will not stash, reset, or rewrite history.",
+            "Safe Update",
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Question);
+        if (confirm != DialogResult.OK) return;
+
+        try
+        {
+            RunSafeUpdate();
+            MessageBox.Show("Safe update completed. The bot was restarted if local config allowed it.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Safe update stopped:\n\n" + SafeError(ex.Message), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+    }
+
+    private void RunSafeUpdate()
+    {
+        AppendUpdateLog("Safe update started.");
+        GitSnapshot before = GetGitSnapshot(true);
+        if (before.Dirty) throw new InvalidOperationException("Local changes are present. Commit or revert them before running safe update.");
+        if (before.Ahead > 0 && before.Behind > 0) throw new InvalidOperationException("Repository diverged from upstream.");
+        if (before.Behind <= 0) throw new InvalidOperationException("No newer origin commit is available.");
+
+        string packageJsonBefore = ReadOptionalFile(Path.Combine(botDir, "package.json"));
+        string packageLockBefore = ReadOptionalFile(Path.Combine(botDir, "package-lock.json"));
+
+        RunRequiredCommand("git", "pull --ff-only", 60000, "git pull --ff-only");
+
+        string packageJsonAfter = ReadOptionalFile(Path.Combine(botDir, "package.json"));
+        string packageLockAfter = ReadOptionalFile(Path.Combine(botDir, "package-lock.json"));
+        bool dependencyFilesChanged = packageJsonBefore != packageJsonAfter || packageLockBefore != packageLockAfter;
+        if (dependencyFilesChanged)
+        {
+            RunRequiredCommand("npm.cmd", "install", 180000, "npm install");
+        }
+
+        RunRequiredCommand("npm.cmd", "run build", 180000, "npm run build");
+        RunRequiredCommand("npm.cmd", "run check", 240000, "npm run check");
+
+        if (IsRunning())
+        {
+            AppendUpdateLog("Restarting running bot.");
+            RestartBot();
+        }
+        else
+        {
+            AppendUpdateLog("Bot was not running; no restart needed.");
+        }
+
+        AppendUpdateLog("Safe update completed.");
+    }
+
+    private void RunRequiredCommand(string fileName, string arguments, int timeoutMs, string label)
+    {
+        AppendUpdateLog("Running " + label + ".");
+        CommandResult result = RunCommand(fileName, arguments, timeoutMs);
+        AppendUpdateLog(label + " exit=" + result.ExitCode.ToString(CultureInfo.InvariantCulture) + (result.TimedOut ? " timed out" : ""));
+        if (!string.IsNullOrWhiteSpace(result.Output)) AppendUpdateLog(TrimForLog(result.Output));
+        if (!string.IsNullOrWhiteSpace(result.Error)) AppendUpdateLog(TrimForLog(result.Error));
+        if (result.TimedOut) throw new TimeoutException(label + " timed out.");
+        if (result.ExitCode != 0) throw new InvalidOperationException(label + " failed.");
+    }
+
+    private string ReadOptionalFile(string filePath)
+    {
+        try
+        {
+            return File.Exists(filePath) ? File.ReadAllText(filePath) : "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private void AppendUpdateLog(string text)
+    {
+        try
+        {
+            string line = DateTime.Now.ToString("s", CultureInfo.InvariantCulture) + " " + text + Environment.NewLine;
+            File.AppendAllText(Path.Combine(botDir, "update.log"), line, new UTF8Encoding(false));
+        }
+        catch
+        {
+        }
+    }
+
+    private static string TrimForLog(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "";
+        string trimmed = value.Trim();
+        return trimmed.Length <= 4000 ? trimmed : trimmed.Substring(trimmed.Length - 4000);
+    }
+
+    private CommandResult RunCommand(string fileName, string arguments, int timeoutMs)
+    {
+        CommandResult result = new CommandResult();
+        try
+        {
+            ProcessStartInfo info = new ProcessStartInfo();
+            info.FileName = fileName;
+            info.Arguments = arguments;
+            info.WorkingDirectory = botDir;
+            info.UseShellExecute = false;
+            info.RedirectStandardOutput = true;
+            info.RedirectStandardError = true;
+            info.CreateNoWindow = true;
+
+            using (Process process = new Process())
+            {
+                process.StartInfo = info;
+                StringBuilder output = new StringBuilder();
+                StringBuilder error = new StringBuilder();
+                System.Threading.AutoResetEvent outputDone = new System.Threading.AutoResetEvent(false);
+                System.Threading.AutoResetEvent errorDone = new System.Threading.AutoResetEvent(false);
+                process.OutputDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                {
+                    if (args.Data == null) outputDone.Set();
+                    else output.AppendLine(args.Data);
+                };
+                process.ErrorDataReceived += delegate(object sender, DataReceivedEventArgs args)
+                {
+                    if (args.Data == null) errorDone.Set();
+                    else error.AppendLine(args.Data);
+                };
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                if (!process.WaitForExit(timeoutMs))
+                {
+                    result.TimedOut = true;
+                    result.ExitCode = 124;
+                    try { process.Kill(); } catch { }
+                    return result;
+                }
+                outputDone.WaitOne(1000);
+                errorDone.WaitOne(1000);
+
+                result.Output = output.ToString();
+                result.Error = error.ToString();
+                result.ExitCode = process.ExitCode;
+            }
+        }
+        catch (Exception ex)
+        {
+            result.ExitCode = 1;
+            result.Error = SafeError(ex.Message);
+        }
+        return result;
+    }
+
+    private static string FirstLine(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "";
+        using (StringReader reader = new StringReader(value.Trim()))
+        {
+            return reader.ReadLine() ?? "";
+        }
+    }
+
+    private string StartupShortcutPath()
+    {
+        string startup = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        return Path.Combine(startup, "Attys DC BOT.lnk");
+    }
+
+    private bool IsAutostartEnabled()
+    {
+        return File.Exists(StartupShortcutPath());
+    }
+
+    private void SetAutostartEnabled(bool enabled)
+    {
+        string shortcut = StartupShortcutPath();
+        if (!enabled)
+        {
+            if (File.Exists(shortcut)) File.Delete(shortcut);
+            return;
+        }
+
+        string target = Path.Combine(botDir, "win-start.bat");
+        string script = "$shell = New-Object -ComObject WScript.Shell; "
+            + "$shortcut = $shell.CreateShortcut('" + EscapePowerShellSingleQuoted(shortcut) + "'); "
+            + "$shortcut.TargetPath = '" + EscapePowerShellSingleQuoted(target) + "'; "
+            + "$shortcut.WorkingDirectory = '" + EscapePowerShellSingleQuoted(botDir) + "'; "
+            + "$shortcut.IconLocation = '" + EscapePowerShellSingleQuoted(Path.Combine(botDir, "tray", "CodexBotTray.exe")) + "'; "
+            + "$shortcut.Save()";
+        CommandResult result = RunCommand("powershell", "-NoProfile -ExecutionPolicy Bypass -Command \"" + script.Replace("\"", "\\\"") + "\"", 15000);
+        if (result.ExitCode != 0 || result.TimedOut || !File.Exists(shortcut))
+        {
+            throw new InvalidOperationException("Could not create Startup shortcut.");
+        }
+    }
+
+    private void OpenStartupFolder()
+    {
+        string startup = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+        Process.Start("explorer.exe", Quote(startup));
+    }
+
     private void OpenLog()
     {
         if (!File.Exists(logPath))
@@ -628,6 +1106,16 @@ internal sealed class CodexBotTray : Form
     private void OpenFolder()
     {
         Process.Start("explorer.exe", Quote(botDir));
+    }
+
+    private void OpenLocalFile(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            MessageBox.Show("File not found: " + Path.GetFileName(filePath), "Open File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+        Process.Start("notepad.exe", Quote(filePath));
     }
 
     private void OpenUrl(string url)
@@ -646,6 +1134,17 @@ internal sealed class CodexBotTray : Form
     {
         trayIcon.Visible = false;
         Application.Exit();
+    }
+
+    private static string SafeError(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return "Unknown error";
+        return value.Replace(Environment.UserName, "<user>");
+    }
+
+    private static string EscapePowerShellSingleQuoted(string value)
+    {
+        return value.Replace("'", "''");
     }
 
     private void LoadUsageCache()

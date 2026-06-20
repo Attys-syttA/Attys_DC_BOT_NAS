@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: Windows-first minimum parity implemented
-- Git state: local `main` tracks `origin/main`; launcher/tray/docs closeout prepared for validation
+- Phase: guarded Windows safe auto-update implemented
+- Git state: local `main` tracks `origin/main`; safe update implementation validated locally
 
 ## Current Goal
 
@@ -55,9 +55,11 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Added read-only `/mappings` overview for project-channel mappings, with duplicate project path groups called out before cleanup.
 - Extended `/mappings` with cleanup buttons for duplicate mappings; each button stops that channel session, removes the mapping, and refreshes the overview.
 - Added Windows launcher/status stabilization and a local tray/control panel with start/stop/restart, settings editor, log/folder open, and Codex usage cache display.
+- Extended the Windows tray/control panel with package version, local/upstream commit display, clean/dirty/ahead/behind git status, read-only update check through `git fetch`, and Windows login startup toggle.
+- Added guarded `Safe Update` to the Windows tray: clean checkout only, `git pull --ff-only`, dependency install only when package files changed, build/check, and bot restart without stash/reset.
 
 ## Open Work
 
-1. Consider a later explicit auto-update/lifecycle plan only after deciding the desired git safety model.
+1. Consider a later explicit destructive recovery/update mode only if `git stash` or `git reset --hard` should be allowed with strong confirmation.
 2. Consider Linux/macOS launcher parity only if the project stops being Windows-first.
 3. Keep using `/mappings` and `/doctor` for future legacy mapping drift checks.

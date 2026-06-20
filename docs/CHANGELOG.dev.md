@@ -46,3 +46,7 @@
 - Windows parity: bekerult a `win-start.bat --status` process-detektalas javitasa, a repohoz kotott stop/status logika, a `bot.err.log` background stderr kimenet, es a Windows tray/control panel.
 - Tray/control panel: a panel tud start/stop/restart vezerlest, vizualis allapotot, lokalis `.env` settings editort, `bot.log` es folder megnyitast, valamint Codex usage cache megjelenitest/frissitest.
 - Public docs: a README es SETUP Windows launcher/tray/control panel leirast kapott public-safe illusztracioval; auto-update es cross-platform parity tovabbra is kulon future-work.
+- Terv: aktiv foiranykent felvettem a Windows desktop lifecycle / update-readiness csomagot, amely read-only git/origin allapotot, update jelzest es Windows autostart kezelest tervez, destruktiv auto-update nelkul.
+- Windows lifecycle: a tray/control panel megjeleniti a package verziot, local/upstream commitot, clean/dirty/ahead/behind allapotot, read-only `git fetch` update checket es Windows login startup toggle-t.
+- Lifecycle closeout: launcher/tray smoke, read-only update check, autostart shortcut create/remove smoke, npm validacio es ggshield secret scan zold; a lifecycle terv `done` ala kerult.
+- Safe update: a tray `Safe Update` gombot kapott clean checkout es behind origin eseten; `git pull --ff-only`, szukseg szerinti `npm install`, `npm run build`, `npm run check`, majd bot restart fut, de nincs stash/reset/history rewrite.

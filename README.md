@@ -88,8 +88,14 @@ It provides:
 - `bot.log` opener
 - repository folder opener
 - Codex usage cache view with a refresh button
+- package version, local commit, upstream commit, and clean/dirty/ahead/behind git status
+- read-only `Check Updates` action using `git fetch`
+- guarded `Safe Update` action for clean repositories
+- Windows login startup toggle through the current user's Startup folder
 
 The usage panel reads `~/.codex/rate-limits-cache.json` and can refresh it through the local Codex app-server. If Codex usage is unavailable, the panel shows a local error state without printing tokens, Discord IDs, or private configuration values.
+
+The lifecycle panel separates safe update from destructive recovery. `Check Updates` is read-only apart from `git fetch`. `Safe Update` is enabled only for a clean checkout that is behind origin and runs `git pull --ff-only`, optional `npm install` when dependency files changed, `npm run build`, `npm run check`, and bot restart. It never runs `git stash`, `git reset --hard`, or history rewriting.
 
 ## Commands
 
@@ -156,6 +162,7 @@ The tray settings editor writes only the local ignored `.env` file. Keep real va
 - command and file-change auto-approval is disabled unless `DISCORD_ENABLE_AUTO_APPROVE=true`
 - local Codex session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
 - message-based prompts require Discord's privileged Message Content intent; slash commands work with `DISCORD_ENABLE_MESSAGE_PROMPTS=false`
+- tray update checks are read-only apart from `git fetch`; safe update is clean-checkout only and does not stash or reset local work
 - `/doctor` reports whether message prompt mode is enabled or slash-command-only mode is active
 - `/doctor` warns when one local project still has multiple Discord channel mappings, such as old forum/thread leftovers
 - `/mappings` provides an overview and cleanup buttons before falling back to `/unregister [channel]` for manual legacy mapping removal

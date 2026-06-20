@@ -81,12 +81,31 @@ It can:
 - open the repository folder
 - show Codex usage from `~/.codex/rate-limits-cache.json`
 - refresh usage through the local Codex app-server
+- show package version, local commit, upstream commit, and git sync state
+- check for updates with a read-only `git fetch`
+- run a guarded `Safe Update` when the checkout is clean and behind origin
+- enable or disable Windows login startup
 
 Public-safe preview:
 
 ![Windows control panel illustration](docs/windows-control-panel-public-safe.svg)
 
 The settings editor is for local values only. Do not paste real tokens, real Discord IDs, or private local paths into tracked docs, issues, commits, or screenshots.
+
+The update status area is intentionally conservative:
+
+- `Check Updates` may run `git fetch --prune origin`.
+- `Safe Update` is enabled only when the checkout is clean, behind origin, and not diverged.
+- `Safe Update` runs `git pull --ff-only`.
+- It runs `npm install` only when `package.json` or `package-lock.json` changed.
+- It then runs `npm run build` and `npm run check`.
+- If the bot was already running, it restarts it after successful checks.
+- It does not run `git reset --hard`.
+- It does not run `git stash`.
+
+If local changes are present, the panel stops and asks for manual cleanup. This keeps your uncommitted work visible instead of hiding it in a stash or deleting it.
+
+The Windows login startup toggle creates or removes `Attys DC BOT.lnk` in the current user's Startup folder. The shortcut points to `win-start.bat` and is never tracked by Git.
 
 ## 6. Manual Node Start
 
@@ -124,6 +143,10 @@ Optional local commands:
 - If `.bot.lock` is stale, run `cmd /c win-start.bat --stop`, then `cmd /c win-start.bat --status`.
 - If the tray does not appear, check whether `tray/CodexBotTray.exe` exists and whether Windows/.NET C# compiler tooling is installed.
 - If usage is unavailable, check `codex.cmd login status` and try the panel's `Refresh Usage` button again.
+- If update status is unavailable, check whether `git` is on PATH and whether the repo has an `origin/main` upstream.
+- If `Safe Update` is disabled, check whether the repo is clean and behind origin.
+- If `Safe Update` stops, read `update.log`; it is local and ignored by Git.
+- If Windows login startup cannot be toggled, open `shell:startup` and create or remove a shortcut to `win-start.bat` manually.
 - If Discord commands are missing, set `DISCORD_REGISTER_COMMANDS=true` once, start the bot, then turn it back off if you do not want command registration on every boot.
 
 ## 9. Validate Before Commit
