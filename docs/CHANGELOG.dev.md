@@ -69,3 +69,4 @@
 - Slash queue parity: a `/ask` aktiv Codex futas kozben ugyanazt a queue confirmation flow-t hasznalja, mint a normal message prompt, igy nem indit masodik parhuzamos turnt ugyanabban a channelben.
 - Slash multi-attachment parity: a `/ask` most `file`, `file2`, `file3` attachment slotokat kezel, es minden mentett fajlt egy kozos Codex prompt suffixbe rendez.
 - Last response fallback: a `/last` live Codex app-server olvasas hiba vagy ures valasz eseten a helyi Codex rollout JSONL logbol probalja visszahozni az utolso assistant uzenetet.
+- Session list filtering: a `/sessions` `query`, `source`, es `limit` opciokat kapott, hogy nagy helyi Codex thread lista mellett is gyorsan szukitheto legyen a valaszthato sessionok koze.

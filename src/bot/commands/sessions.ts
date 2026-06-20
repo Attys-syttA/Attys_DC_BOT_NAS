@@ -18,6 +18,12 @@ interface SessionInfo {
   source: string;
 }
 
+interface SessionFilterOptions {
+  query?: string | null;
+  source?: string | null;
+  limit?: number;
+}
+
 export function findSessionDir(projectPath: string): string | null {
   const first = listStoredThreads(projectPath)[0];
   return first?.rollout_path ? path.dirname(first.rollout_path) : null;
@@ -72,9 +78,50 @@ export async function listSessions(projectPath: string): Promise<SessionInfo[]> 
   }));
 }
 
+export function filterSessions(
+  sessions: SessionInfo[],
+  options: SessionFilterOptions = {},
+): SessionInfo[] {
+  const query = options.query?.trim().toLowerCase() ?? "";
+  const source = options.source?.trim().toLowerCase() ?? "all";
+  const limit = Math.max(1, Math.min(24, options.limit ?? 24));
+
+  return sessions
+    .filter((session) => source === "all" || session.source.toLowerCase() === source)
+    .filter((session) => {
+      if (!query) return true;
+      return [
+        session.preview,
+        session.sessionId,
+        session.source,
+      ].some((value) => value.toLowerCase().includes(query));
+    })
+    .slice(0, limit);
+}
+
 export const data = new SlashCommandBuilder()
   .setName("sessions")
-  .setDescription("List and resume existing Codex sessions for this project");
+  .setDescription("List and resume existing Codex sessions for this project")
+  .addStringOption((option) => option
+    .setName("query")
+    .setDescription("Filter sessions by title, source, or id")
+    .setRequired(false))
+  .addStringOption((option) => option
+    .setName("source")
+    .setDescription("Filter by session source")
+    .setRequired(false)
+    .addChoices(
+      { name: "all", value: "all" },
+      { name: "vscode", value: "vscode" },
+      { name: "codex", value: "codex" },
+      { name: "discord", value: "discord" },
+    ))
+  .addIntegerOption((option) => option
+    .setName("limit")
+    .setDescription("Maximum sessions to show")
+    .setMinValue(1)
+    .setMaxValue(24)
+    .setRequired(false));
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -89,9 +136,13 @@ export async function execute(
     return;
   }
 
-  const sessions = await listSessions(project.project_path);
+  const allSessions = await listSessions(project.project_path);
+  const query = interaction.options.getString("query", false);
+  const source = interaction.options.getString("source", false) ?? "all";
+  const limit = interaction.options.getInteger("limit", false) ?? 24;
+  const sessions = filterSessions(allSessions, { query, source, limit });
 
-  if (sessions.length === 0) {
+  if (allSessions.length === 0) {
     const { randomUUID } = await import("node:crypto");
     upsertSession(randomUUID(), channelId, null, "idle");
     await interaction.editReply({
@@ -109,6 +160,13 @@ export async function execute(
     return;
   }
 
+  if (sessions.length === 0) {
+    await interaction.editReply({
+      content: L("No Codex sessions matched that filter.", "해당 필터와 일치하는 Codex 세션이 없습니다."),
+    });
+    return;
+  }
+
   const dbSession = getSession(channelId);
   const activeSessionId = dbSession?.session_id ?? null;
 
@@ -120,7 +178,7 @@ export async function execute(
     },
   ];
 
-  for (const session of sessions.slice(0, 24)) {
+  for (const session of sessions) {
     const preview = session.preview.length > 70 ? session.preview.slice(0, 70) + "…" : session.preview;
     const date = new Date(session.timestamp).toLocaleString();
     options.push({
@@ -146,6 +204,9 @@ export async function execute(
           `Project: \`${project.project_path}\`\nChoose a session to view its last response, resume it, or delete it.`,
           `프로젝트: \`${project.project_path}\`\n세션을 선택하면 마지막 응답을 보고, 재개하거나, 삭제할 수 있습니다.`
         ),
+        footer: {
+          text: `Showing ${sessions.length} of ${allSessions.length} sessions`,
+        },
         color: 0x5865f2,
       },
     ],

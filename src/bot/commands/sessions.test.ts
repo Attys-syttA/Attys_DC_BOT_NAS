@@ -9,6 +9,7 @@ vi.mock("../../codex/storage.js", () => ({
 
 import { listStoredThreads } from "../../codex/storage.js";
 import {
+  filterSessions,
   findSessionDir,
   getLastAssistantMessage,
   getLastAssistantMessageFull,
@@ -93,5 +94,32 @@ describe("sessions helpers", () => {
         source: "vscode",
       },
     ]);
+  });
+
+  it("filters sessions by query, source, and limit", () => {
+    const sessions = [
+      {
+        sessionId: "thread-alpha",
+        preview: "Analyze repo",
+        timestamp: "2026-06-20T10:00:00.000Z",
+        source: "vscode",
+      },
+      {
+        sessionId: "thread-beta",
+        preview: "Fix Discord bot",
+        timestamp: "2026-06-20T11:00:00.000Z",
+        source: "discord",
+      },
+      {
+        sessionId: "thread-gamma",
+        preview: "Write docs",
+        timestamp: "2026-06-20T12:00:00.000Z",
+        source: "vscode",
+      },
+    ];
+
+    expect(filterSessions(sessions, { query: "bot" }).map((session) => session.sessionId)).toEqual(["thread-beta"]);
+    expect(filterSessions(sessions, { source: "vscode" }).map((session) => session.sessionId)).toEqual(["thread-alpha", "thread-gamma"]);
+    expect(filterSessions(sessions, { limit: 2 })).toHaveLength(2);
   });
 });

@@ -73,6 +73,7 @@ Confirm the panel shows:
 - `/ask file/file2/file3:` saves slash attachments for Codex without echoing local saved paths to Discord
 - `/ask` uses queue confirmation instead of starting a parallel turn when the channel already has active Codex work
 - `/last` falls back to local rollout JSONL only when live thread reading is unavailable or empty
+- `/sessions query/source/limit` filters large local session lists without changing stored session state
 
 `Safe Update` must stay guarded:
 

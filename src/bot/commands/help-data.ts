@@ -198,10 +198,11 @@ export const HELP_ENTRIES: HelpEntry[] = [
   {
     name: "sessions",
     category: "sessions",
-    usage: "/sessions",
-    short: "Listazza es kivalaszthatova teszi a projecthez tartozo helyi Codex sessionoket.",
+    usage: "/sessions query: <opcionalis> source: all|vscode|codex|discord limit: <1-24>",
+    short: "Listazza, szuri es kivalaszthatova teszi a projecthez tartozo helyi Codex sessionoket.",
     details: [
       "A local Codex thread tarolobol keresi az adott project pathhoz tartozo sessionoket.",
+      "A `query`, `source`, es `limit` opciok segitenek nagy session lista eseten.",
       "Lehet uj sessiont kezdeni, regi sessiont resume-olni, vagy engedelyezett esetben torolni.",
     ],
   },
