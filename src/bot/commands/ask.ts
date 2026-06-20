@@ -11,7 +11,7 @@ import { getProject } from "../../db/database.js";
 import { checkRateLimit } from "../../security/guard.js";
 import { sessionManager } from "../../codex/session-manager.js";
 import { L } from "../../utils/i18n.js";
-import { buildAttachmentPromptSuffix, downloadAttachment } from "../attachments.js";
+import { buildAttachmentPromptSuffix, downloadAttachment, type DownloadedAttachment } from "../attachments.js";
 import { getConfig } from "../../utils/config.js";
 
 export const data = new SlashCommandBuilder()
@@ -27,6 +27,18 @@ export const data = new SlashCommandBuilder()
     opt
       .setName("file")
       .setDescription("Optional image or file for Codex to inspect")
+      .setRequired(false),
+  )
+  .addAttachmentOption((opt) =>
+    opt
+      .setName("file2")
+      .setDescription("Optional second image or file for Codex")
+      .setRequired(false),
+  )
+  .addAttachmentOption((opt) =>
+    opt
+      .setName("file3")
+      .setDescription("Optional third image or file for Codex")
       .setRequired(false),
   );
 
@@ -64,18 +76,23 @@ export async function execute(
     return;
   }
 
-  const attachment = interaction.options.getAttachment("file", false);
   let finalPrompt = prompt;
   const attachmentNotes: string[] = [];
-  if (attachment) {
+  const downloadedAttachments: DownloadedAttachment[] = [];
+  const attachments = ["file", "file2", "file3"]
+    .map((name) => interaction.options.getAttachment(name, false))
+    .filter((attachment): attachment is Attachment => Boolean(attachment));
+
+  for (const attachment of attachments) {
     const result = await downloadAttachment(attachment as Attachment, project.project_path);
     if ("skipped" in result) {
       attachmentNotes.push(result.skipped);
     } else {
-      finalPrompt += buildAttachmentPromptSuffix([result]);
+      downloadedAttachments.push(result);
       attachmentNotes.push(`Attachment saved for Codex: \`${result.safeName}\``);
     }
   }
+  finalPrompt += buildAttachmentPromptSuffix(downloadedAttachments);
 
   if (sessionManager.isActive(interaction.channelId)) {
     if (sessionManager.hasQueue(interaction.channelId)) {

@@ -42,7 +42,7 @@ vi.mock("../attachments.js", () => ({
 
 import { execute } from "./ask.js";
 
-function makeInteraction(prompt: string, attachment: unknown = null) {
+function makeInteraction(prompt: string, attachments: unknown[] = []) {
   return {
     channelId: "channel-1",
     user: { id: "user-1" },
@@ -52,7 +52,10 @@ function makeInteraction(prompt: string, attachment: unknown = null) {
     },
     options: {
       getString: vi.fn(() => prompt),
-      getAttachment: vi.fn(() => attachment),
+      getAttachment: vi.fn((name: string) => {
+        const index = name === "file" ? 0 : name === "file2" ? 1 : 2;
+        return attachments[index] ?? null;
+      }),
     },
     editReply: vi.fn(),
   };
@@ -72,7 +75,11 @@ describe("/ask", () => {
       isImage: false,
       safeName: "note.txt",
     });
-    mocks.buildAttachmentPromptSuffix.mockReturnValue("\n\n[Attached files - inspect these local files]\n/projects/app/.codex-uploads/note.txt");
+    mocks.buildAttachmentPromptSuffix.mockImplementation((items: unknown[]) =>
+      items.length > 0
+        ? "\n\n[Attached files - inspect these local files]\n/projects/app/.codex-uploads/note.txt"
+        : "",
+    );
   });
 
   it("rejects unregistered channels", async () => {
@@ -111,7 +118,7 @@ describe("/ask", () => {
 
   it("downloads an optional slash attachment without echoing the local path", async () => {
     const attachment = { name: "note.txt", size: 100, url: "https://cdn.example/note.txt" };
-    const interaction = makeInteraction("inspect this file", attachment);
+    const interaction = makeInteraction("inspect this file", [attachment]);
 
     await execute(interaction as never);
 
@@ -129,7 +136,7 @@ describe("/ask", () => {
   it("reports skipped slash attachments and still sends the prompt", async () => {
     const attachment = { name: "tool.exe", size: 100, url: "https://cdn.example/tool.exe" };
     mocks.downloadAttachment.mockResolvedValue({ skipped: "Blocked: `tool.exe` (dangerous file type)" });
-    const interaction = makeInteraction("ignore unsafe file", attachment);
+    const interaction = makeInteraction("ignore unsafe file", [attachment]);
 
     await execute(interaction as never);
 
@@ -137,6 +144,37 @@ describe("/ask", () => {
       content: "Prompt sent to local Codex.\nBlocked: `tool.exe` (dangerous file type)\n```text\nignore unsafe file\n```",
     });
     expect(mocks.sendMessage).toHaveBeenCalledWith(interaction.channel, "ignore unsafe file");
+  });
+
+  it("downloads multiple optional slash attachments", async () => {
+    const first = { name: "first.txt", size: 100, url: "https://cdn.example/first.txt" };
+    const second = { name: "second.png", size: 100, url: "https://cdn.example/second.png" };
+    mocks.downloadAttachment
+      .mockResolvedValueOnce({
+        filePath: "/projects/app/.codex-uploads/first.txt",
+        isImage: false,
+        safeName: "first.txt",
+      })
+      .mockResolvedValueOnce({
+        filePath: "/projects/app/.codex-uploads/second.png",
+        isImage: true,
+        safeName: "second.png",
+      });
+    mocks.buildAttachmentPromptSuffix.mockReturnValue("\n\n[Attached files - inspect these local files]\n/projects/app/.codex-uploads/first.txt\n/projects/app/.codex-uploads/second.png");
+    const interaction = makeInteraction("inspect both", [first, second]);
+
+    await execute(interaction as never);
+
+    expect(mocks.downloadAttachment).toHaveBeenCalledTimes(2);
+    expect(mocks.downloadAttachment).toHaveBeenNthCalledWith(1, first, "/projects/app");
+    expect(mocks.downloadAttachment).toHaveBeenNthCalledWith(2, second, "/projects/app");
+    expect(interaction.editReply.mock.calls[0][0].content).toContain("Attachment saved for Codex: `first.txt`");
+    expect(interaction.editReply.mock.calls[0][0].content).toContain("Attachment saved for Codex: `second.png`");
+    expect(interaction.editReply.mock.calls[0][0].content).not.toContain("/projects/app");
+    expect(mocks.sendMessage).toHaveBeenCalledWith(
+      interaction.channel,
+      "inspect both\n\n[Attached files - inspect these local files]\n/projects/app/.codex-uploads/first.txt\n/projects/app/.codex-uploads/second.png",
+    );
   });
 
   it("offers queue confirmation instead of starting another turn when active", async () => {

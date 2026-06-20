@@ -46,7 +46,7 @@ describe("/help and /sugo", () => {
     const content = interaction.editReply.mock.calls[0][0].content;
     expect(content).toContain("**/ask**");
     expect(content).toContain("Kategoria: Codex work");
-    expect(content).toContain("Hasznalat: `/ask prompt: <szoveg> file: <opcionalis>`");
+    expect(content).toContain("Hasznalat: `/ask prompt: <szoveg> file/file2/file3: <opcionalis>`");
     expect(content).toContain("A megadott promptot");
   });
 
