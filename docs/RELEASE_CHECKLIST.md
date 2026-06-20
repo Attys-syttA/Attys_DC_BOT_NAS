@@ -46,6 +46,7 @@ Confirm:
 - tray process starts when `tray/CodexBotTray.exe` can be built
 - `tray-error.log` is not created
 - `bot.log`, `bot.err.log`, `update.log`, `CodexBot.exe`, and `tray/CodexBotTray.exe` remain ignored
+- Windows docs screenshot/illustration is public-safe and contains no token, Discord ID, or private path
 
 ## Linux Launcher Smoke
 
@@ -73,6 +74,7 @@ Confirm:
 - `python3 tray/codex_control_panel.py` opens a local panel when `tkinter` is available
 - Linux panel Start/Stop/Restart routes through `linux-start.sh`
 - Linux update checks stay read-only and do not run stash/reset/pull/install automatically
+- `docs/linux-control-panel-public-safe.svg` remains synthetic and public-safe
 
 ## macOS Launcher Smoke
 
@@ -97,6 +99,7 @@ Confirm:
 - `./menubar/CodexBotMenu` opens a menu bar item on macOS
 - menu bar Start/Stop/Restart routes through the documented launchd/`mac-start.sh` contract
 - menu bar update checks stay read-only and do not run stash/reset/pull/install automatically
+- `docs/macos-menubar-public-safe.svg` remains synthetic and public-safe
 - no `.env` value is printed
 
 ## Tray Panel Smoke

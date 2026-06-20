@@ -13,13 +13,15 @@ Status: active
 - Fazon 4 Discord attachment/message prompt parity elindult: `DISCORD_ENABLE_ATTACHMENT_MESSAGES` flag, doctor/help/docs, normal text+attachment message flow.
 - Fazon 4 attachment/message prompt parity lezarva es pusholva (`40f2ce4`).
 - Fazon 5 usage/cache canonical helper frissites elindult: cache payload normalizalas, cache age formatting, pontosabb unavailable allapot.
+- Fazon 5 usage/cache helper lezarva es pusholva (`9cfcb4e`).
+- Fazon 6 public docs/assets closeout elindult: Linux/macOS public-safe SVG illusztraciok, README/SETUP/RELEASE_CHECKLIST platform frissites.
 
 ## Nyitott reszek
 
-- Fazon 5 teljes validacio, commit es push.
+- Fazon 6 teljes validacio, commit es push.
 - Linux tray/control panel GUI runtime smoke tenyleges Linux desktop hoston kesobb platformtesztet igenyelhet.
 - macOS menubar Swift build/runtime smoke tenyleges macOS hoston kesobb platformtesztet igenyelhet.
-- Fazon 6-8 meg nincs implementalva.
+- Fazon 7-8 meg nincs implementalva.
 
 ## Cel
 

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560" role="img" aria-labelledby="title desc">
+  <title id="title">Attys DC BOT Linux control panel illustration</title>
+  <desc id="desc">Public-safe synthetic Linux control panel preview with placeholder data only.</desc>
+  <rect width="900" height="560" fill="#121821"/>
+  <rect x="40" y="36" width="820" height="488" rx="18" fill="#1b2330" stroke="#344155" stroke-width="2"/>
+  <text x="78" y="95" fill="#f4f7fb" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">Attys DC BOT</text>
+  <circle cx="92" cy="142" r="13" fill="#16c784"/>
+  <text x="120" y="151" fill="#f4f7fb" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Bot status: Running</text>
+  <g fill="#2d3a4f" stroke="#d9e2ef" stroke-width="2">
+    <rect x="78" y="188" width="210" height="56" rx="5"/>
+    <rect x="320" y="188" width="210" height="56" rx="5"/>
+    <rect x="562" y="188" width="210" height="56" rx="5"/>
+    <rect x="78" y="268" width="210" height="56" rx="5"/>
+    <rect x="320" y="268" width="210" height="56" rx="5"/>
+    <rect x="562" y="268" width="210" height="56" rx="5"/>
+  </g>
+  <g fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="700" text-anchor="middle">
+    <text x="183" y="224">Start</text>
+    <text x="425" y="224">Restart</text>
+    <text x="667" y="224">Settings</text>
+    <text x="183" y="304">Open Log</text>
+    <text x="425" y="304">Open Folder</text>
+    <text x="667" y="304">Refresh Usage</text>
+  </g>
+  <rect x="78" y="356" width="694" height="120" rx="8" fill="#202938"/>
+  <text x="104" y="400" fill="#f4f7fb" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Codex usage cache</text>
+  <text x="104" y="436" fill="#b9c4d4" font-family="Segoe UI, Arial, sans-serif" font-size="18">Plan: placeholder</text>
+  <rect x="104" y="454" width="610" height="16" rx="8" fill="#3b4658"/>
+  <rect x="104" y="454" width="530" height="16" rx="8" fill="#16c784"/>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">Attys DC BOT macOS menu bar illustration</title>
+  <desc id="desc">Public-safe synthetic macOS menu bar preview with placeholder data only.</desc>
+  <rect width="900" height="520" fill="#101318"/>
+  <rect x="0" y="0" width="900" height="38" fill="#f1f3f6"/>
+  <text x="36" y="25" fill="#111827" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Attys DC BOT</text>
+  <circle cx="820" cy="19" r="8" fill="#16c784"/>
+  <rect x="520" y="54" width="320" height="410" rx="18" fill="#222936" stroke="#394456" stroke-width="2"/>
+  <text x="548" y="104" fill="#ffffff" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Attys DC BOT</text>
+  <text x="548" y="137" fill="#b8c2d1" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="15">Status: Running</text>
+  <g fill="#2f3b50" stroke="#dbe4f0" stroke-width="1.5">
+    <rect x="548" y="168" width="120" height="42" rx="6"/>
+    <rect x="692" y="168" width="120" height="42" rx="6"/>
+    <rect x="548" y="224" width="264" height="42" rx="6"/>
+  </g>
+  <g fill="#ffffff" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="16" font-weight="700" text-anchor="middle">
+    <text x="608" y="194">Stop</text>
+    <text x="752" y="194">Restart</text>
+    <text x="680" y="250">Open Control Panel</text>
+  </g>
+  <rect x="548" y="294" width="264" height="104" rx="10" fill="#1a2230"/>
+  <text x="568" y="326" fill="#ffffff" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">Codex Usage</text>
+  <text x="568" y="354" fill="#b8c2d1" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="14">5-hour limit - 94% left</text>
+  <rect x="568" y="370" width="220" height="10" rx="5" fill="#3b4658"/>
+  <rect x="568" y="370" width="206" height="10" rx="5" fill="#16c784"/>
+  <text x="548" y="431" fill="#73b7ff" font-family="SF Pro Display, Segoe UI, Arial, sans-serif" font-size="15">GitHub: Attys-syttA/Attys_DC_BOT</text>
+</svg>

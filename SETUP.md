@@ -189,6 +189,8 @@ The Linux panel uses `linux-start.sh` for Start, Stop, Restart, and Status, so i
 
 Linux update checks are read-only. The panel may compare local `HEAD` with `origin/main`, but it does not run `git stash`, `git reset --hard`, automatic pull, automatic dependency install, or restart-for-update actions.
 
+![Linux control panel illustration](docs/linux-control-panel-public-safe.svg)
+
 ### macOS Menu Bar App
 
 On a Mac with Xcode Command Line Tools installed, build and run the menu bar app:
@@ -201,6 +203,8 @@ swiftc menubar/CodexBotMenu.swift -o menubar/CodexBotMenu
 The macOS menu bar app uses the same local `.env`, `bot.log`, `bot.err.log`, `~/.codex/rate-limits-cache.json`, and `mac-start.sh`/launchd lifecycle contract as the shell launcher. It can show status, Start, Stop, Restart, open logs/folder/settings, display Codex usage, and open GitHub/Setup links.
 
 macOS update checks are read-only. The menu bar app does not run automatic git, npm, or restart update actions.
+
+![macOS menu bar illustration](docs/macos-menubar-public-safe.svg)
 
 If macOS blocks the downloaded/built binary, clear quarantine only after reviewing the local file:
 
