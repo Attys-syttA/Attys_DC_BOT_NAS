@@ -1,10 +1,12 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits } from "discord.js";
-import { buildLifecycleNotification } from "../bot/lifecycle-notifications.js";
+import { buildLifecycleNotification, safeLifecycleEventLabel } from "../bot/lifecycle-notifications.js";
+import { recordOperatorEvent } from "../bot/operator-events.js";
 
 const eventName = process.argv[2];
 const token = process.env.DISCORD_BOT_TOKEN;
 const channelId = process.env.DISCORD_NOTIFICATION_CHANNEL_ID;
+recordOperatorEvent({ kind: "lifecycle", status: safeLifecycleEventLabel(eventName) });
 
 if (!token || !channelId) {
   process.exit(0);

@@ -168,6 +168,7 @@ Optional local commands:
 - `/queue remove` removes one queued prompt without using buttons.
 - `/tools run` runs the VS Code-free operator tools preflight from Discord.
 - `/tools status` shows the last public-safe operator tools status lines.
+- `/events` shows recent public-safe startup, lifecycle, attention, and task outcome events.
 - `/dashboard` shows pending operator action state for approvals, Codex questions, custom answers, and queue confirmations.
 - `/health` shows the bot runtime health: process uptime, error log, operator tools, usage cache, and bot repo sync state.
 - `/run-tests` is disabled unless `DISCORD_ENABLE_RUN_TESTS=true` is set in `.env`.
@@ -185,6 +186,7 @@ Optional local commands:
 - If approval or question cards appear in a project channel but no central attention message arrives, check `DISCORD_NOTIFICATION_CHANNEL_ID`; duplicate notifications are skipped when it points to the same channel.
 - If task completion appears in a project channel but no central completion message arrives, check that the notification channel is separate and sendable.
 - If the bot seems alive but behavior is odd, run `/health` first, then `/doctor` if config or Codex login readiness needs checking.
+- If you missed a notification while away, run `/events` to see the recent public-safe operator timeline.
 - If `Safe Update` is disabled, check whether the repo is clean and behind origin.
 - If `Safe Update` stops, read `update.log`; it is local and ignored by Git.
 - If Windows login startup cannot be toggled, open `shell:startup` and create or remove a shortcut to `win-start.bat` manually.

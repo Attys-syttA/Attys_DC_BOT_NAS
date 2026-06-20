@@ -60,3 +60,4 @@
 - Operator attention notifications: approval es Codex question varakozasnal a bot rovid jelzest kuld a kulon `DISCORD_NOTIFICATION_CHANNEL_ID` csatornaba, ha az nem ugyanaz, mint az aktiv project csatorna.
 - Operator task outcome notifications: Codex turn complete/fail eseten a bot public-safe kozponti statuszt kuld a kulon notification csatornaba, hibareszlet es privat path nelkul.
 - Runtime health command: bekerult a `/health`, amely public-safe bot process, Node runtime, `bot.err.log`, operator tools, usage cache es sajat repo sync/worktree allapotot mutat.
+- Operator events timeline: bekerult az ignored `operator-events.log` es a `/events`, amely startup/lifecycle/attention/task outcome esemenyeket mutat public-safe sorokban.

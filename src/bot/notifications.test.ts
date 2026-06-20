@@ -1,4 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  recordOperatorEvent: vi.fn(),
+}));
+
+vi.mock("./operator-events.js", () => ({
+  recordOperatorEvent: mocks.recordOperatorEvent,
+}));
+
 import {
   buildOperatorAttentionNotification,
   buildOperatorTaskOutcomeNotification,
@@ -82,6 +91,7 @@ describe("startup notifications", () => {
     const fetch = vi.fn();
     await sendStartupNotification({ channels: { fetch } } as never, makeConfig());
     expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({ kind: "startup", status: "online" });
   });
 
   it("sends to the configured notification channel", async () => {
@@ -121,6 +131,11 @@ describe("operator attention notifications", () => {
     );
 
     expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "attention",
+      status: "question",
+      channelId: "project-channel",
+    });
   });
 
   it("skips duplicate notifications to the same channel", async () => {
@@ -201,5 +216,10 @@ describe("operator task outcome notifications", () => {
     );
 
     expect(fetch).not.toHaveBeenCalled();
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "task",
+      status: "failed",
+      channelId: "notify-channel",
+    });
   });
 });

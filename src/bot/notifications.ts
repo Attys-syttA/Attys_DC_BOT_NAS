@@ -1,5 +1,6 @@
 import type { Client, TextChannel } from "discord.js";
 import type { Config } from "../utils/config.js";
+import { recordOperatorEvent } from "./operator-events.js";
 
 type StartupNotificationOptions = {
   botTag?: string;
@@ -78,6 +79,7 @@ export async function sendStartupNotification(
   config: Config,
   options: StartupNotificationOptions = {},
 ): Promise<void> {
+  recordOperatorEvent({ kind: "startup", status: "online" });
   if (!config.DISCORD_NOTIFICATION_CHANNEL_ID) return;
 
   const channel = await client.channels.fetch(config.DISCORD_NOTIFICATION_CHANNEL_ID);
@@ -116,6 +118,7 @@ export async function sendOperatorAttentionNotification(
   config: Config,
   kind: OperatorAttentionKind,
 ): Promise<void> {
+  recordOperatorEvent({ kind: "attention", status: kind, channelId: sourceChannel.id });
   const notifyChannelId = config.DISCORD_NOTIFICATION_CHANNEL_ID;
   if (!notifyChannelId || notifyChannelId === sourceChannel.id) return;
 
@@ -145,6 +148,7 @@ export async function sendOperatorTaskOutcomeNotification(
   config: Config,
   kind: OperatorTaskOutcomeKind,
 ): Promise<void> {
+  recordOperatorEvent({ kind: "task", status: kind, channelId: sourceChannel.id });
   const notifyChannelId = config.DISCORD_NOTIFICATION_CHANNEL_ID;
   if (!notifyChannelId || notifyChannelId === sourceChannel.id) return;
 

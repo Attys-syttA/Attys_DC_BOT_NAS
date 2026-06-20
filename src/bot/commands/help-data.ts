@@ -56,6 +56,16 @@ export const HELP_ENTRIES: HelpEntry[] = [
     ],
   },
   {
+    name: "events",
+    usage: "/events limit: <1-25>",
+    short: "Megmutatja a legutobbi public-safe operator eventeket.",
+    details: [
+      "A startup, lifecycle, approval/question es task outcome esemenyek rovid helyi timeline-ja.",
+      "Az adat az ignored `operator-events.log` fajlbol jon.",
+      "Nem tartalmaz promptot, error detailt, tokent, privat pathot vagy config erteket.",
+    ],
+  },
+  {
     name: "git-status",
     usage: "/git-status",
     short: "Lefuttatja a `git status --short --branch` parancsot a regisztralt projecten.",
