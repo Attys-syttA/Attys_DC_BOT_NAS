@@ -50,7 +50,7 @@ Because it reads local Codex thread storage where supported, sessions created fr
 - Public-safe `/health`, `/events`, `/logs`, `/doctor`, and `/dashboard`
 - Windows launcher, tray/control panel, and desktop lifecycle controls
 - Linux launcher plus Python tray/control panel for desktop host operation
-- macOS launcher scripts for background host operation
+- macOS launcher scripts plus source-derived menu bar app for desktop host operation
 - Codex usage cache display in Discord and the Windows panel
 - Optional VS Code-free operator tools preflight for local MCP/Docker/Obsidian readiness
 - Allowed-user or allowed-role access control
@@ -232,7 +232,14 @@ python3 tray/codex_control_panel.py
 
 The Linux tray/control panel can show status, start/stop/restart through `linux-start.sh`, open logs/folder/settings, show Codex usage cache, and check for upstream updates read-only. It does not run destructive auto-update actions.
 
-macOS menu bar parity is tracked in the cross-platform parity plan.
+macOS desktop users can build the source-derived, Attys-branded menu bar app on a Mac with Xcode Command Line Tools:
+
+```bash
+swiftc menubar/CodexBotMenu.swift -o menubar/CodexBotMenu
+./menubar/CodexBotMenu
+```
+
+The menu bar app uses the same `mac-start.sh`/launchd lifecycle contract, shows status and Codex usage, opens logs/folder/settings, and keeps update actions read-only.
 
 ## Commands
 

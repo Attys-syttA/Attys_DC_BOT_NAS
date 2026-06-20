@@ -7,13 +7,16 @@ Status: active
 - Fazon 0 baseline lezarva: a `Send to Codex` file handoff/application command valtozasok validalva, commitolva es pusholva (`a89a2f8`).
 - Fazon 1 cross-platform launcher alap lezarva es pusholva: `install.sh`, `linux-start.sh`, `mac-start.sh` (`a5411c1`).
 - Fazon 2 Linux tray/control panel adaptacio elindult: `tray/codex_tray.py`, `tray/codex_control_panel.py` Attys brandinggel, launcher-alapu Start/Stop/Restart contracttal.
-- Fazon 2 dokumentacios frissites folyamatban: `README.md`, `SETUP.md`, `docs/RELEASE_CHECKLIST.md`.
+- Fazon 2 Linux tray/control panel lezarva es pusholva (`d7c53da`).
+- Fazon 3 macOS menubar adaptacio elindult: `menubar/CodexBotMenu.swift` Attys brandinggel, read-only update modellel, `mac-start.sh`/launchd contracttal.
+- Fazon 3 dokumentacios frissites folyamatban: `README.md`, `SETUP.md`, `docs/RELEASE_CHECKLIST.md`.
 
 ## Nyitott reszek
 
-- Fazon 2 teljes validacio, commit es push.
+- Fazon 3 teljes validacio, commit es push.
 - Linux tray/control panel GUI runtime smoke tenyleges Linux desktop hoston kesobb platformtesztet igenyelhet.
-- Fazon 3-8 meg nincs implementalva.
+- macOS menubar Swift build/runtime smoke tenyleges macOS hoston kesobb platformtesztet igenyelhet.
+- Fazon 4-8 meg nincs implementalva.
 
 ## Cel
 

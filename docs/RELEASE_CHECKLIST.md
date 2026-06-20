@@ -81,6 +81,7 @@ On a macOS host:
 ```bash
 bash -n install.sh
 bash -n mac-start.sh
+swiftc menubar/CodexBotMenu.swift -o menubar/CodexBotMenu
 ./install.sh --help
 ./mac-start.sh --status
 ./mac-start.sh
@@ -93,6 +94,9 @@ Confirm:
 - `--status` does not require secrets
 - normal start uses `launchd`
 - `bot.log` and `bot.err.log` remain ignored
+- `./menubar/CodexBotMenu` opens a menu bar item on macOS
+- menu bar Start/Stop/Restart routes through the documented launchd/`mac-start.sh` contract
+- menu bar update checks stay read-only and do not run stash/reset/pull/install automatically
 - no `.env` value is printed
 
 ## Tray Panel Smoke

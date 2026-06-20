@@ -437,17 +437,47 @@ def _edit_settings_gtk(icon=None):
     env = _load_env()
     fields = [
         ("DISCORD_BOT_TOKEN", L("Discord Bot Token", "Discord 봇 토큰")),
+        ("DISCORD_APPLICATION_ID", L("Discord Application ID", "Discord Application ID")),
         ("DISCORD_GUILD_ID", L("Discord Guild ID (Server ID)", "Discord Guild ID (서버 ID)")),
+        ("DISCORD_NOTIFICATION_CHANNEL_ID", L("Notification Channel ID", "알림 채널 ID")),
         ("ALLOWED_USER_IDS", L("Allowed User IDs (comma-separated)", "허용된 사용자 ID (쉼표로 구분)")),
+        ("ALLOWED_ROLE_IDS", L("Allowed Role IDs (comma-separated)", "허용된 역할 ID (쉼표로 구분)")),
         ("BASE_PROJECT_DIR", L("Base Project Directory", "기본 프로젝트 디렉토리")),
+        ("DISCORD_DATABASE_PATH", L("SQLite Database Path", "SQLite 데이터베이스 경로")),
+        ("DISCORD_SESSION_STORE_PATH", L("Session Store Path", "세션 저장소 경로")),
         ("RATE_LIMIT_PER_MINUTE", L("Rate Limit Per Minute", "분당 요청 제한")),
+        ("DISCORD_QUEUE_MAX_ITEMS", L("Queue Max Items", "큐 최대 항목 수")),
+        ("DISCORD_ENABLE_MESSAGE_PROMPTS", L("Message Prompts (true/false)", "메시지 프롬프트 (true/false)")),
+        ("DISCORD_EPHEMERAL_RESPONSES", L("Ephemeral Responses (true/false)", "임시 응답 (true/false)")),
         ("SHOW_COST", L("Show Cost (true/false)", "비용 표시 (true/false)")),
+        ("DISCORD_REGISTER_COMMANDS", L("Register Slash Commands (true/false)", "Slash 명령 등록 (true/false)")),
+        ("DISCORD_ENABLE_RUN_TESTS", L("Enable Run Tests (true/false)", "테스트 실행 활성화 (true/false)")),
+        ("DISCORD_ENABLE_AUTO_APPROVE", L("Enable Auto Approve (true/false)", "자동 승인 활성화 (true/false)")),
+        ("DISCORD_ENABLE_SESSION_DELETE", L("Enable Session Delete (true/false)", "세션 삭제 활성화 (true/false)")),
+        ("DISCORD_ENABLE_BOT_LIFECYCLE", L("Enable Bot Lifecycle Command (true/false)", "봇 수명주기 명령 활성화 (true/false)")),
     ]
-    defaults = {"RATE_LIMIT_PER_MINUTE": "10", "SHOW_COST": "true", "BASE_PROJECT_DIR": ""}
+    defaults = {
+        "BASE_PROJECT_DIR": "",
+        "DISCORD_DATABASE_PATH": ".discord-bot-state/bridge.sqlite",
+        "DISCORD_SESSION_STORE_PATH": ".discord-bot-state/sessions.json",
+        "RATE_LIMIT_PER_MINUTE": "10",
+        "DISCORD_QUEUE_MAX_ITEMS": "10",
+        "DISCORD_ENABLE_MESSAGE_PROMPTS": "true",
+        "DISCORD_EPHEMERAL_RESPONSES": "true",
+        "SHOW_COST": "false",
+        "DISCORD_REGISTER_COMMANDS": "false",
+        "DISCORD_ENABLE_RUN_TESTS": "false",
+        "DISCORD_ENABLE_AUTO_APPROVE": "false",
+        "DISCORD_ENABLE_SESSION_DELETE": "false",
+        "DISCORD_ENABLE_BOT_LIFECYCLE": "false",
+    }
     placeholders = {
         "DISCORD_BOT_TOKEN": L("Paste your bot token here", "봇 토큰을 여기에 붙여넣으세요"),
+        "DISCORD_APPLICATION_ID": L("Application/client ID", "Application/client ID"),
         "DISCORD_GUILD_ID": L("Right-click server > Copy Server ID", "서버 우클릭 > 서버 ID 복사"),
+        "DISCORD_NOTIFICATION_CHANNEL_ID": L("Channel for startup/completion notices", "시작/완료 알림 채널"),
         "ALLOWED_USER_IDS": L("e.g. 123456789,987654321", "예: 123456789,987654321"),
+        "ALLOWED_ROLE_IDS": L("Optional role IDs", "선택적 역할 ID"),
         "BASE_PROJECT_DIR": L("e.g. /home/you/projects", "예: /home/you/projects"),
         "RATE_LIMIT_PER_MINUTE": "10",
         "SHOW_COST": L("false recommended for Max plan", "Max 요금제는 false 권장"),
@@ -595,11 +625,18 @@ def _edit_settings_gtk(icon=None):
             dialog.destroy()
             return
 
+        merged_env = dict(env)
+        merged_env.update(new_env)
         with open(ENV_PATH, "w") as f:
             for key, _ in fields:
                 if key == "SHOW_COST":
                     f.write("# Show estimated API cost in task results (set false for Max plan users)\n")
-                f.write(f"{key}={new_env.get(key, '')}\n")
+                f.write(f"{key}={merged_env.get(key, '')}\n")
+            extra_keys = sorted(key for key in merged_env if key not in {field[0] for field in fields})
+            if extra_keys:
+                f.write("\n# Preserved local-only settings\n")
+                for key in extra_keys:
+                    f.write(f"{key}={merged_env.get(key, '')}\n")
 
     dialog.destroy()
 
