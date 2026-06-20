@@ -1,46 +1,112 @@
 # Attys DC BOT
 
-Local-first Discord control surface for Codex CLI on a single Windows machine.
+Control local Codex workspaces from Discord on a Windows machine.
 
-This project is intentionally local-first. The bot runs on the same Windows PC where Codex CLI, `codex login`, Git, and the local repositories are available.
+Attys DC BOT is a Windows-first, local-first Discord control surface for Codex CLI. It runs on the same PC as your local repositories, your Git tools, your `codex login` session, and your optional local operator tooling. One Discord channel can be mapped to one local project, so you can start, resume, inspect, and stop Codex work from Discord without exposing a remote execution server.
 
-## What It Does
+**No manually pasted OpenAI API key is required for normal use.** The bot uses your local `codex login` session.
 
-- maps one Discord channel to one local project folder under `BASE_PROJECT_DIR`
-- sends Discord prompts to the local Codex app-server protocol
-- reads local Codex session state where supported
-- stores channel/project/session mappings in local SQLite
-- restricts access with an allowed-user whitelist
-- rate-limits user prompts
-- validates project paths so Discord cannot escape the configured workspace root
-- blocks dangerous attachment types and stores allowed uploads under the project-local `.codex-uploads/`
+This project follows the local-first direction of [chadingTV/codex-discord](https://github.com/chadingTV/codex-discord), with Windows-specific launcher, tray, operator tooling, and public-safety hardening added for this repository.
+
+> Setup guide: [SETUP.md](SETUP.md)<br>
+> Public support notes: [docs/PUBLIC_SUPPORT.md](docs/PUBLIC_SUPPORT.md)<br>
+> Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
+
+## What This Project Is
+
+`Attys_DC_BOT` is a self-hosted Discord bot that sits beside Codex CLI on your own Windows PC.
+
+It gives you a Discord-native operator surface for Codex:
+
+- register a Discord channel to a local project folder
+- send explicit `/ask` prompts, with optional attachments
+- resume existing local Codex threads for that project
+- answer Codex approvals and user-input questions from Discord
+- queue follow-up prompts while a task is already running
+- inspect runtime health, logs, events, usage, sessions, and mappings
+- start, stop, restart, and inspect the Windows bot process through a tray panel
+
+Because it reads local Codex thread storage where supported, sessions created from VS Code Codex can also appear in Discord for the same project path.
+
+## Why Use Discord for Codex?
+
+- Discord is already available on phone and desktop
+- channel-per-project mapping keeps context easy to scan
+- push notifications work well for approvals and task completion
+- buttons and select menus cover the most common operator actions
+- the bot stays local: Discord controls the local Codex session, but this repo does not open a custom remote execution server
+
+## Key Features
+
+- Uses your logged-in Codex account via `codex login`
+- One Discord channel = one local project directory under `BASE_PROJECT_DIR`
+- SQLite-backed project/session mapping
+- Local Codex app-server protocol integration
+- Local rollout/session fallback for `/last` and `/sessions`
+- Discord approval UI for tool calls and file changes
+- Codex user-input questions surfaced in Discord
+- Queue confirmation and queue management
+- `/ask` attachment support for up to three files
+- Public-safe `/health`, `/events`, `/logs`, `/doctor`, and `/dashboard`
+- Windows launcher, tray/control panel, and desktop lifecycle controls
+- Codex usage cache display in Discord and the Windows panel
+- Optional VS Code-free operator tools preflight for local MCP/Docker/Obsidian readiness
+- Allowed-user or allowed-role access control
+- Rate limiting, path validation, attachment filtering, and output sanitizing
+
+## How It Works
+
+```text
+[Discord]
+    |
+    v
+[discord.js bot on Windows]
+    |
+    v
+[local Codex session manager]
+    |
+    +--> Codex app-server protocol
+    +--> local codex login state
+    +--> local project folders under BASE_PROJECT_DIR
+    +--> local SQLite mapping state
+    +--> local rollout/session logs where available
+```
+
+- The bot stores channel-to-project mappings in local SQLite.
+- `/register` links a Discord channel to a local folder under `BASE_PROJECT_DIR`.
+- `/ask` or message prompts start or resume Codex work for that project.
+- Assistant output is streamed back to Discord and split safely for long messages and code blocks.
+- Operator events are written to ignored local logs and can be inspected from Discord without exposing secrets.
 
 ## Requirements
 
 - Windows
 - Node.js 20+
 - Codex CLI installed
-- local `codex login`
+- Local `codex login`
 - Discord bot token
 - Discord server ID
-- at least one allowed Discord user ID
+- At least one allowed Discord user ID or role ID
 
 Normal use does **not** require `OPENAI_API_KEY`; the bot uses the local Codex login session.
 
-## Setup
+## Installation
+
+```powershell
+git clone https://github.com/Attys-syttA/Attys_DC_BOT.git
+cd Attys_DC_BOT
+cmd /c install.bat
+```
+
+Manual setup:
 
 ```powershell
 npm install
 Copy-Item .env.example .env
+npm run build
 ```
 
 Edit `.env` with real local values. Never commit `.env`.
-
-For the Windows first-pass installer and desktop shortcut:
-
-```powershell
-cmd /c install.bat
-```
 
 Recommended Codex login check on Windows:
 
@@ -48,147 +114,174 @@ Recommended Codex login check on Windows:
 codex.cmd login status
 ```
 
-If `codex.cmd` is not available, test the command that works on this machine before starting the bot.
+If `codex.cmd` is not available, test the Codex command that works on this machine before starting the bot.
 
-## Run
+## Quick Start
 
-Windows launcher and tray control panel:
+1. Log in to Codex on the same Windows account that will run the bot.
+
+```powershell
+codex.cmd login
+codex.cmd login status
+```
+
+2. Create and fill `.env`.
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+Minimum keys:
+
+```env
+DISCORD_BOT_TOKEN=
+DISCORD_APPLICATION_ID=
+DISCORD_GUILD_ID=
+ALLOWED_USER_IDS=
+BASE_PROJECT_DIR=C:\workspace
+DISCORD_REGISTER_COMMANDS=true
+DISCORD_ENABLE_MESSAGE_PROMPTS=false
+```
+
+3. Start the bot and tray panel.
 
 ```powershell
 cmd /c win-start.bat
 cmd /c win-start.bat --status
-cmd /c win-start.bat --stop
-cmd /c win-start.bat --fg
 ```
 
-Default launch builds the project when needed, starts the tray app when the local C# compiler is available, and writes bot output to `bot.log` plus `bot.err.log`.
+4. In Discord, run:
 
-```powershell
-npm run build
-npm start
-```
-
-For development:
-
-```powershell
-npm run dev
-```
-
-Local preflight without starting the Discord bot:
-
-```powershell
-npm run doctor:local
+```text
+/doctor
+/register path:<project-folder>
+/dashboard
+/ask prompt:<what you want Codex to do>
 ```
 
 ## Windows Control Panel
 
-The Windows tray app opens an operator control panel for the same local bot instance.
+The Windows tray app opens a local operator panel for the same bot instance.
 
-![Public-safe Windows control panel illustration](docs/windows-control-panel-public-safe.svg)
+<p align="center">
+  <img src="docs/windows-control-panel-screenshot.png" alt="Attys DC BOT Windows control panel screenshot" width="760">
+</p>
 
-It provides:
+The screenshot above is public-safe for this repository: it does not include tokens, Discord IDs, private paths, or local configuration values.
+
+The panel provides:
 
 - visual bot status
 - `Start`, `Stop`, and `Restart`
 - local `.env` settings editor based on `.env.example`
 - `bot.log` opener
 - repository folder opener
-- Codex usage cache view with a refresh button
-- package version, local commit, upstream commit, and clean/dirty/ahead/behind git status
-- read-only `Check Updates` action using `git fetch`
-- guarded `Safe Update` action for clean repositories
-- operator tools preflight for the sibling `codex-ai-tools-mcp-link` launcher when available
-- Windows login startup toggle through the current user's Startup folder
+- Codex usage cache view with refresh
+- package version and local/upstream commit display
+- clean/dirty/ahead/behind git status
+- read-only `Check Updates`
+- guarded `Safe Update`
+- operator tools preflight button
+- Windows login startup toggle
 
-The usage panel reads `~/.codex/rate-limits-cache.json` and can refresh it through the local Codex app-server. If Codex usage is unavailable, the panel shows a local error state without printing tokens, Discord IDs, or private configuration values.
-
-The lifecycle panel separates safe update from destructive recovery. `Check Updates` is read-only apart from `git fetch`. `Safe Update` is enabled only for a clean checkout that is behind origin and runs `git pull --ff-only`, optional `npm install` when dependency files changed, `npm run build`, `npm run check`, and bot restart. It never runs `git stash`, `git reset --hard`, or history rewriting.
-
-When the sibling `codex-ai-tools-mcp-link` repository is present next to this repo, the Windows launcher and tray can run a VS Code-free operator tools preflight. It starts/checks the shared local MCP launcher path with VS Code and Telegram/NAS worker skipped, so the bot can use the same local tool surface more reliably while running by itself. The preflight is guarded by a local lock so duplicate button presses or Discord requests do not start parallel runs. The result is written to the startup Discord message as `operator tools: ready`, `failed`, `skipped`, or `running`.
+`Check Updates` is read-only apart from `git fetch`. `Safe Update` is enabled only for clean repositories and uses `git pull --ff-only`; it does not run `git stash`, `git reset --hard`, or history rewriting.
 
 ## Commands
 
-- `/register <path>`: link the current channel to a local project folder
-- `/unregister [channel]`: remove the current channel mapping, or a selected legacy channel mapping
-- `/status`: show registered project status
-- `/dashboard`: show the channel's local Codex control center, including pending operator action state
-- `/doctor`: check local Codex, config, and channel readiness without printing secrets
-- `/session current`: show the selected local Codex thread for this channel
-- `/session new`: make the next prompt start a fresh local Codex thread
-- `/session stop`: stop the active Codex turn in this channel
-- `/sessions`: show, filter, and resume known local Codex sessions for the registered project
-- `/clear-sessions`: delete local Codex session files for the registered project when `DISCORD_ENABLE_SESSION_DELETE=true`
-- `/last`: show the last known assistant response, with local rollout-log fallback when live thread read is unavailable
-- `/mappings`: list project-channel mappings, flag duplicate project paths, and offer cleanup buttons
-- `/stop`: interrupt the current Codex turn
-- `/queue list`: show queued prompts
-- `/queue clear`: clear queued prompts
-- `/queue remove <number>`: remove one queued prompt by its list number
-- `/git-status`: run `git status --short --branch` in the registered local project
-- `/bot`: show launcher status or restart the local bot when `DISCORD_ENABLE_BOT_LIFECYCLE=true`
-- `/events`: show recent public-safe operator events from the local event log, with optional type/status filtering and summary
-- `/help`: show categorized Hungarian help for known bot commands
-- `/sugo`: Hungarian alias for `/help`
-- `/health`: show public-safe bot runtime health
-- `/logs`: show a public-safe tail from local bot logs, with optional scrubbed text filtering
-- `/run-tests`: run `npm test` in the registered local project when `DISCORD_ENABLE_RUN_TESTS=true`
-- `/tools`: run or inspect the VS Code-free local operator tools preflight
-- `/usage`: show local Codex account usage when the app-server exposes rate limits
-- `/ask <prompt> [file] [file2] [file3]`: send an explicit prompt and optional file/image attachments to the registered local Codex session
-- `/auto-approve`: toggle approval bypass for the current channel when `DISCORD_ENABLE_AUTO_APPROVE=true`
+| Command | What it does |
+|---|---|
+| `/register path:` | Link the current channel to a local project folder |
+| `/unregister channel:` | Remove the current or selected legacy channel mapping |
+| `/status` | Show registered project status, runtime state, queue size, and pending action |
+| `/dashboard` | Show the channel control center and recent public-safe operator events |
+| `/doctor` | Check config, Codex readiness, channel mapping, and live slash command registration |
+| `/health` | Show public-safe bot runtime health |
+| `/events` | Show recent public-safe operator events with kind/status filtering |
+| `/logs` | Show scrubbed tails from allowlisted local bot logs |
+| `/bot action:` | Show launcher status or restart the bot when enabled |
+| `/tools action:` | Run or inspect the VS Code-free operator tools preflight |
+| `/ask prompt:` | Send an explicit prompt and optional file attachments to Codex |
+| `/session current/new/stop` | Inspect, reset, or stop the channel's Codex session |
+| `/sessions` | Filter, inspect, and resume known local Codex sessions |
+| `/last` | Show the last known assistant response with local fallback |
+| `/queue list/clear/remove` | Inspect or manage queued prompts |
+| `/mappings` | List project-channel mappings and clean duplicate legacy mappings |
+| `/git-status` | Run read-only `git status --short --branch` for the registered project |
+| `/run-tests` | Run `npm test` in the registered project when enabled |
+| `/usage` | Show local Codex usage/rate-limit information when available |
+| `/auto-approve` | Toggle approval bypass when explicitly enabled |
+| `/clear-sessions` | Delete local session files when explicitly enabled |
+| `/help` / `/sugo` | Show categorized Hungarian help |
+
+## Typical Workflow
+
+1. Start the bot with `win-start.bat` or the desktop shortcut.
+2. Run `/doctor` to confirm config, Codex login, and slash command registration.
+3. In a Discord channel, run `/register`.
+4. Use `/dashboard` to confirm the channel/project/session state.
+5. Send work with `/ask`.
+6. Approve, deny, answer, queue, stop, or inspect from Discord as needed.
+7. Use `/events`, `/logs`, `/health`, and `/last` when operating away from the Windows desktop.
+
+## Project Path Model
+
+The bot enforces a base directory boundary:
+
+- `BASE_PROJECT_DIR` is the root users are allowed to register under
+- `/register my-app` becomes `BASE_PROJECT_DIR\my-app`
+- nested paths like `/register apps/api-server` are supported
+- absolute paths are allowed only if they still resolve inside `BASE_PROJECT_DIR`
+- if the folder does not exist yet, `/register` can create it
+
+This keeps the Discord UI simple while preventing path traversal outside the allowed workspace root.
+
+## Attachments
+
+When you attach files through `/ask`:
+
+- files are downloaded into the project-local `.codex-uploads/` folder
+- images and files are appended to the Codex prompt as local references
+- executable and dangerous file types are rejected
+- local saved paths are not echoed back to Discord
+
+## Security Model
+
+- `.env` is ignored and must stay local
+- runtime SQLite state, logs, uploads, generated binaries, and Codex auth state are ignored
+- access is limited to configured allowed users or roles
+- project registration is restricted to `BASE_PROJECT_DIR`
+- executable attachments are blocked
+- no custom HTTP execution server is opened by this project
+- message prompts require Discord's privileged Message Content intent; slash commands can run without it
+- command and file-change auto-approval is disabled unless `DISCORD_ENABLE_AUTO_APPROVE=true`
+- session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
+- Discord-side bot restart is disabled unless `DISCORD_ENABLE_BOT_LIFECYCLE=true`
+- `/logs`, `/events`, `/health`, `/doctor`, and `/dashboard` avoid tokens, raw Discord IDs, private paths, and config values
 
 ## Configuration
 
 Important `.env` keys:
 
-- `DISCORD_BOT_TOKEN`
-- `DISCORD_APPLICATION_ID`
-- `DISCORD_GUILD_ID`
-- `DISCORD_NOTIFICATION_CHANNEL_ID`
-- `ALLOWED_USER_IDS`
-- `ALLOWED_ROLE_IDS`
-- `BASE_PROJECT_DIR`
-- `DISCORD_DATABASE_PATH`
-- `DISCORD_SESSION_STORE_PATH`
-- `RATE_LIMIT_PER_MINUTE`
-- `DISCORD_QUEUE_MAX_ITEMS`
-- `DISCORD_ENABLE_MESSAGE_PROMPTS`
-- `DISCORD_EPHEMERAL_RESPONSES`
-- `SHOW_COST`
-- `DISCORD_REGISTER_COMMANDS`
-- `DISCORD_ENABLE_RUN_TESTS`
-- `DISCORD_ENABLE_AUTO_APPROVE`
-- `DISCORD_ENABLE_SESSION_DELETE`
-- `DISCORD_ENABLE_BOT_LIFECYCLE`
+| Key | Purpose |
+|---|---|
+| `DISCORD_BOT_TOKEN` | Discord bot token, local only |
+| `DISCORD_APPLICATION_ID` | Optional app ID to avoid runtime lookup |
+| `DISCORD_GUILD_ID` | Target Discord server |
+| `DISCORD_NOTIFICATION_CHANNEL_ID` | Optional central operator notification channel |
+| `ALLOWED_USER_IDS` | Comma-separated allowed Discord user IDs |
+| `ALLOWED_ROLE_IDS` | Optional allowed Discord role IDs |
+| `BASE_PROJECT_DIR` | Workspace root that `/register` may use |
+| `DISCORD_DATABASE_PATH` | Local SQLite state path |
+| `DISCORD_SESSION_STORE_PATH` | Local session store path |
+| `DISCORD_ENABLE_MESSAGE_PROMPTS` | Whether normal messages can become prompts |
+| `DISCORD_REGISTER_COMMANDS` | Whether startup registers slash commands |
+| `DISCORD_ENABLE_RUN_TESTS` | Enables `/run-tests` |
+| `DISCORD_ENABLE_AUTO_APPROVE` | Enables approval bypass toggle |
+| `DISCORD_ENABLE_SESSION_DELETE` | Enables destructive session deletion |
+| `DISCORD_ENABLE_BOT_LIFECYCLE` | Enables Discord-triggered bot restart |
 
-No remote execution keys are required. Do not add custom execution-agent secrets, private hostnames, private IPs, or machine-specific private examples to tracked files.
-
-The tray settings editor writes only the local ignored `.env` file. Keep real values local; tracked docs and examples must use placeholders only.
-
-## Security Model
-
-- `.env` is ignored and must stay local
-- access is limited to `ALLOWED_USER_IDS`
-- project registration is restricted to `BASE_PROJECT_DIR`
-- executable attachment types are blocked
-- slash `/ask` attachments are saved under project-local `.codex-uploads/` and local paths are not echoed back to Discord
-- runtime SQLite and upload state are ignored
-- no custom HTTP execution server is opened by this project
-- no network-share or portable-drive workflow is part of the target architecture
-- command and file-change auto-approval is disabled unless `DISCORD_ENABLE_AUTO_APPROVE=true`
-- local Codex session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
-- Discord-side bot restart is disabled unless `DISCORD_ENABLE_BOT_LIFECYCLE=true`
-- message-based prompts require Discord's privileged Message Content intent; slash commands work with `DISCORD_ENABLE_MESSAGE_PROMPTS=false`
-- tray update checks are read-only apart from `git fetch`; safe update is clean-checkout only and does not stash or reset local work
-- `/doctor` reports whether message prompt mode is enabled or slash-command-only mode is active
-- `/doctor` warns when one local project still has multiple Discord channel mappings, such as old forum/thread leftovers
-- `/dashboard` shows whether Codex is waiting for approval, a question answer, custom input, or queue confirmation
-- `/mappings` provides an overview and cleanup buttons before falling back to `/unregister [channel]` for manual legacy mapping removal
-- startup notifications go only to `DISCORD_NOTIFICATION_CHANNEL_ID` when it is configured, and the message does not include secrets or raw IDs
-- approval/question attention notifications go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
-- task completed/failed notifications also go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
-- operator events are also written to ignored `operator-events.log` and can be inspected with `/events`; use `kind`, `status`, and `summary` when you need a shorter filtered view
-- `/logs` reads only allowlisted local bot log files and scrubs path, ID, IP, and secret-looking fragments before replying in Discord
+Tracked examples and docs must use placeholders only.
 
 ## Validation
 
@@ -212,15 +305,31 @@ cmd /c win-start.bat --status
 cmd /c win-start.bat --stop
 ```
 
-## Repository Protection
+## CI And Repository Protection
 
-- GitHub Actions CI runs lint, typecheck, tests, and build on Node.js 20 and 22.
-- SQLite Check verifies the native `better-sqlite3` dependency in CI.
-- Secret Scan runs `ggshield` when `GITGUARDIAN_API_KEY` is configured as a repository secret.
+- GitHub Actions CI runs lint, plan check, typecheck, tests, and build on Node.js 20 and 22.
+- SQLite Check verifies the native `better-sqlite3` dependency.
+- Secret Scan runs GitGuardian/ggshield when `GITGUARDIAN_API_KEY` is configured as a repository secret.
 - Dependabot checks npm and GitHub Actions dependencies weekly.
 
-## Public Support And Releases
+## Current Scope
 
-- Public support guide: [docs/PUBLIC_SUPPORT.md](docs/PUBLIC_SUPPORT.md)
-- Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
-- Issue templates ask reporters to remove tokens, real Discord IDs, private paths, and local runtime files before posting.
+In scope:
+
+- Windows/local-first Codex control
+- Discord operator UX
+- local SQLite mapping state
+- local Codex login/session usage
+- public-safe docs and diagnostics
+
+Out of scope:
+
+- remote execution bridge
+- custom HTTP execution agent
+- multi-machine state sharing
+- network-share or portable-drive workflow
+- Linux/macOS launcher parity for this repository
+
+## License
+
+MIT. See [LICENSE](LICENSE).

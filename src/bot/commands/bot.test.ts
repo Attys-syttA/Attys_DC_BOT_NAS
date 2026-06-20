@@ -18,14 +18,19 @@ import {
 
 describe("/bot helpers", () => {
   it("builds a public-safe launcher status reply", async () => {
-    mocks.runLocalCommand.mockResolvedValue({
-      exitCode: 0,
-      timedOut: false,
-      output: "Running.\n",
-    });
+    const platform = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
+    try {
+      mocks.runLocalCommand.mockResolvedValue({
+        exitCode: 0,
+        timedOut: false,
+        output: "Running.\n",
+      });
 
-    await expect(botStatus("repo")).resolves.toContain("Running.");
-    expect(mocks.runLocalCommand).toHaveBeenCalledWith("cmd", ["/c", "win-start.bat", "--status"], "repo", 15_000);
+      await expect(botStatus("repo")).resolves.toContain("Running.");
+      expect(mocks.runLocalCommand).toHaveBeenCalledWith("cmd", ["/c", "win-start.bat", "--status"], "repo", 15_000);
+    } finally {
+      platform.mockRestore();
+    }
   });
 
   it("keeps restart gated behind an explicit env flag message", () => {
