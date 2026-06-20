@@ -196,3 +196,9 @@ cmd /c win-start.bat --stop
 - SQLite Check verifies the native `better-sqlite3` dependency in CI.
 - Secret Scan runs `ggshield` when `GITGUARDIAN_API_KEY` is configured as a repository secret.
 - Dependabot checks npm and GitHub Actions dependencies weekly.
+
+## Public Support And Releases
+
+- Public support guide: [docs/PUBLIC_SUPPORT.md](docs/PUBLIC_SUPPORT.md)
+- Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)
+- Issue templates ask reporters to remove tokens, real Discord IDs, private paths, and local runtime files before posting.

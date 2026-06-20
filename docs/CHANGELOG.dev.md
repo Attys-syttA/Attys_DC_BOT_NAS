@@ -50,3 +50,4 @@
 - Windows lifecycle: a tray/control panel megjeleniti a package verziot, local/upstream commitot, clean/dirty/ahead/behind allapotot, read-only `git fetch` update checket es Windows login startup toggle-t.
 - Lifecycle closeout: launcher/tray smoke, read-only update check, autostart shortcut create/remove smoke, npm validacio es ggshield secret scan zold; a lifecycle terv `done` ala kerult.
 - Safe update: a tray `Safe Update` gombot kapott clean checkout es behind origin eseten; `git pull --ff-only`, szukseg szerinti `npm install`, `npm run build`, `npm run check`, majd bot restart fut, de nincs stash/reset/history rewrite.
+- Public polish: bekerult bug/feature issue template, PR checklist, Windows release checklist es public support guide, mind secret-hygiene es Windows local-first fokuszban.

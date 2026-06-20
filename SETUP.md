@@ -161,3 +161,8 @@ ggshield secret scan path --recursive --yes --use-gitignore .
 ```
 
 No `git push` should happen until the local-first cleanup and secret scan are reviewed.
+
+For public-safe reports and releases, also see:
+
+- [docs/PUBLIC_SUPPORT.md](docs/PUBLIC_SUPPORT.md)
+- [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)

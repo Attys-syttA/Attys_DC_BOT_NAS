@@ -1,0 +1,91 @@
+# Release Checklist
+
+This repository is Windows-first and local-first. A release should prove that the Discord bot, launcher, tray panel, and public docs are safe to publish.
+
+## Preflight
+
+```powershell
+git status --short --branch
+git rev-list --left-right --count origin/main...HEAD
+npm run doctor:local
+```
+
+Expected:
+
+- the branch is `main`
+- local and `origin/main` are synced before tagging
+- `.env` stays local and ignored
+- no runtime database, logs, generated executables, or Codex auth state are staged
+
+## Validation
+
+```powershell
+npm run lint
+npm run typecheck
+npm test
+npm run build
+npm run check
+git diff --check
+ggshield secret scan path --recursive --yes --use-gitignore .
+```
+
+## Windows Smoke
+
+```powershell
+cmd /c win-start.bat --stop
+cmd /c win-start.bat --status
+cmd /c win-start.bat
+cmd /c win-start.bat --status
+cmd /c win-start.bat --stop
+```
+
+Confirm:
+
+- stopped state reports `Stopped`
+- started state reports `Running`
+- tray process starts when `tray/CodexBotTray.exe` can be built
+- `tray-error.log` is not created
+- `bot.log`, `bot.err.log`, `update.log`, `CodexBot.exe`, and `tray/CodexBotTray.exe` remain ignored
+
+## Tray Panel Smoke
+
+Confirm the panel shows:
+
+- bot status
+- start/stop/restart controls
+- `.env` settings editor
+- log and folder open buttons
+- Codex usage cache state
+- package version and local/upstream commit
+- clean/dirty/ahead/behind status
+- `Check Updates`
+- guarded `Safe Update`
+- Windows login startup toggle
+
+`Safe Update` must stay guarded:
+
+- clean + behind origin: allowed
+- dirty: stop for manual cleanup
+- diverged: stop for manual review
+- no `git stash`
+- no `git reset --hard`
+
+## Public-Safe Docs
+
+Before publishing:
+
+- screenshots and SVGs must be synthetic or scrubbed
+- docs must not contain real Discord IDs, tokens, usernames, private paths, or local hostnames
+- examples must use placeholders
+- issue templates must warn users not to paste secrets
+
+## Tagging
+
+Only after all checks are green:
+
+```powershell
+git tag vX.Y.Z
+git push origin vX.Y.Z
+```
+
+Do not create a tag from a dirty working tree.
