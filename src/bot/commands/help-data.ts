@@ -37,6 +37,16 @@ export const HELP_ENTRIES: HelpEntry[] = [
     ],
   },
   {
+    name: "bot",
+    usage: "/bot action: status|restart",
+    short: "Megmutatja vagy ujrainditja a helyi bot processzt.",
+    details: [
+      "`status` read-only modon a Windows launcher allapotat mutatja.",
+      "`restart` csak `DISCORD_ENABLE_BOT_LIFECYCLE=true` mellett mukodik.",
+      "A restart valaszt kuld Discordra, majd par masodperccel kesobb inditja ujra a helyi botot.",
+    ],
+  },
+  {
     name: "dashboard",
     usage: "/dashboard",
     short: "Megmutatja a csatorna helyi Codex control paneljet.",

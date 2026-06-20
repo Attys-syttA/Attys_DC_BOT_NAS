@@ -37,6 +37,7 @@ function makeConfig(overrides: Partial<Config> = {}): Config {
     DISCORD_ENABLE_RUN_TESTS: false,
     DISCORD_ENABLE_AUTO_APPROVE: false,
     DISCORD_ENABLE_SESSION_DELETE: false,
+    DISCORD_ENABLE_BOT_LIFECYCLE: false,
     SHOW_COST: false,
     ...overrides,
   };

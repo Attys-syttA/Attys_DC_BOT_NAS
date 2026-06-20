@@ -42,6 +42,10 @@ const envSchema = z.object({
     .enum(["true", "false"])
     .default("false")
     .transform((v) => v === "true"),
+  DISCORD_ENABLE_BOT_LIFECYCLE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
   SHOW_COST: z
     .enum(["true", "false"])
     .default("false")

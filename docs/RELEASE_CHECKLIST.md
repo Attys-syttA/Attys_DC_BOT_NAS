@@ -68,6 +68,7 @@ Confirm the panel shows:
 - `/health` runtime report does not expose private paths, tokens, raw Discord IDs, or config values
 - `/events` timeline reads only public-safe `operator-events.log` lines, supports `kind` filtering and `summary`, and does not expose prompts or error details
 - `/logs` reads only allowlisted bot log files and scrubs local paths, raw IDs, IPs, and secret-looking fragments before Discord output
+- `/bot status` is read-only, and `/bot restart` stays gated behind `DISCORD_ENABLE_BOT_LIFECYCLE=true`
 
 `Safe Update` must stay guarded:
 

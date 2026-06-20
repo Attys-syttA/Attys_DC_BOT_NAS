@@ -164,6 +164,8 @@ Optional local commands:
 
 - `/ask` gives a slash-command prompt path in addition to normal messages.
 - `/git-status` reports the registered local project's git state.
+- `/bot status` checks the Windows launcher status from Discord.
+- `/bot restart` restarts the local bot only when `DISCORD_ENABLE_BOT_LIFECYCLE=true`.
 - `/session current/new/stop` gives direct per-channel session controls.
 - `/queue remove` removes one queued prompt without using buttons.
 - `/tools run` runs the VS Code-free operator tools preflight from Discord.
@@ -177,6 +179,7 @@ Optional local commands:
 ## 9. Troubleshooting
 
 - If `--status` says `Stopped`, run `Get-Content bot.log -Tail 80` and `Get-Content bot.err.log -Tail 80`.
+- If you are away from the desktop, run `/bot status`; if lifecycle control is enabled, `/bot restart` can restart the local bot.
 - If `.bot.lock` is stale, run `cmd /c win-start.bat --stop`, then `cmd /c win-start.bat --status`.
 - If the tray does not appear, check whether `tray/CodexBotTray.exe` exists and whether Windows/.NET C# compiler tooling is installed.
 - If the desktop shortcut icon is generic, start the bot once so the launcher can build `tray/CodexBotTray.exe`, then recreate the shortcut by running `cmd /c install.bat`.

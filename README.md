@@ -125,6 +125,7 @@ When the sibling `codex-ai-tools-mcp-link` repository is present next to this re
 - `/queue clear`: clear queued prompts
 - `/queue remove <number>`: remove one queued prompt by its list number
 - `/git-status`: run `git status --short --branch` in the registered local project
+- `/bot`: show launcher status or restart the local bot when `DISCORD_ENABLE_BOT_LIFECYCLE=true`
 - `/events`: show recent public-safe operator events from the local event log, with optional type filtering and summary
 - `/help`: show Hungarian help for known bot commands
 - `/sugo`: Hungarian alias for `/help`
@@ -158,6 +159,7 @@ Important `.env` keys:
 - `DISCORD_ENABLE_RUN_TESTS`
 - `DISCORD_ENABLE_AUTO_APPROVE`
 - `DISCORD_ENABLE_SESSION_DELETE`
+- `DISCORD_ENABLE_BOT_LIFECYCLE`
 
 No remote execution keys are required. Do not add custom execution-agent secrets, private hostnames, private IPs, or machine-specific private examples to tracked files.
 
@@ -174,6 +176,7 @@ The tray settings editor writes only the local ignored `.env` file. Keep real va
 - no network-share or portable-drive workflow is part of the target architecture
 - command and file-change auto-approval is disabled unless `DISCORD_ENABLE_AUTO_APPROVE=true`
 - local Codex session deletion is disabled unless `DISCORD_ENABLE_SESSION_DELETE=true`
+- Discord-side bot restart is disabled unless `DISCORD_ENABLE_BOT_LIFECYCLE=true`
 - message-based prompts require Discord's privileged Message Content intent; slash commands work with `DISCORD_ENABLE_MESSAGE_PROMPTS=false`
 - tray update checks are read-only apart from `git fetch`; safe update is clean-checkout only and does not stash or reset local work
 - `/doctor` reports whether message prompt mode is enabled or slash-command-only mode is active
