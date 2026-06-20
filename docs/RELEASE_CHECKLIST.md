@@ -64,6 +64,7 @@ Confirm the panel shows:
 - Windows login startup toggle
 - `/dashboard` pending operator action row for approval/question/custom answer/queue confirmation state
 - central approval/question attention notification when `DISCORD_NOTIFICATION_CHANNEL_ID` points to a separate channel
+- central task completed/failed notification when `DISCORD_NOTIFICATION_CHANNEL_ID` points to a separate channel
 
 `Safe Update` must stay guarded:
 

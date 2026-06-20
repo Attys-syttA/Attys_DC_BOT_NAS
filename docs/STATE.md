@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: operator attention notification hardening in progress
-- Git state: local `main` tracks `origin/main`; attention notification changes prepared for validation
+- Phase: operator task outcome notification hardening in progress
+- Git state: local `main` tracks `origin/main`; task outcome notification changes prepared for validation
 
 ## Current Goal
 
@@ -68,6 +68,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Allowed pending custom Codex answers through the message handler even when normal message prompts are disabled.
 - Extended `/dashboard` with pending operator action visibility for approvals, questions, custom answers, and queue confirmations.
 - Added best-effort central attention notifications for approval and Codex question waits when `DISCORD_NOTIFICATION_CHANNEL_ID` points to a separate sendable channel.
+- Added best-effort central task outcome notifications for completed and failed Codex turns without exposing error details.
 
 ## Open Work
 

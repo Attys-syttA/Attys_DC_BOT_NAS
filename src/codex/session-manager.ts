@@ -18,7 +18,10 @@ import {
   createToolApprovalEmbed,
   splitMessage,
 } from "./output-formatter.js";
-import { sendOperatorAttentionNotification } from "../bot/notifications.js";
+import {
+  sendOperatorAttentionNotification,
+  sendOperatorTaskOutcomeNotification,
+} from "../bot/notifications.js";
 
 interface ActiveSession {
   channelId: string;
@@ -301,6 +304,7 @@ export class SessionManager {
           if (stream) {
             await stream.messages.at(-1)?.edit({ content: `❌ ${message}`, components: [] }).catch(() => {});
           }
+          await sendOperatorTaskOutcomeNotification(active.channel, getConfig(), "failed").catch(() => {});
           updateSessionStatus(channelId, "offline");
           this.finishSession(channelId);
           return;
@@ -315,6 +319,7 @@ export class SessionManager {
           await active.channel.send(payload).catch(() => {});
         }
 
+        await sendOperatorTaskOutcomeNotification(active.channel, getConfig(), "completed").catch(() => {});
         updateSessionStatus(channelId, "idle");
         this.finishSession(channelId);
       }

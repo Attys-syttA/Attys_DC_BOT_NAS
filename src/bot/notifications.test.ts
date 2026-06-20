@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   buildOperatorAttentionNotification,
+  buildOperatorTaskOutcomeNotification,
   buildStartupNotification,
   sendOperatorAttentionNotification,
+  sendOperatorTaskOutcomeNotification,
   sendStartupNotification,
 } from "./notifications.js";
 import type { Config } from "../utils/config.js";
@@ -148,5 +150,56 @@ describe("operator attention notifications", () => {
     expect(fetch).toHaveBeenCalledWith("notify-channel");
     expect(send).toHaveBeenCalledWith(expect.stringContaining("action: Codex question"));
     expect(send).toHaveBeenCalledWith(expect.stringContaining("channel: <#project-channel>"));
+  });
+});
+
+describe("operator task outcome notifications", () => {
+  it("builds a public-safe completion message", () => {
+    const message = buildOperatorTaskOutcomeNotification("completed", "channel-1");
+
+    expect(message).toContain("Attys DC BOT task update.");
+    expect(message).toContain("status: completed");
+    expect(message).toContain("channel: <#channel-1>");
+    expect(message).not.toContain("token");
+    expect(message).not.toContain("C:\\");
+  });
+
+  it("builds a public-safe failure message without error details", () => {
+    const message = buildOperatorTaskOutcomeNotification("failed", "channel-1");
+
+    expect(message).toContain("status: failed");
+    expect(message).toContain("Open the project channel for the full result.");
+    expect(message).not.toContain("stack");
+    expect(message).not.toContain("private");
+  });
+
+  it("sends task outcome notifications to a separate configured channel", async () => {
+    const send = vi.fn();
+    const fetch = vi.fn().mockResolvedValue({
+      isSendable: () => true,
+      send,
+    });
+
+    await sendOperatorTaskOutcomeNotification(
+      { id: "project-channel", client: { channels: { fetch } } } as never,
+      makeConfig({ DISCORD_NOTIFICATION_CHANNEL_ID: "notify-channel" }),
+      "completed",
+    );
+
+    expect(fetch).toHaveBeenCalledWith("notify-channel");
+    expect(send).toHaveBeenCalledWith(expect.stringContaining("status: completed"));
+    expect(send).toHaveBeenCalledWith(expect.stringContaining("channel: <#project-channel>"));
+  });
+
+  it("skips duplicate task outcome notifications to the same channel", async () => {
+    const fetch = vi.fn();
+
+    await sendOperatorTaskOutcomeNotification(
+      { id: "notify-channel", client: { channels: { fetch } } } as never,
+      makeConfig({ DISCORD_NOTIFICATION_CHANNEL_ID: "notify-channel" }),
+      "failed",
+    );
+
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

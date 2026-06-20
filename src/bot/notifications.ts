@@ -9,6 +9,7 @@ type StartupNotificationOptions = {
 };
 
 type OperatorAttentionKind = "approval" | "question";
+type OperatorTaskOutcomeKind = "completed" | "failed";
 
 function safeLaunchReason(value: string | undefined): string {
   if (!value) return "unknown start";
@@ -122,4 +123,33 @@ export async function sendOperatorAttentionNotification(
   if (!channel?.isSendable()) return;
 
   await channel.send(buildOperatorAttentionNotification(kind, sourceChannel.id));
+}
+
+export function buildOperatorTaskOutcomeNotification(
+  kind: OperatorTaskOutcomeKind,
+  sourceChannelId?: string,
+): string {
+  const outcome = kind === "completed" ? "completed" : "failed";
+  const target = sourceChannelId ? `<#${sourceChannelId}>` : "the active project channel";
+
+  return [
+    "Attys DC BOT task update.",
+    `status: ${outcome}`,
+    `channel: ${target}`,
+    "Open the project channel for the full result.",
+  ].join("\n");
+}
+
+export async function sendOperatorTaskOutcomeNotification(
+  sourceChannel: TextChannel,
+  config: Config,
+  kind: OperatorTaskOutcomeKind,
+): Promise<void> {
+  const notifyChannelId = config.DISCORD_NOTIFICATION_CHANNEL_ID;
+  if (!notifyChannelId || notifyChannelId === sourceChannel.id) return;
+
+  const channel = await sourceChannel.client.channels.fetch(notifyChannelId);
+  if (!channel?.isSendable()) return;
+
+  await channel.send(buildOperatorTaskOutcomeNotification(kind, sourceChannel.id));
 }

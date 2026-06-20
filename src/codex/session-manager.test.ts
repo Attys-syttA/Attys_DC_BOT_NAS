@@ -17,6 +17,7 @@ const mocks = vi.hoisted(() => ({
     interruptTurn: vi.fn(),
   },
   sendOperatorAttentionNotification: vi.fn(),
+  sendOperatorTaskOutcomeNotification: vi.fn(),
 }));
 
 vi.mock("../db/database.js", () => ({
@@ -41,6 +42,7 @@ vi.mock("./app-server-client.js", () => ({
 
 vi.mock("../bot/notifications.js", () => ({
   sendOperatorAttentionNotification: mocks.sendOperatorAttentionNotification,
+  sendOperatorTaskOutcomeNotification: mocks.sendOperatorTaskOutcomeNotification,
 }));
 
 import { SessionManager } from "./session-manager.js";
@@ -64,6 +66,7 @@ describe("SessionManager streaming output", () => {
       DISCORD_QUEUE_MAX_ITEMS: 10,
     });
     mocks.sendOperatorAttentionNotification.mockResolvedValue(undefined);
+    mocks.sendOperatorTaskOutcomeNotification.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -178,6 +181,100 @@ describe("SessionManager streaming output", () => {
 
     clearInterval((manager as any).streamState.get("channel-2").heartbeat);
   });
+
+  it("sends a central task-completed notification when a turn completes", async () => {
+    const manager = new SessionManager();
+    const firstMessage = createFakeMessage();
+    const channel = {
+      id: "channel-3",
+      send: vi.fn().mockResolvedValue(createFakeMessage()),
+    } as any;
+
+    (manager as any).sessions.set("channel-3", {
+      channelId: "channel-3",
+      channel,
+      threadId: "thread-3",
+      turnId: "turn-3",
+      dbId: "db-3",
+    });
+
+    (manager as any).streamState.set("channel-3", {
+      buffer: "Done",
+      messages: [firstMessage],
+      lastEditTime: 0,
+      stopRow: createStopButton("channel-3"),
+      startedAt: 0,
+      lastActivity: "Thinking...",
+      toolUseCount: 0,
+      heartbeat: setInterval(() => {}, 60_000),
+      hasTextOutput: true,
+      lastError: null,
+    });
+
+    now = 5_000;
+    await (manager as any).handleNotification({
+      method: "turn/completed",
+      params: {
+        threadId: "thread-3",
+        turn: { status: "completed" },
+      },
+    });
+
+    expect(mocks.sendOperatorTaskOutcomeNotification).toHaveBeenCalledWith(
+      channel,
+      expect.any(Object),
+      "completed",
+    );
+    expect(mocks.updateSessionStatus).toHaveBeenCalledWith("channel-3", "idle");
+  });
+
+  it("sends a central task-failed notification when a turn fails", async () => {
+    const manager = new SessionManager();
+    const firstMessage = createFakeMessage();
+    const channel = {
+      id: "channel-4",
+      send: vi.fn().mockResolvedValue(createFakeMessage()),
+    } as any;
+
+    (manager as any).sessions.set("channel-4", {
+      channelId: "channel-4",
+      channel,
+      threadId: "thread-4",
+      turnId: "turn-4",
+      dbId: "db-4",
+    });
+
+    (manager as any).streamState.set("channel-4", {
+      buffer: "",
+      messages: [firstMessage],
+      lastEditTime: 0,
+      stopRow: createStopButton("channel-4"),
+      startedAt: 0,
+      lastActivity: "Thinking...",
+      toolUseCount: 0,
+      heartbeat: setInterval(() => {}, 60_000),
+      hasTextOutput: false,
+      lastError: null,
+    });
+
+    await (manager as any).handleNotification({
+      method: "turn/completed",
+      params: {
+        threadId: "thread-4",
+        turn: {
+          status: "failed",
+          error: { message: "private failure details" },
+        },
+      },
+    });
+
+    expect(mocks.sendOperatorTaskOutcomeNotification).toHaveBeenCalledWith(
+      channel,
+      expect.any(Object),
+      "failed",
+    );
+    expect(mocks.updateSessionStatus).toHaveBeenCalledWith("channel-4", "offline");
+  });
 });
 
 describe("SessionManager approval safety", () => {
@@ -189,6 +286,7 @@ describe("SessionManager approval safety", () => {
       DISCORD_QUEUE_MAX_ITEMS: 10,
     });
     mocks.sendOperatorAttentionNotification.mockResolvedValue(undefined);
+    mocks.sendOperatorTaskOutcomeNotification.mockResolvedValue(undefined);
   });
 
   it("treats approve-all as a single approval when auto-approve is disabled", async () => {
@@ -307,6 +405,7 @@ describe("SessionManager user input routing", () => {
       DISCORD_QUEUE_MAX_ITEMS: 10,
     });
     mocks.sendOperatorAttentionNotification.mockResolvedValue(undefined);
+    mocks.sendOperatorTaskOutcomeNotification.mockResolvedValue(undefined);
   });
 
   it("routes custom typed answers back to the active Codex question id", async () => {
