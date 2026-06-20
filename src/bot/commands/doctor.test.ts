@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   resolveCodexCommand: vi.fn(),
   getConfig: vi.fn(),
   runLocalCommand: vi.fn(),
+  expectedCommandNames: vi.fn(),
+  inspectDiscordCommandRegistration: vi.fn(),
 }));
 
 vi.mock("node:fs", () => ({
@@ -30,6 +32,11 @@ vi.mock("../../utils/config.js", () => ({
 
 vi.mock("./local-command.js", () => ({
   runLocalCommand: mocks.runLocalCommand,
+}));
+
+vi.mock("../command-surface.js", () => ({
+  expectedCommandNames: mocks.expectedCommandNames,
+  inspectDiscordCommandRegistration: mocks.inspectDiscordCommandRegistration,
 }));
 
 import { execute } from "./doctor.js";
@@ -56,7 +63,12 @@ describe("/doctor", () => {
       ALLOWED_ROLE_IDS: [],
       BASE_PROJECT_DIR: "/projects",
       DISCORD_ENABLE_MESSAGE_PROMPTS: false,
+      DISCORD_REGISTER_COMMANDS: true,
     });
+    mocks.expectedCommandNames.mockReturnValue(["ask", "doctor", "status"]);
+    mocks.inspectDiscordCommandRegistration.mockResolvedValue([
+      "OK slash command registration 3/3",
+    ]);
     mocks.runLocalCommand.mockResolvedValue({
       exitCode: 0,
       timedOut: false,
@@ -73,6 +85,9 @@ describe("/doctor", () => {
     expect(content).toContain("OK DISCORD_APPLICATION_ID configured");
     expect(content).toContain("INFO notification channel not configured");
     expect(content).toContain("OK allowed principals configured");
+    expect(content).toContain("OK known slash command surface 3 commands");
+    expect(content).toContain("INFO startup slash command registration enabled");
+    expect(content).toContain("OK slash command registration 3/3");
     expect(content).toContain("INFO message prompts disabled; slash commands work without Message Content intent");
     expect(content).toContain("OK this channel is registered");
     expect(content).toContain("OK project has one channel mapping");
@@ -121,6 +136,7 @@ describe("/doctor", () => {
       ALLOWED_ROLE_IDS: [],
       BASE_PROJECT_DIR: "/projects",
       DISCORD_ENABLE_MESSAGE_PROMPTS: true,
+      DISCORD_REGISTER_COMMANDS: false,
     });
     const interaction = makeInteraction();
 
@@ -128,6 +144,7 @@ describe("/doctor", () => {
 
     const content = interaction.editReply.mock.calls[0][0].content;
     expect(content).toContain("OK notification channel configured");
+    expect(content).toContain("INFO startup slash command registration disabled");
     expect(content).toContain("INFO message prompts enabled; Discord Message Content intent must be enabled in Developer Portal");
   });
 });

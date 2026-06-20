@@ -85,6 +85,7 @@ Confirm the panel shows:
 - `/logs contains:` filters only already-scrubbed public-safe log lines
 - `/events` records manual operator lifecycle actions such as session new/stop/delete, queue add/clear/remove, mapping remove, and Discord bot restart
 - `/dashboard`, `/status`, and `/health` show recent operator/runtime/queue/pending visibility without exposing prompts or local paths
+- `/doctor` reports expected slash command surface size and live guild registration parity, including missing or extra command names only
 
 `Safe Update` must stay guarded:
 
