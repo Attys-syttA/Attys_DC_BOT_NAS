@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: Discord bot lifecycle in progress
-- Git state: local `main` tracks `origin/main`; Discord bot lifecycle command prepared for validation
+- Phase: help discoverability in progress
+- Git state: local `main` tracks `origin/main`; categorized help prepared for validation
 
 ## Current Goal
 
@@ -74,6 +74,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Extended `/events` with `kind` filtering and optional `summary` output for short public-safe operator timeline triage.
 - Added `/logs` for scrubbed Discord-side tails of allowlisted local bot logs while operating away from the Windows desktop.
 - Added `/bot status|restart`, with restart gated behind `DISCORD_ENABLE_BOT_LIFECYCLE=true`.
+- Grouped `/help` and `/sugo` list output into operator-friendly command categories.
 
 ## Open Work
 

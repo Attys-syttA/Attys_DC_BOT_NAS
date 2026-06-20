@@ -64,3 +64,4 @@
 - Operator events filter: a `/events` `kind` szurest es `summary` kapcsolot kapott, igy a startup/lifecycle/attention/task timeline kulon is visszanezheto rovid public-safe osszegzessel.
 - Remote log peek: bekerult a `/logs`, amely allowlisted helyi bot logokbol ad public-safe tailt Discordra, path/raw ID/IP/secret-szeru reszletek scrubolasaval.
 - Discord bot lifecycle: bekerult a `/bot status|restart`; a status read-only, a restart pedig explicit `DISCORD_ENABLE_BOT_LIFECYCLE=true` flag mogott marad.
+- Help discoverability: a `/help` es `/sugo` listanezet kategoriakba rendezve mutatja a megnott parancskeszletet, rovid kezdo parancs javaslattal.

@@ -127,7 +127,7 @@ When the sibling `codex-ai-tools-mcp-link` repository is present next to this re
 - `/git-status`: run `git status --short --branch` in the registered local project
 - `/bot`: show launcher status or restart the local bot when `DISCORD_ENABLE_BOT_LIFECYCLE=true`
 - `/events`: show recent public-safe operator events from the local event log, with optional type filtering and summary
-- `/help`: show Hungarian help for known bot commands
+- `/help`: show categorized Hungarian help for known bot commands
 - `/sugo`: Hungarian alias for `/help`
 - `/health`: show public-safe bot runtime health
 - `/logs`: show a public-safe tail from local bot logs

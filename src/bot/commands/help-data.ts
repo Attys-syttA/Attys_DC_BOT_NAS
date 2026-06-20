@@ -1,5 +1,6 @@
 export interface HelpEntry {
   name: string;
+  category: "codex" | "sessions" | "repo" | "ops" | "safety";
   usage: string;
   short: string;
   details: string[];
@@ -8,6 +9,7 @@ export interface HelpEntry {
 export const HELP_ENTRIES: HelpEntry[] = [
   {
     name: "ask",
+    category: "codex",
     usage: "/ask prompt: <szoveg>",
     short: "Promptot kuld a csatornahoz rendelt helyi Codex sessionbe.",
     details: [
@@ -18,6 +20,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "auto-approve",
+    category: "safety",
     usage: "/auto-approve mode: on|off",
     short: "Be- vagy kikapcsolja az automatikus tool/file jovahagyast, ha az env engedi.",
     details: [
@@ -28,6 +31,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "clear-sessions",
+    category: "safety",
     usage: "/clear-sessions",
     short: "Torli az adott projecthez tartozo helyi Codex session fajlokat, ha az env engedi.",
     details: [
@@ -38,6 +42,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "bot",
+    category: "ops",
     usage: "/bot action: status|restart",
     short: "Megmutatja vagy ujrainditja a helyi bot processzt.",
     details: [
@@ -48,6 +53,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "dashboard",
+    category: "ops",
     usage: "/dashboard",
     short: "Megmutatja a csatorna helyi Codex control paneljet.",
     details: [
@@ -57,6 +63,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "doctor",
+    category: "ops",
     usage: "/doctor",
     short: "Ellenorzi a bot, a config, a Codex CLI es a channel readiness allapotat.",
     details: [
@@ -67,6 +74,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "events",
+    category: "ops",
     usage: "/events limit: <1-25> kind: all|startup|lifecycle|attention|task summary: true|false",
     short: "Megmutatja es szuri a legutobbi public-safe operator eventeket.",
     details: [
@@ -78,6 +86,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "git-status",
+    category: "repo",
     usage: "/git-status",
     short: "Lefuttatja a `git status --short --branch` parancsot a regisztralt projecten.",
     details: [
@@ -87,6 +96,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "help",
+    category: "ops",
     usage: "/help parancs: <nev>",
     short: "Magyar sugot mutat az ismert bot parancsokrol.",
     details: [
@@ -97,6 +107,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "health",
+    category: "ops",
     usage: "/health",
     short: "Public-safe bot runtime health riportot mutat.",
     details: [
@@ -107,6 +118,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "logs",
+    category: "ops",
     usage: "/logs source: bot|error|operator-tools|events|update lines: <1-30>",
     short: "Public-safe tailt mutat a helyi bot logokbol.",
     details: [
@@ -117,6 +129,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "last",
+    category: "sessions",
     usage: "/last",
     short: "Megmutatja az aktualis session utolso ismert Codex valaszat.",
     details: [
@@ -126,6 +139,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "mappings",
+    category: "repo",
     usage: "/mappings",
     short: "Listazza a project-channel mappingeket es jelzi a duplikalt project path-okat.",
     details: [
@@ -137,6 +151,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "queue",
+    category: "sessions",
     usage: "/queue list|clear|remove number",
     short: "A varakozo promptok listazasa, torlese vagy egy elem eltavolitasa.",
     details: [
@@ -147,6 +162,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "register",
+    category: "repo",
     usage: "/register path: <helyi_mappa>",
     short: "A jelenlegi Discord csatornat egy helyi repo/project mappahoz rendeli.",
     details: [
@@ -157,6 +173,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "run-tests",
+    category: "repo",
     usage: "/run-tests",
     short: "`npm test` futtatasa a regisztralt projecten, ha az env engedi.",
     details: [
@@ -167,6 +184,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "session",
+    category: "sessions",
     usage: "/session current|new|stop",
     short: "Az adott channel aktualis Codex sessionjenek kezelesere valo.",
     details: [
@@ -177,6 +195,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "sessions",
+    category: "sessions",
     usage: "/sessions",
     short: "Listazza es kivalaszthatova teszi a projecthez tartozo helyi Codex sessionoket.",
     details: [
@@ -186,6 +205,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "status",
+    category: "ops",
     usage: "/status",
     short: "Megmutatja a szerveren regisztralt project/session allapotokat.",
     details: [
@@ -195,6 +215,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "tools",
+    category: "ops",
     usage: "/tools action: run|status",
     short: "Elinditja vagy megnezi a VSC nelkuli operator tools preflight allapotat.",
     details: [
@@ -206,6 +227,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "stop",
+    category: "sessions",
     usage: "/stop",
     short: "Leallitja az adott channel aktiv Codex futasat.",
     details: [
@@ -215,6 +237,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "sugo",
+    category: "ops",
     usage: "/sugo parancs: <nev>",
     short: "A `/help` magyar aliasa.",
     details: [
@@ -224,6 +247,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "unregister",
+    category: "repo",
     usage: "/unregister channel: <opcionalis>",
     short: "Torli a jelenlegi vagy kivalasztott channel es project kozotti kapcsolatot.",
     details: [
@@ -234,6 +258,7 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "usage",
+    category: "codex",
     usage: "/usage",
     short: "Megmutatja a helyi Codex account usage/rate-limit informacioit, ha elerheto.",
     details: [
