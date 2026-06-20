@@ -8,6 +8,7 @@ import {
 import { getProject } from "../../db/database.js";
 import { sessionManager } from "../../codex/session-manager.js";
 import { L } from "../../utils/i18n.js";
+import { sanitizePublicText } from "../../utils/public-safety.js";
 
 export const data = new SlashCommandBuilder()
   .setName("queue")
@@ -30,6 +31,10 @@ export const data = new SlashCommandBuilder()
           .setMinValue(1),
       )
   );
+
+function queuePreview(prompt: string): string {
+  return sanitizePublicText(prompt, 100) || "(empty prompt)";
+}
 
 export async function execute(
   interaction: ChatInputCommandInteraction,
@@ -57,7 +62,7 @@ export async function execute(
 
     const list = queue
       .map((item, idx) => {
-        const preview = item.prompt.length > 100 ? item.prompt.slice(0, 100) + "…" : item.prompt;
+        const preview = queuePreview(item.prompt);
         return `**${idx + 1}.** ${preview}`;
       })
       .join("\n\n");
@@ -104,7 +109,7 @@ export async function execute(
       return;
     }
 
-    const preview = removed.length > 100 ? removed.slice(0, 100) + "…" : removed;
+    const preview = queuePreview(removed);
     await interaction.editReply({
       embeds: [
         {

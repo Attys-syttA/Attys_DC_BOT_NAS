@@ -13,6 +13,7 @@ import { sessionManager } from "../../codex/session-manager.js";
 import { L } from "../../utils/i18n.js";
 import { buildAttachmentPromptSuffix, downloadAttachment, type DownloadedAttachment } from "../attachments.js";
 import { getConfig } from "../../utils/config.js";
+import { sanitizePublicText } from "../../utils/public-safety.js";
 
 export const data = new SlashCommandBuilder()
   .setName("ask")
@@ -43,7 +44,7 @@ export const data = new SlashCommandBuilder()
   );
 
 function formatPromptForDiscord(prompt: string): string {
-  const normalized = prompt.replace(/```/g, "'''");
+  const normalized = sanitizePublicText(prompt, 1_400).replace(/```/g, "'''");
   return normalized.length > 1_400 ? `${normalized.slice(0, 1_400)}...` : normalized;
 }
 

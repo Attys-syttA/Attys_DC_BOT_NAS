@@ -233,6 +233,26 @@ describe("createAskUserQuestionEmbed", () => {
     expect(components[0].components).toHaveLength(3);
   });
 
+  it("scrubs question cards before displaying them in Discord", () => {
+    const data: AskQuestionData = {
+      question: "Use C:\\Users\\someone\\repo with DISCORD_BOT_TOKEN=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ?",
+      header: "C:\\Users\\someone\\repo",
+      options: [
+        { label: "C:\\Users\\someone\\repo", description: "Token abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+      ],
+      multiSelect: false,
+    };
+
+    const { embed, components } = createAskUserQuestionEmbed(data, "req-safe", 0, 1);
+
+    expect(embed.data.title).toContain("<local-path>");
+    expect(embed.data.title).not.toContain("someone");
+    expect(embed.data.description).toContain("DISCORD_BOT_TOKEN=<redacted>");
+    expect(embed.data.description).not.toContain("abcdefghijklmnopqrstuvwxyz");
+    expect(embed.data.fields?.[0].name).toContain("<local-path>");
+    expect(components[0].components[0].data.label).toContain("<local-path>");
+  });
+
   it("creates multi-select with StringSelectMenu + custom input row", () => {
     const data: AskQuestionData = {
       question: "Pick many",

@@ -13,6 +13,7 @@ import { renderMappingsPayload } from "../commands/mappings.js";
 import { readLastResponseWithFallback } from "../commands/last.js";
 import { L } from "../../utils/i18n.js";
 import { getConfig } from "../../utils/config.js";
+import { sanitizePublicText } from "../../utils/public-safety.js";
 
 function interactionRoleIds(
   interaction: ButtonInteraction | StringSelectMenuInteraction,
@@ -180,7 +181,7 @@ export async function handleButtonInteraction(
       return;
     }
 
-    const preview = removed.length > 60 ? removed.slice(0, 60) + "…" : removed;
+    const preview = sanitizePublicText(removed, 60) || "(empty prompt)";
     const queue = sessionManager.getQueue(channelId);
     if (queue.length === 0) {
       await interaction.update({
@@ -198,7 +199,7 @@ export async function handleButtonInteraction(
 
     const list = queue
       .map((item: { prompt: string }, idx: number) => {
-        const p = item.prompt.length > 100 ? item.prompt.slice(0, 100) + "…" : item.prompt;
+        const p = sanitizePublicText(item.prompt, 100) || "(empty prompt)";
         return `**${idx + 1}.** ${p}`;
       })
       .join("\n\n");

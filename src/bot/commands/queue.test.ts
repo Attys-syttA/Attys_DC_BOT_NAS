@@ -53,7 +53,7 @@ describe("/queue", () => {
   });
 
   it("lists queued prompts", async () => {
-    mocks.getQueue.mockReturnValue([{ prompt: "first" }, { prompt: "second" }]);
+    mocks.getQueue.mockReturnValue([{ prompt: "first" }, { prompt: "second C:\\Users\\someone\\repo" }]);
     const interaction = makeInteraction("list");
 
     await execute(interaction as never);
@@ -61,16 +61,20 @@ describe("/queue", () => {
     const payload = interaction.editReply.mock.calls[0][0];
     expect(payload.embeds[0].title).toBe("📋 Message Queue (2)");
     expect(payload.embeds[0].description).toContain("**1.** first");
+    expect(payload.embeds[0].description).toContain("<local-path>");
+    expect(payload.embeds[0].description).not.toContain("someone");
     expect(payload.components.length).toBeGreaterThan(0);
   });
 
   it("removes a queued prompt by one-based number", async () => {
+    mocks.removeFromQueue.mockReturnValue("queued prompt DISCORD_BOT_TOKEN=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
     const interaction = makeInteraction("remove", 2);
 
     await execute(interaction as never);
 
     expect(mocks.removeFromQueue).toHaveBeenCalledWith("channel-1", 1);
     expect(interaction.editReply.mock.calls[0][0].embeds[0].description).toContain("Removed item 2");
+    expect(interaction.editReply.mock.calls[0][0].embeds[0].description).toContain("DISCORD_BOT_TOKEN=<redacted>");
   });
 
   it("reports missing queue item on remove", async () => {

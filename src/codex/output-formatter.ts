@@ -9,6 +9,7 @@ import { L } from "../utils/i18n.js";
 import { sanitizePublicFileLabel, sanitizePublicText } from "../utils/public-safety.js";
 
 const MAX_DISCORD_LENGTH = 1900; // leave room for formatting
+const FALLBACK_OPTION_LABEL = "Option";
 
 export function formatStreamChunk(text: string): string {
   if (text.length <= MAX_DISCORD_LENGTH) return text;
@@ -168,19 +169,25 @@ export function createAskUserQuestionEmbed(
   questionIndex: number,
   totalQuestions: number,
 ): { embed: EmbedBuilder; components: ActionRowBuilder<any>[] } {
+  const safeHeader = sanitizePublicText(questionData.header, 120) || "Question";
+  const safeQuestion = sanitizePublicText(questionData.question, 1_000) || "Codex needs operator input.";
+  const safeOptions = questionData.options.map((opt, index) => ({
+    label: sanitizePublicText(opt.label, 80) || `${FALLBACK_OPTION_LABEL} ${index + 1}`,
+    description: sanitizePublicText(opt.description, 240),
+  }));
   const title =
     totalQuestions > 1
-      ? `❓ ${questionData.header} (${questionIndex + 1}/${totalQuestions})`
-      : `❓ ${questionData.header}`;
+      ? `❓ ${safeHeader} (${questionIndex + 1}/${totalQuestions})`
+      : `❓ ${safeHeader}`;
 
   const embed = new EmbedBuilder()
     .setTitle(title)
-    .setDescription(questionData.question)
+    .setDescription(safeQuestion)
     .setColor(0x7c3aed)
     .setTimestamp();
 
   // Add option descriptions as embed fields
-  for (const opt of questionData.options) {
+  for (const opt of safeOptions) {
     embed.addFields({
       name: opt.label,
       value: opt.description || "\u200b",
@@ -196,9 +203,9 @@ export function createAskUserQuestionEmbed(
       .setCustomId(`ask-select:${requestId}`)
       .setPlaceholder(L("Select options...", "옵션을 선택하세요..."))
       .setMinValues(1)
-      .setMaxValues(questionData.options.length)
+      .setMaxValues(safeOptions.length)
       .addOptions(
-        questionData.options.map((opt, i) => ({
+        safeOptions.map((opt, i) => ({
           label: opt.label.slice(0, 100),
           value: String(i),
           ...(opt.description
@@ -223,7 +230,7 @@ export function createAskUserQuestionEmbed(
     );
   } else {
     // Use buttons for single select
-    const buttons: ButtonBuilder[] = questionData.options.map((opt, i) =>
+    const buttons: ButtonBuilder[] = safeOptions.map((opt, i) =>
       new ButtonBuilder()
         .setCustomId(`ask-opt:${requestId}:${i}`)
         .setLabel(opt.label.slice(0, 80))
