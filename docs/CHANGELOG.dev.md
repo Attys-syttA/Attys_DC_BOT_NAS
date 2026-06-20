@@ -62,3 +62,4 @@
 - Runtime health command: bekerult a `/health`, amely public-safe bot process, Node runtime, `bot.err.log`, operator tools, usage cache es sajat repo sync/worktree allapotot mutat.
 - Operator events timeline: bekerult az ignored `operator-events.log` es a `/events`, amely startup/lifecycle/attention/task outcome esemenyeket mutat public-safe sorokban.
 - Operator events filter: a `/events` `kind` szurest es `summary` kapcsolot kapott, igy a startup/lifecycle/attention/task timeline kulon is visszanezheto rovid public-safe osszegzessel.
+- Remote log peek: bekerult a `/logs`, amely allowlisted helyi bot logokbol ad public-safe tailt Discordra, path/raw ID/IP/secret-szeru reszletek scrubolasaval.

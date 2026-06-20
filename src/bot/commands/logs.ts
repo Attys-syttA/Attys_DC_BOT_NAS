@@ -1,0 +1,97 @@
+import fs from "node:fs";
+import path from "node:path";
+import {
+  ChatInputCommandInteraction,
+  SlashCommandBuilder,
+} from "discord.js";
+
+export type LogSource = "bot" | "error" | "operator-tools" | "events" | "update";
+
+const LOG_SOURCES: Record<LogSource, string> = {
+  bot: "bot.log",
+  error: "bot.err.log",
+  "operator-tools": "operator-startup.log",
+  events: "operator-events.log",
+  update: "update.log",
+};
+
+export const data = new SlashCommandBuilder()
+  .setName("logs")
+  .setDescription("Show a public-safe tail from local bot logs")
+  .addStringOption((option) => option
+    .setName("source")
+    .setDescription("Which local log to inspect")
+    .setRequired(true)
+    .addChoices(
+      { name: "bot", value: "bot" },
+      { name: "error", value: "error" },
+      { name: "operator-tools", value: "operator-tools" },
+      { name: "events", value: "events" },
+      { name: "update", value: "update" },
+    ))
+  .addIntegerOption((option) => option
+    .setName("lines")
+    .setDescription("Number of lines to show")
+    .setMinValue(1)
+    .setMaxValue(30));
+
+function clampLineCount(value: number): number {
+  return Math.max(1, Math.min(30, value));
+}
+
+export function sanitizeLogLine(line: string): string {
+  return line
+    .replace(/([A-Z0-9_]*(?:TOKEN|SECRET|KEY|AUTH|PASSWORD)[A-Z0-9_]*=)\S+/gi, "$1<redacted>")
+    .replace(/[A-Za-z]:[\\/][^\s`"']+/g, "<local-path>")
+    .replace(/(?:^|\s)\/(?:Users|home|mnt|var|tmp)\/[^\s`"']+/g, " <local-path>")
+    .replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, "<ip>")
+    .replace(/<#\d{5,30}>/g, "<#channel>")
+    .replace(/\b\d{15,30}\b/g, "<id>")
+    .replace(/\b[A-Za-z0-9_-]{48,}\b/g, "<redacted>")
+    .trim()
+    .slice(0, 240);
+}
+
+export function readPublicLogLines(
+  repoRoot: string,
+  source: LogSource,
+  lineCount = 12,
+): string[] {
+  const filename = LOG_SOURCES[source];
+  if (!filename) return [];
+
+  try {
+    return fs.readFileSync(path.join(repoRoot, filename), "utf8")
+      .split(/\r?\n/)
+      .map(sanitizeLogLine)
+      .filter(Boolean)
+      .slice(-clampLineCount(lineCount));
+  } catch {
+    return [];
+  }
+}
+
+function compactCodeBlock(lines: string[]): string {
+  const joined = lines.join("\n");
+  if (joined.length <= 1750) return joined;
+  return `...${joined.slice(joined.length - 1750)}`;
+}
+
+export function buildLogsReply(source: LogSource, lines: string[]): string {
+  return [
+    `**Attys DC BOT Logs** (${source})`,
+    lines.length > 0
+      ? `\`\`\`text\n${compactCodeBlock(lines)}\n\`\`\``
+      : "No public-safe lines found for this log source.",
+  ].join("\n");
+}
+
+export async function execute(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  const source = (interaction.options.getString("source", true) ?? "bot") as LogSource;
+  const lines = interaction.options.getInteger("lines") ?? 12;
+  await interaction.editReply({
+    content: buildLogsReply(source, readPublicLogLines(process.cwd(), source, lines)),
+  });
+}

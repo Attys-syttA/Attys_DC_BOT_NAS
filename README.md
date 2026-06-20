@@ -129,6 +129,7 @@ When the sibling `codex-ai-tools-mcp-link` repository is present next to this re
 - `/help`: show Hungarian help for known bot commands
 - `/sugo`: Hungarian alias for `/help`
 - `/health`: show public-safe bot runtime health
+- `/logs`: show a public-safe tail from local bot logs
 - `/run-tests`: run `npm test` in the registered local project when `DISCORD_ENABLE_RUN_TESTS=true`
 - `/tools`: run or inspect the VS Code-free local operator tools preflight
 - `/usage`: show local Codex account usage when the app-server exposes rate limits
@@ -183,6 +184,7 @@ The tray settings editor writes only the local ignored `.env` file. Keep real va
 - approval/question attention notifications go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
 - task completed/failed notifications also go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
 - operator events are also written to ignored `operator-events.log` and can be inspected with `/events`; use `kind` and `summary` when you need a shorter filtered view
+- `/logs` reads only allowlisted local bot log files and scrubs path, ID, IP, and secret-looking fragments before replying in Discord
 
 ## Validation
 

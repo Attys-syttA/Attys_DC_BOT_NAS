@@ -96,6 +96,16 @@ export const HELP_ENTRIES: HelpEntry[] = [
     ],
   },
   {
+    name: "logs",
+    usage: "/logs source: bot|error|operator-tools|events|update lines: <1-30>",
+    short: "Public-safe tailt mutat a helyi bot logokbol.",
+    details: [
+      "Tavoli operatori diagnosztikahoz valo, amikor nincs VS Code vagy desktop panel elotted.",
+      "Csak elore engedelyezett repo-lokalis logforrasokat olvas.",
+      "A valasz scrubolja a pathokat, raw ID-kat, IP-ket es secret-szeru ertekeket.",
+    ],
+  },
+  {
     name: "last",
     usage: "/last",
     short: "Megmutatja az aktualis session utolso ismert Codex valaszat.",
