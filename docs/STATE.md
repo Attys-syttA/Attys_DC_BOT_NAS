@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: session filtering in progress
-- Git state: local `main` tracks `origin/main`; `/sessions` filtering prepared for validation
+- Phase: health version visibility in progress
+- Git state: local `main` tracks `origin/main`; `/health` version visibility prepared for validation
 
 ## Current Goal
 
@@ -80,6 +80,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Extended `/ask` to accept `file`, `file2`, and `file3` attachment slots.
 - Added `/last` fallback to local Codex rollout JSONL logs when live app-server thread reading is unavailable.
 - Added `/sessions query/source/limit` filtering for large local Codex session lists.
+- Added bot package version visibility to `/health`.
 
 ## Open Work
 

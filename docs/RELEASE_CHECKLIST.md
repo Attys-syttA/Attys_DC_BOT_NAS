@@ -74,6 +74,7 @@ Confirm the panel shows:
 - `/ask` uses queue confirmation instead of starting a parallel turn when the channel already has active Codex work
 - `/last` falls back to local rollout JSONL only when live thread reading is unavailable or empty
 - `/sessions query/source/limit` filters large local session lists without changing stored session state
+- `/health` shows the package version without reading or printing private config values
 
 `Safe Update` must stay guarded:
 

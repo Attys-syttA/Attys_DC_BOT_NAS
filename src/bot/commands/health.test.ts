@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   statSync: vi.fn(),
+  readFileSync: vi.fn(),
   loadCodexUsageCache: vi.fn(),
   runLocalCommand: vi.fn(),
   readOperatorStartupLog: vi.fn(),
@@ -11,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("node:fs", () => ({
   default: {
     statSync: mocks.statSync,
+    readFileSync: mocks.readFileSync,
   },
 }));
 
@@ -47,6 +49,7 @@ describe("/health report", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.statSync.mockReturnValue({ size: 0 });
+    mocks.readFileSync.mockReturnValue(JSON.stringify({ version: "0.1.0" }));
     mocks.loadCodexUsageCache.mockReturnValue({ fetchedAt: Date.now(), usage: { buckets: [] } });
     mocks.readOperatorStartupLog.mockReturnValue(["2026-06-20T18:00:00 OK: operator tools preflight completed."]);
     mocks.operatorToolsStatusFromLog.mockReturnValue("ready");
@@ -61,6 +64,7 @@ describe("/health report", () => {
 
     expect(report).toContain("Attys DC BOT Health");
     expect(report).toContain("OK bot process");
+    expect(report).toContain("OK bot version: 0.1.0");
     expect(report).toContain("OK bot error log: empty");
     expect(report).toContain("OK operator tools: ready");
     expect(report).toContain("OK Codex usage cache");

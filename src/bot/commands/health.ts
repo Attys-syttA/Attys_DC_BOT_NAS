@@ -87,6 +87,18 @@ function usageHealthLine(): string {
     : healthLine("INFO", "Codex usage cache", "missing or unreadable");
 }
 
+function packageVersionLine(repoRoot: string): string {
+  try {
+    const raw = fs.readFileSync(path.join(repoRoot, "package.json"), "utf8");
+    const parsed = JSON.parse(raw) as { version?: unknown };
+    return typeof parsed.version === "string" && /^[0-9A-Za-z.+-]{1,40}$/.test(parsed.version)
+      ? healthLine("OK", "bot version", parsed.version)
+      : healthLine("INFO", "bot version", "unknown");
+  } catch {
+    return healthLine("INFO", "bot version", "unknown");
+  }
+}
+
 function operatorToolsHealthLine(repoRoot: string): string {
   const status = operatorToolsStatusFromLog(readOperatorStartupLog(repoRoot));
   if (status === "ready") return healthLine("OK", "operator tools", "ready");
@@ -98,6 +110,7 @@ export async function buildHealthReport(repoRoot: string): Promise<string> {
   const uptimeSec = Math.max(0, Math.floor(process.uptime()));
   const lines = [
     healthLine("OK", "bot process", `pid ${process.pid}, uptime ${uptimeSec}s`),
+    packageVersionLine(repoRoot),
     healthLine("OK", "node runtime", process.version),
     botLogHealthLine(repoRoot),
     operatorToolsHealthLine(repoRoot),
