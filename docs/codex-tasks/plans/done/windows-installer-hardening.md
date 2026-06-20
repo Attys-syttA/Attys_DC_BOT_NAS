@@ -11,16 +11,19 @@ Status: done / Windows installer hardening implemented
 - `install.bat` a script elejen beallitja a `SCRIPT_DIR` valtozot, mielott barmelyik restart-ag hasznalna.
 - A lepesek szamozasa a tenyleges 6 fazishoz igazodik.
 - A desktop shortcut Attys DC BOT brandinget kapott.
+- A shortcut letrehozasa PowerShell COM hivasra valtott a rejtett VBS hiba helyett.
 - A shortcut ikon fallback sorrendje:
   - `tray\CodexBotTray.exe`
   - `CodexBot.exe`
   - Windows system icon
 - A Codex login next-step Windows-kompatibilis `codex.cmd login` szoveget hasznal.
 - README es SETUP dokumentalja az installer hasznalatat es a shortcut ikon fallback viselkedest.
+- Acceptance futas utan letrejott a `Desktop\Attys DC BOT.lnk`, amely a repo `win-start.bat` fajljara mutat.
 
 ## Validacios terv
 
 - `cmd /c win-start.bat --status`
+- `cmd /c "echo. | install.bat"`
 - `npm run plans:check`
 - `git diff --check`
 - `npm run check`

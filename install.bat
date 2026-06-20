@@ -104,7 +104,7 @@ if %errorlevel% neq 0 (
 echo.
 
 :: --- 3. npm install ---
-echo [3/4] Installing project dependencies...
+echo [3/6] Installing project dependencies...
 call npm install
 if %errorlevel% neq 0 (
     echo   X npm install failed.
@@ -118,7 +118,7 @@ echo   OK Done
 echo.
 
 :: --- 4. .env ---
-echo [4/4] Checking .env file...
+echo [4/6] Checking .env file...
 if exist .env (
     echo   .env already exists
     echo   OK
@@ -140,23 +140,21 @@ echo.
 
 :: --- 6. Desktop shortcut ---
 echo [6/6] Creating desktop shortcut...
-set "SHORTCUT_VBS=%TEMP%\create-shortcut.vbs"
 for /f "usebackq delims=" %%D in (`powershell -NoProfile -Command "[Environment]::GetFolderPath('Desktop')"`) do set "DESKTOP=%%D"
 set "ICON_LOCATION=%SCRIPT_DIR%\tray\CodexBotTray.exe, 0"
 if not exist "%SCRIPT_DIR%\tray\CodexBotTray.exe" set "ICON_LOCATION=%SCRIPT_DIR%\CodexBot.exe, 0"
 if not exist "%SCRIPT_DIR%\CodexBot.exe" set "ICON_LOCATION=%SystemRoot%\System32\shell32.dll, 220"
 
-echo Set oWS = WScript.CreateObject("WScript.Shell") > "%SHORTCUT_VBS%"
-echo sLinkFile = "%DESKTOP%\%SHORTCUT_NAME%" >> "%SHORTCUT_VBS%"
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> "%SHORTCUT_VBS%"
-echo oLink.TargetPath = "%SCRIPT_DIR%\win-start.bat" >> "%SHORTCUT_VBS%"
-echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> "%SHORTCUT_VBS%"
-echo oLink.Description = "%PROJECT_NAME%" >> "%SHORTCUT_VBS%"
-echo oLink.IconLocation = "%ICON_LOCATION%" >> "%SHORTCUT_VBS%"
-echo oLink.WindowStyle = 7 >> "%SHORTCUT_VBS%"
-echo oLink.Save >> "%SHORTCUT_VBS%"
-cscript //nologo "%SHORTCUT_VBS%" >nul 2>&1
-del "%SHORTCUT_VBS%" >nul 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$shortcutPath = Join-Path ([Environment]::GetFolderPath('Desktop')) '%SHORTCUT_NAME%';" ^
+    "$shell = New-Object -ComObject WScript.Shell;" ^
+    "$shortcut = $shell.CreateShortcut($shortcutPath);" ^
+    "$shortcut.TargetPath = Join-Path '%SCRIPT_DIR%' 'win-start.bat';" ^
+    "$shortcut.WorkingDirectory = '%SCRIPT_DIR%';" ^
+    "$shortcut.Description = '%PROJECT_NAME%';" ^
+    "$shortcut.IconLocation = '%ICON_LOCATION%';" ^
+    "$shortcut.WindowStyle = 7;" ^
+    "$shortcut.Save()"
 
 if exist "%DESKTOP%\%SHORTCUT_NAME%" (
     echo   OK Desktop shortcut created
