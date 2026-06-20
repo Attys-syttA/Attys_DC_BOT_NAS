@@ -58,17 +58,17 @@ export function validateProjectPath(projectPath: string): string | null {
   const config = getConfig();
   const baseDir = path.resolve(config.BASE_PROJECT_DIR);
   if (!resolved.startsWith(baseDir + path.sep) && resolved !== baseDir) {
-    return `Path must be within ${baseDir}`;
+    return "Path must stay within BASE_PROJECT_DIR";
   }
 
   // Check existence
   if (!fs.existsSync(resolved)) {
-    return `Path does not exist: ${resolved}`;
+    return "Path does not exist";
   }
 
   // Check it's a directory
   if (!fs.statSync(resolved).isDirectory()) {
-    return `Path is not a directory: ${resolved}`;
+    return "Path is not a directory";
   }
 
   return null; // valid

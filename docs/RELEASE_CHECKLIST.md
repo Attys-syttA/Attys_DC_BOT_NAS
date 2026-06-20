@@ -68,6 +68,7 @@ Confirm the panel shows:
 - Codex approval cards and failed-turn Discord messages scrub private paths, raw IDs, and secret-looking values
 - project/session/status commands show public-safe project labels instead of full local paths
 - `/register` metadata/autocomplete, `/mappings`, and `/clear-sessions` do not expose full local paths
+- path validation and Codex thread/turn start errors do not expose full local paths or secret-looking values in Discord
 - `/health` runtime report does not expose private paths, tokens, raw Discord IDs, or config values
 - `/events` timeline reads only public-safe `operator-events.log` lines, supports `kind` and `status` filtering plus `summary`, and does not expose prompts or error details
 - `/logs` reads only allowlisted bot log files and scrubs local paths, raw IDs, IPs, and secret-looking fragments before Discord output

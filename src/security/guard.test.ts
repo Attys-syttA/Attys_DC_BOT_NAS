@@ -118,7 +118,8 @@ describe("validateProjectPath", () => {
 
   it("returns error when path is outside BASE_PROJECT_DIR", () => {
     const result = validateProjectPath("/etc/passwd");
-    expect(result).toContain("Path must be within");
+    expect(result).toBe("Path must stay within BASE_PROJECT_DIR");
+    expect(result).not.toContain("/projects");
   });
 
   it("does not call fs when path is outside BASE_PROJECT_DIR", () => {
@@ -130,14 +131,16 @@ describe("validateProjectPath", () => {
   it("returns error when path does not exist", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(false);
     const result = validateProjectPath("/projects/nonexistent");
-    expect(result).toContain("Path does not exist");
+    expect(result).toBe("Path does not exist");
+    expect(result).not.toContain("nonexistent");
   });
 
   it("returns error when path is not a directory", () => {
     vi.spyOn(fs, "existsSync").mockReturnValue(true);
     vi.spyOn(fs, "statSync").mockReturnValue({ isDirectory: () => false } as fs.Stats);
     const result = validateProjectPath("/projects/file.txt");
-    expect(result).toContain("Path is not a directory");
+    expect(result).toBe("Path is not a directory");
+    expect(result).not.toContain("file.txt");
   });
 
   it("returns null for valid directory path within BASE_PROJECT_DIR", () => {

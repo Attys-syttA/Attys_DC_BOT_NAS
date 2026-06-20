@@ -283,6 +283,50 @@ describe("SessionManager streaming output", () => {
     );
     expect(mocks.updateSessionStatus).toHaveBeenCalledWith("channel-4", "offline");
   });
+
+  it("scrubs start-turn failures before sending them to Discord", async () => {
+    const manager = new SessionManager();
+    const channel = {
+      id: "channel-5",
+      send: vi.fn().mockResolvedValue(createFakeMessage()),
+    } as any;
+
+    (manager as any).sessions.set("channel-5", {
+      channelId: "channel-5",
+      channel,
+      threadId: "thread-5",
+      turnId: "turn-5",
+      dbId: "db-5",
+    });
+
+    (manager as any).streamState.set("channel-5", {
+      buffer: "",
+      messages: [createFakeMessage()],
+      lastEditTime: 0,
+      stopRow: createStopButton("channel-5"),
+      startedAt: 0,
+      lastActivity: "Thinking...",
+      toolUseCount: 0,
+      heartbeat: setInterval(() => {}, 60_000),
+      hasTextOutput: false,
+      lastError: null,
+    });
+
+    mocks.codexAppServer.startTurn.mockRejectedValueOnce(
+      new Error("failed in C:\\Users\\someone\\repo DISCORD_BOT_TOKEN=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+    );
+    mocks.getProject.mockReturnValue({
+      channel_id: "channel-5",
+      project_path: "/projects/app",
+    });
+    mocks.getSession.mockReturnValue({ id: "db-5", session_id: "thread-5" });
+
+    await manager.sendMessage(channel, "hi");
+
+    expect(channel.send).toHaveBeenCalledWith(expect.stringContaining("<local-path>"));
+    expect(channel.send).toHaveBeenCalledWith(expect.not.stringContaining("someone"));
+    expect(channel.send).toHaveBeenCalledWith(expect.stringContaining("DISCORD_BOT_TOKEN=<redacted>"));
+  });
 });
 
 describe("SessionManager approval safety", () => {

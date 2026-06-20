@@ -138,11 +138,12 @@ export class SessionManager {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to prepare Codex thread";
+      const publicMessage = sanitizePublicText(message, 700);
       const isResumeFailure = Boolean(threadId) && !existingSession;
       if (isResumeFailure) {
         console.error(`[codex] Failed to resume thread ${threadId} for channel ${channelId}:`, message);
         await channel.send(
-          `❌ ${L("Failed to resume the selected Codex session", "선택한 Codex 세션을 재개하지 못했습니다")}: ${message}\n` +
+          `❌ ${L("Failed to resume the selected Codex session", "선택한 Codex 세션을 재개하지 못했습니다")}: ${publicMessage}\n` +
           L(
             "Try `/sessions` again or choose `Create New Session`.",
             "`/sessions`를 다시 열거나 `새 세션 만들기`를 선택해 보세요."
@@ -150,7 +151,7 @@ export class SessionManager {
         ).catch(() => {});
       } else {
         console.error(`[codex] Failed to start thread for channel ${channelId}:`, message);
-        await channel.send(`❌ ${message}`).catch(() => {});
+        await channel.send(`❌ ${publicMessage}`).catch(() => {});
       }
       updateSessionStatus(channelId, "offline");
       this.finishSession(channelId);
@@ -204,7 +205,8 @@ export class SessionManager {
     try {
       await codexAppServer.startTurn(threadId, prompt);
     } catch (error) {
-      await channel.send(`❌ ${error instanceof Error ? error.message : "Failed to start Codex turn"}`);
+      const message = error instanceof Error ? error.message : "Failed to start Codex turn";
+      await channel.send(`❌ ${sanitizePublicText(message, 700)}`);
       updateSessionStatus(channelId, "offline");
       this.finishSession(channelId);
     }
