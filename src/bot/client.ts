@@ -33,6 +33,7 @@ import * as mappingsCmd from "./commands/mappings.js";
 import * as helpCmd from "./commands/help.js";
 import * as sugoCmd from "./commands/sugo.js";
 import * as toolsCmd from "./commands/tools.js";
+import * as healthCmd from "./commands/health.js";
 
 const commands = [
   registerCmd,
@@ -55,6 +56,7 @@ const commands = [
   helpCmd,
   sugoCmd,
   toolsCmd,
+  healthCmd,
 ];
 const commandMap = new Collection<
   string,

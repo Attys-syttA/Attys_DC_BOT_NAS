@@ -59,3 +59,4 @@
 - Codex user-input routing: a custom typed answer most az aktualis Codex question id ala kerul vissza, nem fix `answer` kulcs ala; slash-only modban is atmegy a pending custom answer, mikozben a normal message prompt tovabbra is tiltva marad; a `/dashboard` mutatja a pending approval/question/custom answer/queue confirmation allapotot.
 - Operator attention notifications: approval es Codex question varakozasnal a bot rovid jelzest kuld a kulon `DISCORD_NOTIFICATION_CHANNEL_ID` csatornaba, ha az nem ugyanaz, mint az aktiv project csatorna.
 - Operator task outcome notifications: Codex turn complete/fail eseten a bot public-safe kozponti statuszt kuld a kulon notification csatornaba, hibareszlet es privat path nelkul.
+- Runtime health command: bekerult a `/health`, amely public-safe bot process, Node runtime, `bot.err.log`, operator tools, usage cache es sajat repo sync/worktree allapotot mutat.
