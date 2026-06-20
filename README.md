@@ -49,7 +49,8 @@ Because it reads local Codex thread storage where supported, sessions created fr
 - `/ask` attachment support for up to three files
 - Public-safe `/health`, `/events`, `/logs`, `/doctor`, and `/dashboard`
 - Windows launcher, tray/control panel, and desktop lifecycle controls
-- Linux and macOS launcher scripts for background host operation
+- Linux launcher plus Python tray/control panel for desktop host operation
+- macOS launcher scripts for background host operation
 - Codex usage cache display in Discord and the Windows panel
 - Optional VS Code-free operator tools preflight for local MCP/Docker/Obsidian readiness
 - Allowed-user or allowed-role access control
@@ -218,7 +219,20 @@ The repository includes initial cross-platform host launchers:
 - `linux-start.sh` starts the bot through `systemd --user` when available, with a `nohup` fallback for simpler sessions.
 - `mac-start.sh` starts the bot through `launchd`, with foreground diagnostics through `--fg`.
 
-These launchers use the same local `.env`, `bot.log`, `bot.err.log`, and `dist/index.js` entrypoint as Windows. They do not provide the Windows tray/control panel yet; Linux tray and macOS menu bar parity are tracked in the cross-platform parity plan.
+These launchers use the same local `.env`, `bot.log`, `bot.err.log`, and `dist/index.js` entrypoint as Windows.
+
+Linux desktop users can also run the source-derived, Attys-branded panel:
+
+```bash
+python3 -m pip install --user pystray Pillow
+python3 tray/codex_tray.py
+# or open the standalone panel
+python3 tray/codex_control_panel.py
+```
+
+The Linux tray/control panel can show status, start/stop/restart through `linux-start.sh`, open logs/folder/settings, show Codex usage cache, and check for upstream updates read-only. It does not run destructive auto-update actions.
+
+macOS menu bar parity is tracked in the cross-platform parity plan.
 
 ## Commands
 
@@ -382,7 +396,7 @@ Out of scope:
 - custom HTTP execution agent
 - multi-machine state sharing
 - network-share or portable-drive workflow
-- Linux tray and macOS menu bar desktop parity until the cross-platform plan is completed
+- macOS menu bar desktop parity until the cross-platform plan is completed
 
 ## License
 

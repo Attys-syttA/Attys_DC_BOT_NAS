@@ -165,7 +165,31 @@ If local changes are present, the panel stops and asks for manual cleanup. This 
 
 The Windows login startup toggle creates or removes `Attys DC BOT.lnk` in the current user's Startup folder. The shortcut points to `win-start.bat` and is never tracked by Git.
 
-Linux tray/control panel and macOS menu bar parity are tracked in the cross-platform parity plan. The current Linux/macOS launchers are host lifecycle scripts, not full desktop panels yet.
+### Linux Tray And Control Panel
+
+Linux desktop users can run the Attys-branded Python tray/control panel. Install the GUI dependencies explicitly:
+
+```bash
+python3 -m pip install --user pystray Pillow
+```
+
+Start the tray:
+
+```bash
+python3 tray/codex_tray.py
+```
+
+Or open the standalone control panel:
+
+```bash
+python3 tray/codex_control_panel.py
+```
+
+The Linux panel uses `linux-start.sh` for Start, Stop, Restart, and Status, so it works with `systemd --user` when available and with the launcher's `nohup` fallback when systemd is unavailable. It can open the local `.env`/`.env.example`, `bot.log`, and repository folder, and it can display the Codex usage cache from `~/.codex/rate-limits-cache.json`.
+
+Linux update checks are read-only. The panel may compare local `HEAD` with `origin/main`, but it does not run `git stash`, `git reset --hard`, automatic pull, automatic dependency install, or restart-for-update actions.
+
+macOS menu bar parity is still tracked in the cross-platform parity plan. The current macOS launcher is a host lifecycle script, not yet a full desktop menubar app.
 
 ## 6. Operator Tools Preflight
 

@@ -54,6 +54,7 @@ On a Linux host:
 ```bash
 bash -n install.sh
 bash -n linux-start.sh
+python3 -m py_compile tray/codex_tray.py tray/codex_control_panel.py
 ./install.sh --help
 ./linux-start.sh --status
 ./linux-start.sh
@@ -68,6 +69,10 @@ Confirm:
 - fallback start uses `nohup` when user systemd is not available
 - `bot.log` and `bot.err.log` remain ignored
 - no `.env` value is printed
+- `python3 tray/codex_tray.py` starts when `pystray` and `Pillow` are installed
+- `python3 tray/codex_control_panel.py` opens a local panel when `tkinter` is available
+- Linux panel Start/Stop/Restart routes through `linux-start.sh`
+- Linux update checks stay read-only and do not run stash/reset/pull/install automatically
 
 ## macOS Launcher Smoke
 

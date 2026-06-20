@@ -17,6 +17,8 @@ Usage:
   ./linux-start.sh --fg      Start in foreground for diagnostics
   ./linux-start.sh --status  Print bot status
   ./linux-start.sh --stop    Stop this bot instance
+  ./linux-start.sh --regen-service
+                           Regenerate the systemd user service, then exit
   ./linux-start.sh --help    Show this help
 EOF
 }
@@ -121,6 +123,16 @@ case "${1:-}" in
   --stop)
     stop_bot
     echo "Stopped."
+    exit 0
+    ;;
+  --regen-service)
+    if supports_systemd_user; then
+      write_service
+      systemctl --user enable "$SERVICE_NAME" >/dev/null 2>&1 || true
+      echo "Regenerated $SERVICE_NAME user service."
+    else
+      echo "systemd --user is unavailable; service regeneration skipped."
+    fi
     exit 0
     ;;
   --fg)
