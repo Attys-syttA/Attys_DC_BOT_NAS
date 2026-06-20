@@ -66,7 +66,7 @@ Confirm the panel shows:
 - central approval/question attention notification when `DISCORD_NOTIFICATION_CHANNEL_ID` points to a separate channel
 - central task completed/failed notification when `DISCORD_NOTIFICATION_CHANNEL_ID` points to a separate channel
 - `/health` runtime report does not expose private paths, tokens, raw Discord IDs, or config values
-- `/events` timeline reads only public-safe `operator-events.log` lines and does not expose prompts or error details
+- `/events` timeline reads only public-safe `operator-events.log` lines, supports `kind` filtering and `summary`, and does not expose prompts or error details
 
 `Safe Update` must stay guarded:
 

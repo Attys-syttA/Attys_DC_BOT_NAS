@@ -125,7 +125,7 @@ When the sibling `codex-ai-tools-mcp-link` repository is present next to this re
 - `/queue clear`: clear queued prompts
 - `/queue remove <number>`: remove one queued prompt by its list number
 - `/git-status`: run `git status --short --branch` in the registered local project
-- `/events`: show recent public-safe operator events from the local event log
+- `/events`: show recent public-safe operator events from the local event log, with optional type filtering and summary
 - `/help`: show Hungarian help for known bot commands
 - `/sugo`: Hungarian alias for `/help`
 - `/health`: show public-safe bot runtime health
@@ -182,7 +182,7 @@ The tray settings editor writes only the local ignored `.env` file. Keep real va
 - startup notifications go only to `DISCORD_NOTIFICATION_CHANNEL_ID` when it is configured, and the message does not include secrets or raw IDs
 - approval/question attention notifications go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
 - task completed/failed notifications also go to `DISCORD_NOTIFICATION_CHANNEL_ID` only when it is a separate sendable channel
-- operator events are also written to ignored `operator-events.log` and can be inspected with `/events`
+- operator events are also written to ignored `operator-events.log` and can be inspected with `/events`; use `kind` and `summary` when you need a shorter filtered view
 
 ## Validation
 

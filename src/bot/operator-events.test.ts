@@ -2,7 +2,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { formatOperatorEvent, readOperatorEvents, recordOperatorEvent } from "./operator-events.js";
+import {
+  formatOperatorEvent,
+  readOperatorEvents,
+  recordOperatorEvent,
+  summarizeOperatorEvents,
+} from "./operator-events.js";
 
 const tempDirs: string[] = [];
 
@@ -58,5 +63,35 @@ describe("operator events", () => {
 
     expect(readOperatorEvents(dir, 2)).toHaveLength(2);
     expect(readOperatorEvents(dir, 2)[0]).toContain("two");
+  });
+
+  it("filters event reads by kind", () => {
+    const dir = makeTempDir();
+    recordOperatorEvent({ kind: "startup", status: "online" }, dir);
+    recordOperatorEvent({ kind: "attention", status: "codex-question" }, dir);
+    recordOperatorEvent({ kind: "task", status: "completed" }, dir);
+
+    expect(readOperatorEvents(dir, 10, "attention")).toEqual([
+      expect.stringContaining("attention codex-question"),
+    ]);
+    expect(readOperatorEvents(dir, 10, "task")).toEqual([
+      expect.stringContaining("task completed"),
+    ]);
+  });
+
+  it("summarizes event lines without private details", () => {
+    const summary = summarizeOperatorEvents([
+      "2026-06-20T18:40:00.000Z startup online",
+      "2026-06-20T18:41:00.000Z attention codex-question channel=<#123456789012345678>",
+      "2026-06-20T18:42:00.000Z task completed channel=project-channel",
+      "private path C:\\Users\\someone",
+    ]);
+
+    expect(summary.total).toBe(3);
+    expect(summary.byKind.startup).toBe(1);
+    expect(summary.byKind.attention).toBe(1);
+    expect(summary.byKind.task).toBe(1);
+    expect(summary.byStatus.completed).toBe(1);
+    expect(summary.byStatus.private).toBeUndefined();
   });
 });

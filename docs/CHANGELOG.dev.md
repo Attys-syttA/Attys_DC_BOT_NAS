@@ -61,3 +61,4 @@
 - Operator task outcome notifications: Codex turn complete/fail eseten a bot public-safe kozponti statuszt kuld a kulon notification csatornaba, hibareszlet es privat path nelkul.
 - Runtime health command: bekerult a `/health`, amely public-safe bot process, Node runtime, `bot.err.log`, operator tools, usage cache es sajat repo sync/worktree allapotot mutat.
 - Operator events timeline: bekerult az ignored `operator-events.log` es a `/events`, amely startup/lifecycle/attention/task outcome esemenyeket mutat public-safe sorokban.
+- Operator events filter: a `/events` `kind` szurest es `summary` kapcsolot kapott, igy a startup/lifecycle/attention/task timeline kulon is visszanezheto rovid public-safe osszegzessel.

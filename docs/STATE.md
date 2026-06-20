@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: operator events timeline in progress
-- Git state: local `main` tracks `origin/main`; operator events timeline prepared for validation
+- Phase: operator events filter/summary in progress
+- Git state: local `main` tracks `origin/main`; operator events filter/summary prepared for validation
 
 ## Current Goal
 
@@ -71,6 +71,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Added best-effort central task outcome notifications for completed and failed Codex turns without exposing error details.
 - Added `/health` as a public-safe bot runtime health report for process uptime, error log, operator tools, usage cache, and bot repo git state.
 - Added ignored `operator-events.log` and `/events` for a public-safe startup/lifecycle/attention/task outcome timeline.
+- Extended `/events` with `kind` filtering and optional `summary` output for short public-safe operator timeline triage.
 
 ## Open Work
 

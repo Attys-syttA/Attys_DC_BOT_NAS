@@ -57,10 +57,11 @@ export const HELP_ENTRIES: HelpEntry[] = [
   },
   {
     name: "events",
-    usage: "/events limit: <1-25>",
-    short: "Megmutatja a legutobbi public-safe operator eventeket.",
+    usage: "/events limit: <1-25> kind: all|startup|lifecycle|attention|task summary: true|false",
+    short: "Megmutatja es szuri a legutobbi public-safe operator eventeket.",
     details: [
       "A startup, lifecycle, approval/question es task outcome esemenyek rovid helyi timeline-ja.",
+      "A `kind` opcioval csak egy event tipusra szurhetsz, a `summary` pedig rovid darabszam-osszefoglalot ad.",
       "Az adat az ignored `operator-events.log` fajlbol jon.",
       "Nem tartalmaz promptot, error detailt, tokent, privat pathot vagy config erteket.",
     ],
