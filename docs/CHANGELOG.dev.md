@@ -80,3 +80,4 @@
 - Register/mapping path metadata safety: a `/register` command metadata, autocomplete base label, `/mappings` es `/clear-sessions` kimenet sem ir teljes lokalis pathot Discordra.
 - Error public-safety: a path-validacio es Codex thread/turn start hibak Discord elott maszkolt, path-mentes uzenetre szukulnek.
 - User-input and queue preview safety: a Codex kerdeskartyak, queue preview-k es `/ask` Discord prompt preview-k public-safe sanitizerrel jelennek meg.
+- Operator lifecycle events: a session stop/new/delete, queue add/clear/remove, mapping remove es Discordbol inditott bot restart public-safe eventkent bekerul az `/events` timeline-ba.

@@ -23,6 +23,7 @@ import {
   sendOperatorAttentionNotification,
   sendOperatorTaskOutcomeNotification,
 } from "../bot/notifications.js";
+import { recordOperatorEvent } from "../bot/operator-events.js";
 
 interface ActiveSession {
   channelId: string;
@@ -514,6 +515,7 @@ export class SessionManager {
     }
 
     updateSessionStatus(channelId, "offline");
+    recordOperatorEvent({ kind: "lifecycle", status: "session-stop", channelId });
     this.finishSession(channelId);
     return true;
   }
@@ -610,6 +612,7 @@ export class SessionManager {
     const queue = this.messageQueue.get(channelId) ?? [];
     queue.push(pending);
     this.messageQueue.set(channelId, queue);
+    recordOperatorEvent({ kind: "lifecycle", status: "queue-add", channelId });
     return true;
   }
 
@@ -650,6 +653,9 @@ export class SessionManager {
     const count = queue.length;
     this.messageQueue.delete(channelId);
     this.pendingQueuePrompts.delete(channelId);
+    if (count > 0) {
+      recordOperatorEvent({ kind: "lifecycle", status: "queue-clear", channelId });
+    }
     return count;
   }
 
@@ -658,6 +664,7 @@ export class SessionManager {
     if (index < 0 || index >= queue.length) return null;
     const [removed] = queue.splice(index, 1);
     if (queue.length === 0) this.messageQueue.delete(channelId);
+    recordOperatorEvent({ kind: "lifecycle", status: "queue-remove", channelId });
     return removed.prompt;
   }
 }

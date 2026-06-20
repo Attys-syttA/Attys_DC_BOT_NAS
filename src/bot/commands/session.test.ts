@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   upsertSession: vi.fn(),
   isActive: vi.fn(),
   stopSession: vi.fn(),
+  recordOperatorEvent: vi.fn(),
 }));
 
 vi.mock("../../db/database.js", () => ({
@@ -19,6 +20,10 @@ vi.mock("../../codex/session-manager.js", () => ({
     isActive: mocks.isActive,
     stopSession: mocks.stopSession,
   },
+}));
+
+vi.mock("../operator-events.js", () => ({
+  recordOperatorEvent: mocks.recordOperatorEvent,
 }));
 
 import { execute } from "./session.js";
@@ -75,6 +80,11 @@ describe("/session", () => {
     await execute(interaction as never);
 
     expect(mocks.upsertSession).toHaveBeenCalledWith(expect.any(String), "channel-1", null, "idle");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "session-new",
+      channelId: "channel-1",
+    });
     expect(interaction.editReply.mock.calls[0][0].embeds[0].title).toBe("New Session Ready");
   });
 

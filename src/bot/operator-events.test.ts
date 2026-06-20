@@ -82,6 +82,7 @@ describe("operator events", () => {
   it("filters event reads by public-safe status text", () => {
     const dir = makeTempDir();
     recordOperatorEvent({ kind: "lifecycle", status: "windows-launcher-restart" }, dir);
+    recordOperatorEvent({ kind: "lifecycle", status: "queue-clear" }, dir);
     recordOperatorEvent({ kind: "task", status: "failed" }, dir);
     recordOperatorEvent({ kind: "task", status: "completed" }, dir);
 
@@ -90,6 +91,9 @@ describe("operator events", () => {
     ]);
     expect(readOperatorEvents(dir, 10, "task", "fail")).toEqual([
       expect.stringContaining("task failed"),
+    ]);
+    expect(readOperatorEvents(dir, 10, "lifecycle", "queue")).toEqual([
+      expect.stringContaining("lifecycle queue-clear"),
     ]);
   });
 

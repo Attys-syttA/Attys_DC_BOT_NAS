@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getProject: vi.fn(),
   unregisterProject: vi.fn(),
   stopSession: vi.fn(),
+  recordOperatorEvent: vi.fn(),
 }));
 
 vi.mock("../../db/database.js", () => ({
@@ -15,6 +16,10 @@ vi.mock("../../codex/session-manager.js", () => ({
   sessionManager: {
     stopSession: mocks.stopSession,
   },
+}));
+
+vi.mock("../operator-events.js", () => ({
+  recordOperatorEvent: mocks.recordOperatorEvent,
 }));
 
 import { execute } from "./unregister.js";
@@ -45,6 +50,11 @@ describe("/unregister", () => {
 
     expect(mocks.stopSession).toHaveBeenCalledWith("current-channel");
     expect(mocks.unregisterProject).toHaveBeenCalledWith("current-channel");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "mapping-remove",
+      channelId: "current-channel",
+    });
     expect(interaction.editReply.mock.calls[0][0].embeds[0].description).toContain("<#current-channel>");
   });
 
@@ -56,6 +66,11 @@ describe("/unregister", () => {
     expect(mocks.getProject).toHaveBeenCalledWith("legacy-channel");
     expect(mocks.stopSession).toHaveBeenCalledWith("legacy-channel");
     expect(mocks.unregisterProject).toHaveBeenCalledWith("legacy-channel");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "mapping-remove",
+      channelId: "legacy-channel",
+    });
     expect(interaction.editReply.mock.calls[0][0].embeds[0].description).toContain("<#legacy-channel>");
   });
 

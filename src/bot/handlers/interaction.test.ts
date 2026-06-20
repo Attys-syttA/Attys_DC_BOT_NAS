@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => ({
   readThread: vi.fn(),
   readLastResponseWithFallback: vi.fn(),
   deleteStoredThread: vi.fn(),
+  recordOperatorEvent: vi.fn(),
 }));
 
 vi.mock("../../security/guard.js", () => ({
@@ -54,6 +55,10 @@ vi.mock("../commands/last.js", () => ({
 
 vi.mock("../../utils/config.js", () => ({
   getConfig: mocks.getConfig,
+}));
+
+vi.mock("../operator-events.js", () => ({
+  recordOperatorEvent: mocks.recordOperatorEvent,
 }));
 
 import { handleButtonInteraction, handleSelectMenuInteraction } from "./interaction.js";
@@ -200,6 +205,11 @@ describe("interaction handlers", () => {
     await handleSelectMenuInteraction(interaction as never);
 
     expect(mocks.upsertSession).toHaveBeenCalledWith(expect.any(String), "channel-1", null, "idle");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "session-new",
+      channelId: "channel-1",
+    });
     expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
       components: [],
     }));
@@ -258,6 +268,11 @@ describe("interaction handlers", () => {
     await handleButtonInteraction(interaction as never);
 
     expect(mocks.deleteStoredThread).toHaveBeenCalledWith("thread-1");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "session-delete",
+      channelId: "channel-1",
+    });
     expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
       components: [],
     }));
@@ -299,6 +314,11 @@ describe("interaction handlers", () => {
 
     expect(mocks.sessionManager.stopSession).toHaveBeenCalledWith("legacy-channel");
     expect(mocks.unregisterProject).toHaveBeenCalledWith("legacy-channel");
+    expect(mocks.recordOperatorEvent).toHaveBeenCalledWith({
+      kind: "lifecycle",
+      status: "mapping-remove",
+      channelId: "legacy-channel",
+    });
     expect(interaction.update).toHaveBeenCalledWith(expect.objectContaining({
       content: "Removed mapping for <#legacy-channel>.",
       embeds: expect.any(Array),

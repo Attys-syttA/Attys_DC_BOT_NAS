@@ -14,6 +14,7 @@ import { readLastResponseWithFallback } from "../commands/last.js";
 import { L } from "../../utils/i18n.js";
 import { getConfig } from "../../utils/config.js";
 import { sanitizePublicText } from "../../utils/public-safety.js";
+import { recordOperatorEvent } from "../operator-events.js";
 
 function interactionRoleIds(
   interaction: ButtonInteraction | StringSelectMenuInteraction,
@@ -249,6 +250,7 @@ export async function handleButtonInteraction(
 
     await sessionManager.stopSession(channelId);
     unregisterProject(channelId);
+    recordOperatorEvent({ kind: "lifecycle", status: "mapping-remove", channelId });
     const projects = getAllProjects(interaction.guildId!);
     await interaction.update({
       content: L(`Removed mapping for <#${channelId}>.`, `<#${channelId}> 매핑을 제거했습니다.`),
@@ -278,6 +280,7 @@ export async function handleButtonInteraction(
         const { randomUUID } = await import("node:crypto");
         upsertSession(randomUUID(), channelId, null, "idle");
       }
+      recordOperatorEvent({ kind: "lifecycle", status: "session-delete", channelId });
 
       await interaction.update({
         embeds: [
@@ -379,6 +382,7 @@ export async function handleSelectMenuInteraction(
     const channelId = interaction.channelId;
     const { randomUUID } = await import("node:crypto");
     upsertSession(randomUUID(), channelId, null, "idle");
+    recordOperatorEvent({ kind: "lifecycle", status: "session-new", channelId });
 
     await interaction.update({
       embeds: [

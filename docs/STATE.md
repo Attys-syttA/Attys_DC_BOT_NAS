@@ -5,8 +5,8 @@
 - Date: 2026-06-20
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: user-input and queue preview public-safety hardening in progress
-- Git state: local `main` tracks `origin/main`; Codex question cards and queue previews prepared for validation
+- Phase: operator lifecycle event coverage complete
+- Git state: local `main` tracks `origin/main`; session, queue, mapping, and bot restart lifecycle events prepared for validation
 
 ## Current Goal
 
@@ -90,6 +90,7 @@ Build a clean Windows local-first Discord bot that controls local Codex CLI sess
 - Hardened `/register` metadata/autocomplete, `/mappings`, and `/clear-sessions` path displays with the same public-safe labels.
 - Hardened path validation and Codex start/resume/start-turn errors before Discord output.
 - Hardened Codex user-input cards, queue previews, queued-next notices, and `/ask` prompt previews before Discord output.
+- Added public-safe operator lifecycle events for session new/stop/delete, queue add/clear/remove, mapping removal, and Discord-triggered bot restart actions.
 
 ## Open Work
 

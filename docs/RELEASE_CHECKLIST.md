@@ -83,6 +83,7 @@ Confirm the panel shows:
 - `/sessions` selected-session inspection reuses `/last` rollout fallback and does not print raw app-server errors
 - `/health` shows known slash command surface count for remote command registration sanity checks
 - `/logs contains:` filters only already-scrubbed public-safe log lines
+- `/events` records manual operator lifecycle actions such as session new/stop/delete, queue add/clear/remove, mapping remove, and Discord bot restart
 
 `Safe Update` must stay guarded:
 

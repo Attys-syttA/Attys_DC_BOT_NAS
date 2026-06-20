@@ -7,6 +7,7 @@ import { getProject, getSession, upsertSession } from "../../db/database.js";
 import { sessionManager } from "../../codex/session-manager.js";
 import { L } from "../../utils/i18n.js";
 import { sanitizePublicFileLabel } from "../../utils/public-safety.js";
+import { recordOperatorEvent } from "../operator-events.js";
 
 export const data = new SlashCommandBuilder()
   .setName("session")
@@ -58,6 +59,7 @@ export async function execute(
 
   if (subcommand === "new") {
     upsertSession(randomUUID(), channelId, null, "idle");
+    recordOperatorEvent({ kind: "lifecycle", status: "session-new", channelId });
     await interaction.editReply({
       embeds: [
         {

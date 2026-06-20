@@ -5,6 +5,7 @@ import {
 } from "discord.js";
 import { getConfig } from "../../utils/config.js";
 import { runLocalCommand, truncateOutput } from "./local-command.js";
+import { recordOperatorEvent } from "../operator-events.js";
 
 type BotAction = "status" | "restart";
 
@@ -81,6 +82,9 @@ export async function execute(
   }
 
   const scheduled = scheduleBotRestart(process.cwd());
+  if (scheduled) {
+    recordOperatorEvent({ kind: "lifecycle", status: "bot-restart", channelId: interaction.channelId });
+  }
   await interaction.editReply({
     content: scheduled ? restartScheduledReply() : "**Attys DC BOT Restart**\nRestart is only available on Windows.",
   });

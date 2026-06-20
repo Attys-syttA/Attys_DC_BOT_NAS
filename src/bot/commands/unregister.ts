@@ -7,6 +7,7 @@ import { unregisterProject, getProject } from "../../db/database.js";
 import { sessionManager } from "../../codex/session-manager.js";
 import { L } from "../../utils/i18n.js";
 import { sanitizePublicFileLabel } from "../../utils/public-safety.js";
+import { recordOperatorEvent } from "../operator-events.js";
 
 export const data = new SlashCommandBuilder()
   .setName("unregister")
@@ -37,6 +38,7 @@ export async function execute(
 
   await sessionManager.stopSession(channelId);
   unregisterProject(channelId);
+  recordOperatorEvent({ kind: "lifecycle", status: "mapping-remove", channelId });
 
   await interaction.editReply({
     embeds: [
