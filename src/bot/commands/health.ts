@@ -7,7 +7,7 @@ import path from "node:path";
 import { loadCodexUsageCache } from "../../codex/usage.js";
 import { runLocalCommand } from "./local-command.js";
 import { operatorToolsStatusFromLog, readOperatorStartupLog } from "./tools.js";
-import { HELP_ENTRIES } from "./help-data.js";
+import { expectedCommandNames } from "../command-surface.js";
 import { describeOperatorEventLine, readOperatorEvents } from "../operator-events.js";
 
 type HealthLineLevel = "OK" | "INFO" | "FAIL";
@@ -102,7 +102,7 @@ function packageVersionLine(repoRoot: string): string {
 }
 
 function commandSurfaceLine(): string {
-  return healthLine("OK", "slash command surface", `${HELP_ENTRIES.length} known commands`);
+  return healthLine("OK", "slash command surface", `${expectedCommandNames().length} known commands`);
 }
 
 function operatorToolsHealthLine(repoRoot: string): string {

@@ -19,7 +19,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }
@@ -29,15 +29,15 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L("Session Stopped", "세션 중지됨"),
-          description: L(`Stopped Codex session for \`${sanitizePublicFileLabel(project.project_path)}\``, `\`${sanitizePublicFileLabel(project.project_path)}\` Codex 세션이 중지되었습니다`),
+          title: L("Session Stopped", "Session leállítva"),
+          description: L(`Stopped Codex session for \`${sanitizePublicFileLabel(project.project_path)}\``, `\`${sanitizePublicFileLabel(project.project_path)}\` Codex session leállítva`),
           color: 0xff6600,
         },
       ],
     });
   } else {
     await interaction.editReply({
-      content: L("No active session in this channel.", "이 채널에 활성 세션이 없습니다."),
+      content: L("No active session in this channel.", "Ebben a csatornában nincs aktív session."),
     });
   }
 }

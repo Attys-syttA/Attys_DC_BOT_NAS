@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!.env.wsl.example
 
 node_modules/
 dist/
@@ -28,6 +29,7 @@ logs/
 tray-error.log
 *.pid
 .bot.lock
+.tray-lang
 
 runtime/
 tmp/

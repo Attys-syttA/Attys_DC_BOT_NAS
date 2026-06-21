@@ -59,11 +59,11 @@ export function renderMappingFields(projects: Project[], currentChannelId?: stri
     return {
       name: `${duplicate ? "DUPLICATE" : "OK"} ${truncate(sanitizePublicFileLabel(group.projectPath), 180)}`,
       value: [
-        `${L("Channels", "채널")}: ${group.projects.length}`,
+        `${L("Channels", "Csatornák")}: ${group.projects.length}`,
         channels,
         duplicate
-          ? L("Cleanup: use `/unregister channel:` for old forum/thread mappings.", "정리: 오래된 매핑은 `/unregister channel:`로 제거하세요.")
-          : L("Single mapping.", "단일 매핑입니다."),
+          ? L("Cleanup: use `/unregister channel:` for old forum/thread mappings.", "Takarítás: régi forum/thread mappingek törlése: `/unregister channel:`.")
+          : L("Single mapping.", "Egyetlen mapping."),
       ].join("\n"),
       inline: false,
     };
@@ -99,13 +99,13 @@ export function renderMappingComponents(projects: Project[], currentChannelId?: 
 export function renderMappingsPayload(projects: Project[], currentChannelId?: string) {
   const duplicateGroups = groupProjects(projects).filter((group) => group.projects.length > 1).length;
   const embed = new EmbedBuilder()
-    .setTitle(L("Project Channel Mappings", "프로젝트 채널 매핑"))
+    .setTitle(L("Project Channel Mappings", "Projekt Csatornák Mappingek"))
     .setDescription([
-      `${L("Mappings", "매핑")}: **${projects.length}**`,
-      `${L("Duplicate project paths", "중복 프로젝트 경로")}: **${duplicateGroups}**`,
+      `${L("Mappings", "Mappingek")}: **${projects.length}**`,
+      `${L("Duplicate project paths", "Duplikált projektútvonalak")}: **${duplicateGroups}**`,
       duplicateGroups > 0
-        ? L("Use the Remove buttons or `/unregister channel:` for old forum/thread mappings.", "오래된 포럼/스레드 매핑은 Remove 버튼 또는 `/unregister channel:`로 제거할 수 있습니다.")
-        : L("No duplicate project mappings found.", "중복 프로젝트 매핑이 없습니다."),
+        ? L("Use the Remove buttons or `/unregister channel:` for old forum/thread mappings.", "A régi forum/thread mappingek a Remove gombbal vagy az `/unregister channel:` paranccsal törölhetők.")
+        : L("No duplicate project mappings found.", "Nincs duplikált projekt mapping."),
     ].join("\n"))
     .setColor(duplicateGroups > 0 ? 0xf59e0b : 0x10b981)
     .setTimestamp()
@@ -129,7 +129,7 @@ export async function execute(
 
   if (projects.length === 0) {
     await interaction.editReply({
-      content: L("No project-channel mappings registered. Use `/register` first.", "등록된 프로젝트-채널 매핑이 없습니다. 먼저 `/register`를 사용하세요."),
+      content: L("No project-channel mappings registered. Use `/register` first.", "Nincs regisztrált projekt-csatorna mapping. Előbb használd a `/register` parancsot."),
     });
     return;
   }

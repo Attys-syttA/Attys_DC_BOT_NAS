@@ -33,7 +33,7 @@ vi.mock("../utils/config.js", () => ({
 }));
 
 vi.mock("../utils/i18n.js", () => ({
-  L: (en: string, _kr: string) => en,
+  L: (en: string, _hu: string) => en,
 }));
 
 vi.mock("./app-server-client.js", () => ({
@@ -105,17 +105,17 @@ describe("SessionManager streaming output", () => {
     now = 2_000;
     await (manager as any).handleNotification({
       method: "item/agentMessage/delta",
-      params: { threadId: "thread-1", delta: "저는 " },
+      params: { threadId: "thread-1", delta: "Én " },
     });
 
     now = 4_000;
     await (manager as any).handleNotification({
       method: "item/agentMessage/delta",
-      params: { threadId: "thread-1", delta: "Codex입니다." },
+      params: { threadId: "thread-1", delta: "Codex vagyok." },
     });
 
     expect(firstMessage.edit).toHaveBeenLastCalledWith(
-      expect.objectContaining({ content: "저는 Codex입니다." }),
+      expect.objectContaining({ content: "Én Codex vagyok." }),
     );
     expect(channel.send).not.toHaveBeenCalled();
 

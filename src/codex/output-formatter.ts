@@ -13,7 +13,7 @@ const FALLBACK_OPTION_LABEL = "Option";
 
 export function formatStreamChunk(text: string): string {
   if (text.length <= MAX_DISCORD_LENGTH) return text;
-  return text.slice(0, MAX_DISCORD_LENGTH) + "\n" + L("... (truncated)", "... (잘림)");
+  return text.slice(0, MAX_DISCORD_LENGTH) + "\n" + L("... (truncated)", "... (levágva)");
 }
 
 export function splitMessage(text: string): string[] {
@@ -69,7 +69,7 @@ export function createStopButton(
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`stop:${channelId}`)
-      .setLabel(L("Stop", "중지"))
+      .setLabel(L("Stop", "Leállítás"))
       .setStyle(ButtonStyle.Danger)
       .setEmoji("⏹️"),
   );
@@ -79,7 +79,7 @@ export function createCompletedButton(): ActionRowBuilder<ButtonBuilder> {
   return new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId("completed")
-      .setLabel(L("Completed", "완료됨"))
+      .setLabel(L("Completed", "Kész"))
       .setStyle(ButtonStyle.Secondary)
       .setEmoji("✅")
       .setDisabled(true),
@@ -92,24 +92,24 @@ export function createToolApprovalEmbed(
   requestId: string,
 ): { embed: EmbedBuilder; row: ActionRowBuilder<ButtonBuilder> } {
   const embed = new EmbedBuilder()
-    .setTitle(L(`🔧 Tool Use: ${toolName}`, `🔧 도구 사용: ${toolName}`))
+    .setTitle(L(`🔧 Tool Use: ${toolName}`, `🔧 Tool használat: ${toolName}`))
     .setColor(0xffa500)
     .setTimestamp();
 
   // Add relevant fields based on tool type
   if (toolName === "Edit" || toolName === "Write") {
     const filePath = sanitizePublicFileLabel(input.file_path);
-    embed.addFields({ name: L("File", "파일"), value: `\`${filePath}\``, inline: false });
+    embed.addFields({ name: L("File", "Fájl"), value: `\`${filePath}\``, inline: false });
 
     if (input.old_string && input.new_string) {
       const oldText = sanitizePublicText(input.old_string, 500);
       const newText = sanitizePublicText(input.new_string, 500);
       const diff = `\`\`\`diff\n- ${oldText}\n+ ${newText}\n\`\`\``;
-      embed.addFields({ name: L("Changes", "변경 사항"), value: diff, inline: false });
+      embed.addFields({ name: L("Changes", "Módosítások"), value: diff, inline: false });
     } else if (input.content) {
       const preview = sanitizePublicText(input.content, 500);
       embed.addFields({
-        name: L("Content Preview", "내용 미리보기"),
+        name: L("Content Preview", "Tartalom előnézet"),
         value: `\`\`\`\n${preview}\n\`\`\``,
         inline: false,
       });
@@ -118,17 +118,17 @@ export function createToolApprovalEmbed(
     const command = sanitizePublicText(input.command ?? "unknown", 800);
     const description = sanitizePublicText(input.description ?? "", 400);
     embed.addFields(
-      { name: L("Command", "명령어"), value: `\`\`\`bash\n${command}\n\`\`\``, inline: false },
+      { name: L("Command", "Parancs"), value: `\`\`\`bash\n${command}\n\`\`\``, inline: false },
     );
     if (description) {
-      embed.addFields({ name: L("Description", "설명"), value: description, inline: false });
+      embed.addFields({ name: L("Description", "Leírás"), value: description, inline: false });
     }
   } else {
     // Generic tool display - skip empty input
     const summary = sanitizePublicText(JSON.stringify(input, null, 2), 800);
     if (summary && summary !== "{}") {
       embed.addFields({
-        name: L("Input", "입력"),
+        name: L("Input", "Bemenet"),
         value: `\`\`\`json\n${summary.slice(0, 800)}\n\`\`\``,
         inline: false,
       });
@@ -138,17 +138,17 @@ export function createToolApprovalEmbed(
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`approve:${requestId}`)
-      .setLabel(L("Approve", "승인"))
+      .setLabel(L("Approve", "Jóváhagyás"))
       .setStyle(ButtonStyle.Success)
       .setEmoji("✅"),
     new ButtonBuilder()
       .setCustomId(`deny:${requestId}`)
-      .setLabel(L("Deny", "거부"))
+      .setLabel(L("Deny", "Elutasítás"))
       .setStyle(ButtonStyle.Danger)
       .setEmoji("❌"),
     new ButtonBuilder()
       .setCustomId(`approve-all:${requestId}`)
-      .setLabel(L("Auto-approve All", "모두 자동 승인"))
+      .setLabel(L("Auto-approve All", "Mindent auto-jóváhagy"))
       .setStyle(ButtonStyle.Secondary)
       .setEmoji("⚡"),
   );
@@ -201,7 +201,7 @@ export function createAskUserQuestionEmbed(
     // Use StringSelectMenu for multi-select
     const selectMenu = new StringSelectMenuBuilder()
       .setCustomId(`ask-select:${requestId}`)
-      .setPlaceholder(L("Select options...", "옵션을 선택하세요..."))
+      .setPlaceholder(L("Select options...", "Válassz opciót..."))
       .setMinValues(1)
       .setMaxValues(safeOptions.length)
       .addOptions(
@@ -223,7 +223,7 @@ export function createAskUserQuestionEmbed(
       new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
           .setCustomId(`ask-other:${requestId}`)
-          .setLabel(L("Custom input", "직접 입력"))
+          .setLabel(L("Custom input", "Egyedi bemenet"))
           .setStyle(ButtonStyle.Secondary)
           .setEmoji("✏️"),
       ),
@@ -241,7 +241,7 @@ export function createAskUserQuestionEmbed(
     buttons.push(
       new ButtonBuilder()
         .setCustomId(`ask-other:${requestId}`)
-        .setLabel(L("Custom input", "직접 입력"))
+        .setLabel(L("Custom input", "Egyedi bemenet"))
         .setStyle(ButtonStyle.Secondary)
         .setEmoji("✏️"),
     );
@@ -267,11 +267,11 @@ export function createResultEmbed(
 ): EmbedBuilder {
   const duration = `${(durationMs / 1000).toFixed(1)}s`;
   const footer = showCost
-    ? `${L("Cost (est.)", "비용 (추정)")} : $${costUsd.toFixed(4)}  |  ${L("Duration", "소요 시간")} : ${duration}`
-    : `${L("Duration", "소요 시간")} : ${duration}`;
+    ? `${L("Cost (est.)", "Költség (becsült)")} : $${costUsd.toFixed(4)}  |  ${L("Duration", "Időtartam")} : ${duration}`
+    : `${L("Duration", "Időtartam")} : ${duration}`;
 
   const embed = new EmbedBuilder()
-    .setTitle(L("✅ Task Complete", "✅ 작업 완료"))
+    .setTitle(L("✅ Task Complete", "✅ Feladat kész"))
     .setDescription(result.slice(0, 4000))
     .setColor(0x00ff00)
     .setFooter({ text: footer })

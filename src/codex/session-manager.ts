@@ -144,10 +144,10 @@ export class SessionManager {
       if (isResumeFailure) {
         console.error(`[codex] Failed to resume thread ${threadId} for channel ${channelId}:`, message);
         await channel.send(
-          `❌ ${L("Failed to resume the selected Codex session", "선택한 Codex 세션을 재개하지 못했습니다")}: ${publicMessage}\n` +
+          `❌ ${L("Failed to resume the selected Codex session", "Nem sikerült folytatni a kiválasztott Codex sessiont")}: ${publicMessage}\n` +
           L(
             "Try `/sessions` again or choose `Create New Session`.",
-            "`/sessions`를 다시 열거나 `새 세션 만들기`를 선택해 보세요."
+            "Nyisd meg újra a `/sessions` listát, vagy válaszd az `Új session létrehozása` opciót."
           ),
         ).catch(() => {});
       } else {
@@ -163,7 +163,7 @@ export class SessionManager {
 
     const stopRow = createStopButton(channelId);
     const currentMessage = await channel.send({
-      content: L("⏳ Thinking...", "⏳ 생각 중..."),
+      content: L("⏳ Thinking...", "⏳ Gondolkodom..."),
       components: [stopRow],
     });
 
@@ -188,7 +188,7 @@ export class SessionManager {
       lastEditTime: 0,
       stopRow,
       startedAt,
-      lastActivity: L("Thinking...", "생각 중..."),
+      lastActivity: L("Thinking...", "Gondolkodom..."),
       toolUseCount: 0,
       heartbeat,
       hasTextOutput: false,
@@ -255,11 +255,11 @@ export class SessionManager {
 
         if (item.type === "commandExecution" && typeof item.command === "string") {
           const command = item.command.length > 80 ? item.command.slice(0, 80) + "…" : item.command;
-          stream.lastActivity = `${L("Running command", "명령어 실행 중")} \`${command}\``;
+          stream.lastActivity = `${L("Running command", "Parancs futtatása")} \`${command}\``;
         } else if (item.type === "fileChange") {
-          stream.lastActivity = L("Editing files", "파일 편집 중");
+          stream.lastActivity = L("Editing files", "Fájlok szerkesztése");
         } else if (item.type === "webSearch") {
-          stream.lastActivity = L("Searching web", "웹 검색 중");
+          stream.lastActivity = L("Searching web", "Webes keresés");
         }
 
         if (!stream.hasTextOutput) {
@@ -318,7 +318,7 @@ export class SessionManager {
           await this.flushStream(channelId, true);
           const durationMs = Date.now() - stream.startedAt;
           const payload: MessageCreateOptions = {
-            embeds: [createResultEmbed(L("Task completed", "작업 완료"), 0, durationMs, getConfig().SHOW_COST)],
+            embeds: [createResultEmbed(L("Task completed", "Feladat kész"), 0, durationMs, getConfig().SHOW_COST)],
           };
           await active.channel.send(payload).catch(() => {});
         }
@@ -537,8 +537,8 @@ export class SessionManager {
       const remaining = queue.length;
       const preview = sanitizePublicText(next.prompt, 40) || "(empty prompt)";
       const msg = remaining > 0
-        ? L(`📨 Processing queued message... (remaining: ${remaining})\n> ${preview}`, `📨 대기 중이던 메시지를 처리합니다... (남은 큐: ${remaining}개)\n> ${preview}`)
-        : L(`📨 Processing queued message...\n> ${preview}`, `📨 대기 중이던 메시지를 처리합니다...\n> ${preview}`);
+        ? L(`📨 Processing queued message... (remaining: ${remaining})\n> ${preview}`, `📨 Sorban álló üzenet feldolgozása... (hátralévő queue: ${remaining} db)\n> ${preview}`)
+        : L(`📨 Processing queued message...\n> ${preview}`, `📨 Sorban álló üzenet feldolgozása...\n> ${preview}`);
       next.channel.send(msg).catch(() => {});
       this.sendMessage(next.channel, next.prompt).catch((err) => {
         console.error("Queue sendMessage error:", err);

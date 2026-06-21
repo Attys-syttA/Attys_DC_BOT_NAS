@@ -246,6 +246,14 @@ The Linux tray/control panel can show status, start/stop/restart through `linux-
   <img src="docs/linux-control-panel-public-safe.svg" alt="Attys DC BOT Linux control panel illustration" width="760">
 </p>
 
+For Windows-hosted Linux acceptance, use Debian WSL2 with Linux-native Node.js and no inherited Windows `node`/`npm` PATH entries. See `docs/LINUX_WSL_DEBIAN.md`, then run:
+
+```bash
+bash scripts/linux-wsl-acceptance.sh
+```
+
+For an actual WSL-hosted bot run, copy `.env.wsl.example` to `.env`, fill the local Discord values, and run `codex login` inside Debian first.
+
 macOS desktop users can build the source-derived, Attys-branded menu bar app on a Mac with Xcode Command Line Tools:
 
 ```bash

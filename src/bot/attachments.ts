@@ -42,12 +42,12 @@ export async function downloadAttachment(
   const ext = path.extname(safeName).toLowerCase();
 
   if (BLOCKED_EXTENSIONS.has(ext)) {
-    return { skipped: L(`Blocked: \`${safeName}\` (dangerous file type)`, `차단됨: \`${safeName}\` (위험한 파일 형식)`) };
+    return { skipped: L(`Blocked: \`${safeName}\` (dangerous file type)`, `Blokkolva: \`${safeName}\` (veszélyes fájltípus)`) };
   }
 
   if (attachment.size > MAX_FILE_SIZE) {
     const sizeMB = (attachment.size / 1024 / 1024).toFixed(1);
-    return { skipped: L(`Skipped: \`${safeName}\` (${sizeMB}MB exceeds 25MB limit)`, `건너뜀: \`${safeName}\` (${sizeMB}MB, 25MB 제한 초과)`) };
+    return { skipped: L(`Skipped: \`${safeName}\` (${sizeMB}MB exceeds 25MB limit)`, `Kihagyva: \`${safeName}\` (${sizeMB}MB, 25MB limit felett)`) };
   }
 
   const uploadDir = path.join(projectPath, ".codex-uploads");
@@ -61,14 +61,14 @@ export async function downloadAttachment(
   try {
     const response = await fetch(attachment.url);
     if (!response.ok || !response.body) {
-      return { skipped: L(`Failed to download: \`${safeName}\``, `다운로드 실패: \`${safeName}\``) };
+      return { skipped: L(`Failed to download: \`${safeName}\``, `Letöltés sikertelen: \`${safeName}\``) };
     }
 
     const fileStream = fs.createWriteStream(filePath);
     await pipeline(Readable.fromWeb(response.body as never), fileStream);
   } catch (error) {
     console.warn(`[download] Failed to download attachment ${safeName}:`, error instanceof Error ? error.message : error);
-    return { skipped: L(`Failed to download: \`${safeName}\``, `다운로드 실패: \`${safeName}\``) };
+    return { skipped: L(`Failed to download: \`${safeName}\``, `Letöltés sikertelen: \`${safeName}\``) };
   }
 
   return { filePath, isImage: IMAGE_EXTENSIONS.has(ext), safeName };

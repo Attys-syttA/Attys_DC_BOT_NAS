@@ -42,7 +42,7 @@ export async function execute(
   if (existing) {
     const existingLabel = sanitizePublicFileLabel(existing.project_path);
     await interaction.editReply({
-      content: L(`This channel is already registered to \`${existingLabel}\`. Use \`/unregister\` first.`, `이 채널은 이미 \`${existingLabel}\`에 등록되어 있습니다. 먼저 \`/unregister\`를 사용하세요.`),
+      content: L(`This channel is already registered to \`${existingLabel}\`. Use \`/unregister\` first.`, `Ez a csatorna már \`${existingLabel}\` projekthez van regisztrálva. Előbb használd az \`/unregister\` parancsot.`),
     });
     return;
   }
@@ -52,11 +52,11 @@ export async function execute(
     const resolved = path.resolve(projectPath);
     const baseDir = path.resolve(config.BASE_PROJECT_DIR);
     if (!resolved.startsWith(baseDir + path.sep) && resolved !== baseDir) {
-      await interaction.editReply({ content: L(`Invalid path: Path must be within ${sanitizePublicFileLabel(baseDir)}`, `잘못된 경로: ${sanitizePublicFileLabel(baseDir)} 내에 있어야 합니다`) });
+      await interaction.editReply({ content: L(`Invalid path: Path must be within ${sanitizePublicFileLabel(baseDir)}`, `Érvénytelen útvonal: ${sanitizePublicFileLabel(baseDir)} alatt kell lennie`) });
       return;
     }
     if (projectPath.includes("..")) {
-      await interaction.editReply({ content: L("Invalid path: Path must not contain '..'", "잘못된 경로: '..'을 포함할 수 없습니다") });
+      await interaction.editReply({ content: L("Invalid path: Path must not contain '..'", "Érvénytelen útvonal: '..'nem tartalmazhatja") });
       return;
     }
     fs.mkdirSync(projectPath, { recursive: true });
@@ -65,7 +65,7 @@ export async function execute(
   // Validate path
   const error = validateProjectPath(projectPath);
   if (error) {
-    await interaction.editReply({ content: L(`Invalid path: ${error}`, `잘못된 경로: ${error}`) });
+    await interaction.editReply({ content: L(`Invalid path: ${error}`, `Érvénytelen útvonal: ${error}`) });
     return;
   }
 
@@ -75,12 +75,12 @@ export async function execute(
   await interaction.editReply({
     embeds: [
       {
-        title: L("Project Registered", "프로젝트 등록됨"),
-        description: L(`This channel is now linked to:\n\`${projectLabel}\``, `이 채널이 연결되었습니다:\n\`${projectLabel}\``),
+        title: L("Project Registered", "Projekt regisztrálva"),
+        description: L(`This channel is now linked to:\n\`${projectLabel}\``, `Ez a csatorna ehhez kapcsolódik:\n\`${projectLabel}\``),
         color: 0x00ff00,
         fields: [
-          { name: L("Status", "상태"), value: L("🔴 Offline", "🔴 오프라인"), inline: true },
-          { name: L("Auto-approve", "자동 승인"), value: L("Off", "꺼짐"), inline: true },
+          { name: L("Status", "Állapot"), value: L("🔴 Offline", "🔴 Offline"), inline: true },
+          { name: L("Auto-approve", "Auto-jóváhagyás"), value: L("Off", "Ki"), inline: true },
         ],
       },
     ],

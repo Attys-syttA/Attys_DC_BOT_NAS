@@ -88,6 +88,16 @@ Recommended Linux start:
 ./linux-start.sh --status
 ```
 
+For Debian WSL2 validation on a Windows host, first follow `docs/LINUX_WSL_DEBIAN.md`. That setup disables accidental Windows `node`/`npm` PATH inheritance and keeps native Linux dependencies under the WSL filesystem.
+
+Run the headless Linux acceptance script from the Linux repo copy:
+
+```bash
+bash scripts/linux-wsl-acceptance.sh
+```
+
+For a live WSL bot run, create `.env` from `.env.wsl.example`, then complete `codex login` inside Debian.
+
 Useful Linux launcher commands:
 
 ```bash

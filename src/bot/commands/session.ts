@@ -30,7 +30,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project. Use `/register` first.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다. 먼저 `/register`를 사용하세요."),
+      content: L("This channel is not registered to any project. Use `/register` first.", "Ez a csatorna nincs projekthez regisztrálva. Előbb használd a `/register` parancsot."),
     });
     return;
   }
@@ -42,13 +42,13 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L("Current Session", "현재 세션"),
+          title: L("Current Session", "Aktuális session"),
           description: [
-            `${L("Project", "프로젝트")}: \`${sanitizePublicFileLabel(project.project_path)}\``,
-            `${L("Thread", "스레드")}: ${session?.session_id ? `\`${session.session_id}\`` : L("new session on next prompt", "다음 프롬프트에서 새 세션")}`,
-            `${L("Status", "상태")}: **${session?.status ?? "offline"}**`,
-            `${L("Active turn", "활성 작업")}: **${sessionManager.isActive(channelId) ? "yes" : "no"}**`,
-            `${L("Last activity", "마지막 활동")}: ${session?.last_activity ?? "never"}`,
+            `${L("Project", "Projekt")}: \`${sanitizePublicFileLabel(project.project_path)}\``,
+            `${L("Thread", "Thread")}: ${session?.session_id ? `\`${session.session_id}\`` : L("new session on next prompt", "új session a következő promptnál")}`,
+            `${L("Status", "Állapot")}: **${session?.status ?? "offline"}**`,
+            `${L("Active turn", "Aktív feladat")}: **${sessionManager.isActive(channelId) ? "yes" : "no"}**`,
+            `${L("Last activity", "Utolsó aktivitás")}: ${session?.last_activity ?? "never"}`,
           ].join("\n"),
           color: 0x5865f2,
         },
@@ -63,10 +63,10 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L("New Session Ready", "새 세션 준비됨"),
+          title: L("New Session Ready", "Új session kész"),
           description: L(
             "The next prompt in this channel will start a fresh local Codex thread.",
-            "이 채널의 다음 프롬프트는 새로운 로컬 Codex 스레드를 시작합니다.",
+            "A csatorna következő promptja új helyi Codex threadet indít.",
           ),
           color: 0x10b981,
         },
@@ -78,7 +78,7 @@ export async function execute(
   const stopped = await sessionManager.stopSession(channelId);
   await interaction.editReply({
     content: stopped
-      ? L("Stopped the active Codex turn.", "활성 Codex 작업을 중지했습니다.")
-      : L("No active Codex turn is running in this channel.", "이 채널에서 실행 중인 Codex 작업이 없습니다."),
+      ? L("Stopped the active Codex turn.", "Az aktív Codex feladat leállítva.")
+      : L("No active Codex turn is running in this channel.", "Ebben a csatornában nem fut aktív Codex feladat."),
   });
 }

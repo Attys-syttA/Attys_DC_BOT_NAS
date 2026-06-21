@@ -16,7 +16,7 @@ export async function execute(
   const project = getProject(interaction.channelId);
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }

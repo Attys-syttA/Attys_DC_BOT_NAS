@@ -17,7 +17,7 @@ export async function execute(
   const config = getConfig();
   if (!config.DISCORD_ENABLE_RUN_TESTS) {
     await interaction.editReply({
-      content: L("`/run-tests` is disabled. Set `DISCORD_ENABLE_RUN_TESTS=true` in `.env` to enable it.", "`/run-tests`가 비활성화되어 있습니다."),
+      content: L("`/run-tests` is disabled. Set `DISCORD_ENABLE_RUN_TESTS=true` in `.env` to enable it.", "A `/run-tests` ki van kapcsolva."),
     });
     return;
   }
@@ -25,12 +25,12 @@ export async function execute(
   const project = getProject(interaction.channelId);
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }
 
-  await interaction.editReply({ content: L("Running `npm test` locally...", "로컬에서 `npm test`를 실행합니다...") });
+  await interaction.editReply({ content: L("Running `npm test` locally...", "Helyben futtatom: `npm test`...") });
   const result = await runLocalCommand(npmCommand(), ["test"], project.project_path, 120_000);
   const title = result.timedOut
     ? "npm test timed out"

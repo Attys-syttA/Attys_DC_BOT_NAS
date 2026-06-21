@@ -44,7 +44,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }
@@ -55,7 +55,7 @@ export async function execute(
     const queue = sessionManager.getQueue(channelId);
     if (queue.length === 0) {
       await interaction.editReply({
-        content: L("No messages in queue.", "큐에 대기 중인 메시지가 없습니다."),
+        content: L("No messages in queue.", "Nincs üzenet a queue-ban."),
       });
       return;
     }
@@ -77,7 +77,7 @@ export async function execute(
 
     const clearButton = new ButtonBuilder()
       .setCustomId(`queue-clear:${channelId}`)
-      .setLabel(L("Clear All", "모두 취소"))
+      .setLabel(L("Clear All", "Összes törlése"))
       .setStyle(ButtonStyle.Danger);
 
     const allButtons = [...itemButtons.slice(0, 19), clearButton];
@@ -89,7 +89,7 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L(`📋 Message Queue (${queue.length})`, `📋 메시지 큐 (${queue.length}개)`),
+          title: L(`📋 Message Queue (${queue.length})`, `📋 Üzenet queue (${queue.length})`),
           description: list,
           color: 0x5865f2,
         },
@@ -104,7 +104,7 @@ export async function execute(
     const removed = sessionManager.removeFromQueue(channelId, itemNumber - 1);
     if (!removed) {
       await interaction.editReply({
-        content: L("No queued message exists with that number.", "해당 번호의 대기 메시지가 없습니다."),
+        content: L("No queued message exists with that number.", "Nincs ilyen sorszámú queue elem."),
       });
       return;
     }
@@ -113,8 +113,8 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L("Queue Item Removed", "큐 항목 제거됨"),
-          description: L(`Removed item ${itemNumber}:\n> ${preview}`, `${itemNumber}번 항목을 제거했습니다:\n> ${preview}`),
+          title: L("Queue Item Removed", "Queue elem eltávolítva"),
+          description: L(`Removed item ${itemNumber}:\n> ${preview}`, `${itemNumber}. elem eltávolítva:\n> ${preview}`),
           color: 0xff6600,
         },
       ],
@@ -126,8 +126,8 @@ export async function execute(
   await interaction.editReply({
     embeds: [
       {
-        title: L("Queue Cleared", "큐 초기화됨"),
-        description: L(`Cleared ${cleared} queued message(s).`, `${cleared}개의 대기 중이던 메시지를 취소했습니다.`),
+        title: L("Queue Cleared", "Queue törölve"),
+        description: L(`Cleared ${cleared} queued message(s).`, `${cleared} függő üzenet törölve.`),
         color: 0xff6600,
       },
     ],

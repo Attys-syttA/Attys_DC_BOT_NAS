@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   operatorToolsStatusFromLog: vi.fn(),
   readOperatorEvents: vi.fn(),
   describeOperatorEventLine: vi.fn(),
+  expectedCommandNames: vi.fn(),
 }));
 
 vi.mock("node:fs", () => ({
@@ -34,6 +35,10 @@ vi.mock("./tools.js", () => ({
 vi.mock("../operator-events.js", () => ({
   readOperatorEvents: mocks.readOperatorEvents,
   describeOperatorEventLine: mocks.describeOperatorEventLine,
+}));
+
+vi.mock("../command-surface.js", () => ({
+  expectedCommandNames: mocks.expectedCommandNames,
 }));
 
 import { buildHealthReport, formatHealthAge, parseAheadBehind } from "./health.js";
@@ -62,6 +67,7 @@ describe("/health report", () => {
     mocks.operatorToolsStatusFromLog.mockReturnValue("ready");
     mocks.readOperatorEvents.mockReturnValue(["2026-06-20T18:00:00.000Z lifecycle session-new channel=<#12345>"]);
     mocks.describeOperatorEventLine.mockReturnValue("lifecycle session-new channel=<#12345>");
+    mocks.expectedCommandNames.mockReturnValue(["ask", "health", "Send to Codex"]);
     mocks.runLocalCommand
       .mockResolvedValueOnce({ exitCode: 0, timedOut: false, output: "main\n" })
       .mockResolvedValueOnce({ exitCode: 0, timedOut: false, output: "" })
@@ -74,7 +80,7 @@ describe("/health report", () => {
     expect(report).toContain("Attys DC BOT Health");
     expect(report).toContain("OK bot process");
     expect(report).toContain("OK bot version: 0.1.0");
-    expect(report).toContain("OK slash command surface:");
+    expect(report).toContain("OK slash command surface: 3 known commands");
     expect(report).toContain("OK bot error log: empty");
     expect(report).toContain("OK operator tools: ready");
     expect(report).toContain("INFO latest operator event: lifecycle session-new channel=<#12345>");

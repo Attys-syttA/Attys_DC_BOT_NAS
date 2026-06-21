@@ -27,13 +27,13 @@ export async function execute(
 
   if (projects.length === 0) {
     await interaction.editReply({
-      content: L("No projects registered. Use `/register` in a channel first.", "등록된 프로젝트가 없습니다. 먼저 채널에서 `/register`를 사용하세요."),
+      content: L("No projects registered. Use `/register` in a channel first.", "Nincs regisztrált projekt. Előbb használd a `/register` parancsot egy csatornában."),
     });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setTitle(L("Codex Sessions", "Codex 세션"))
+    .setTitle(L("Codex Sessions", "Codex Session"))
     .setColor(0x10b981)
     .setTimestamp();
 
@@ -49,12 +49,12 @@ export async function execute(
       name: `${emoji} <#${project.channel_id}>`,
       value: [
         `\`${sanitizePublicFileLabel(project.project_path)}\``,
-        `${L("Status", "상태")}: **${status}**`,
-        `${L("Runtime", "런타임")}: **${sessionManager.isActive(project.channel_id) ? "active" : "idle"}**`,
-        `${L("Queue", "큐")}: **${queueSize}**`,
-        `${L("Pending", "대기 중")}: **${describePendingOperatorAction(runtime)}**`,
-        `${L("Auto-approve", "자동 승인")}: ${project.auto_approve ? L("On", "켜짐") : L("Off", "꺼짐")}`,
-        `${L("Last activity", "마지막 활동")}: ${lastActivity}`,
+        `${L("Status", "Állapot")}: **${status}**`,
+        `${L("Runtime", "Runtime")}: **${sessionManager.isActive(project.channel_id) ? "active" : "idle"}**`,
+        `${L("Queue", "Queue")}: **${queueSize}**`,
+        `${L("Pending", "Függőben")}: **${describePendingOperatorAction(runtime)}**`,
+        `${L("Auto-approve", "Auto-jóváhagyás")}: ${project.auto_approve ? L("On", "Be") : L("Off", "Ki")}`,
+        `${L("Last activity", "Utolsó aktivitás")}: ${lastActivity}`,
       ].join("\n"),
       inline: false,
     });

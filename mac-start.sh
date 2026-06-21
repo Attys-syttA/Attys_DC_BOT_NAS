@@ -142,8 +142,6 @@ case "${1:-}" in
     ensure_sqlite
     export ATTYS_BOT_LAUNCH_REASON=macos-foreground
     export ATTYS_OPERATOR_TOOLS_STATUS=skipped
-    touch "$LOCK_FILE"
-    trap 'rm -f "$LOCK_FILE"' EXIT
     exec "$NODE_BIN" "$SCRIPT_DIR/dist/index.js"
     ;;
 esac

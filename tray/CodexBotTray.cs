@@ -42,6 +42,7 @@ internal sealed class CodexBotTray : Form
     private readonly string logPath;
     private readonly string errorLogPath;
     private readonly string trayErrorLogPath;
+    private readonly string languagePath;
     private readonly string botExePath;
     private readonly string usageCachePath;
     private readonly string runtimeCachePath;
@@ -58,6 +59,7 @@ internal sealed class CodexBotTray : Form
     private DateTime lastUsageRefresh = DateTime.MinValue;
     private Dictionary<string, object> usageData;
     private long usageFetchedAt;
+    private bool isHungarian;
 
     private sealed class CommandResult
     {
@@ -111,6 +113,7 @@ internal sealed class CodexBotTray : Form
         logPath = Path.Combine(botDir, "bot.log");
         errorLogPath = Path.Combine(botDir, "bot.err.log");
         trayErrorLogPath = Path.Combine(botDir, "tray-error.log");
+        languagePath = Path.Combine(botDir, ".tray-lang");
         botExePath = Path.Combine(botDir, "CodexBot.exe");
         usageCachePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
@@ -125,6 +128,7 @@ internal sealed class CodexBotTray : Form
         ShowInTaskbar = false;
         Visible = false;
 
+        LoadLanguage();
         trayIcon = new NotifyIcon();
         trayIcon.Text = "Attys DC BOT";
         trayIcon.Icon = SystemIcons.Application;
@@ -203,25 +207,65 @@ internal sealed class CodexBotTray : Form
     {
         ContextMenuStrip menu = new ContextMenuStrip();
         bool running = IsRunning();
-        menu.Items.Add(running ? "Status: Running" : "Status: Stopped").Enabled = false;
+        menu.Items.Add(running ? L("Status: Running", "Állapot: fut") : L("Status: Stopped", "Állapot: leállítva")).Enabled = false;
         menu.Items.Add("-");
         if (running)
         {
-            menu.Items.Add("Stop Bot", null, delegate { StopBot(); });
-            menu.Items.Add("Restart Bot", null, delegate { RestartBot(); });
+            menu.Items.Add(L("Stop Bot", "Bot leállítása"), null, delegate { StopBot(); });
+            menu.Items.Add(L("Restart Bot", "Bot újraindítása"), null, delegate { RestartBot(); });
         }
         else
         {
-            menu.Items.Add("Start Bot", null, delegate { StartBot(true); });
+            menu.Items.Add(L("Start Bot", "Bot indítása"), null, delegate { StartBot(true); });
         }
-        menu.Items.Add("Control Panel", null, delegate { SafeShowControlPanel(); });
-        menu.Items.Add("Settings...", null, delegate { OpenSettings(); });
-        menu.Items.Add("View Log", null, delegate { OpenLog(); });
-        menu.Items.Add("Open Folder", null, delegate { OpenFolder(); });
+        menu.Items.Add(L("Control Panel", "Vezérlőpult"), null, delegate { SafeShowControlPanel(); });
+        menu.Items.Add(L("Settings...", "Beállítások..."), null, delegate { OpenSettings(); });
+        menu.Items.Add(L("View Log", "Log megnyitása"), null, delegate { OpenLog(); });
+        menu.Items.Add(L("Open Folder", "Mappa megnyitása"), null, delegate { OpenFolder(); });
+        ToolStripMenuItem language = new ToolStripMenuItem(isHungarian ? "Language: HU" : "Language: EN");
+        ToolStripMenuItem english = new ToolStripMenuItem("English", null, delegate { SetLanguage(false); });
+        english.Checked = !isHungarian;
+        ToolStripMenuItem hungarian = new ToolStripMenuItem("Magyar", null, delegate { SetLanguage(true); });
+        hungarian.Checked = isHungarian;
+        language.DropDownItems.Add(english);
+        language.DropDownItems.Add(hungarian);
+        menu.Items.Add(language);
         menu.Items.Add("-");
-        menu.Items.Add("Exit Tray", null, delegate { ExitTray(); });
+        menu.Items.Add(L("Exit Tray", "Tray kilépés"), null, delegate { ExitTray(); });
         trayIcon.ContextMenuStrip = menu;
-        trayIcon.Text = running ? "Attys DC BOT - Running" : "Attys DC BOT - Stopped";
+        trayIcon.Text = running ? L("Attys DC BOT - Running", "Attys DC BOT - fut") : L("Attys DC BOT - Stopped", "Attys DC BOT - leállítva");
+    }
+
+    private string L(string en, string hu)
+    {
+        return isHungarian ? hu : en;
+    }
+
+    private void LoadLanguage()
+    {
+        try
+        {
+            if (!File.Exists(languagePath)) return;
+            string saved = File.ReadAllText(languagePath).Trim().ToLowerInvariant();
+            isHungarian = saved == "hu" || saved == "kr";
+        }
+        catch
+        {
+        }
+    }
+
+    private void SetLanguage(bool hungarian)
+    {
+        isHungarian = hungarian;
+        try
+        {
+            File.WriteAllText(languagePath, hungarian ? "hu" : "en", new UTF8Encoding(false));
+        }
+        catch
+        {
+        }
+        BuildMenu();
+        RebuildControlPanel();
     }
 
     private void ShowControlPanel()
@@ -283,6 +327,18 @@ internal sealed class CodexBotTray : Form
         Label title = MakeLabel("Attys DC BOT", 24, 22, 340, 30, 18, FontStyle.Bold);
         controlPanel.Controls.Add(title);
 
+        Button english = MakeButton("EN", controlPanel.ClientSize.Width - 132, 20, 52, 32);
+        english.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        english.BackColor = !isHungarian ? Color.FromArgb(47, 136, 255) : Color.FromArgb(45, 58, 78);
+        english.Click += delegate { SetLanguage(false); };
+        controlPanel.Controls.Add(english);
+
+        Button hungarian = MakeButton("HU", controlPanel.ClientSize.Width - 72, 20, 52, 32);
+        hungarian.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        hungarian.BackColor = isHungarian ? Color.FromArgb(47, 136, 255) : Color.FromArgb(45, 58, 78);
+        hungarian.Click += delegate { SetLanguage(true); };
+        controlPanel.Controls.Add(hungarian);
+
         statusDot = new Panel();
         statusDot.Left = 25;
         statusDot.Top = 70;
@@ -294,7 +350,7 @@ internal sealed class CodexBotTray : Form
         controlPanel.Controls.Add(statusLabel);
 
         int y = 108;
-        Button startStop = MakeButton(IsRunning() ? "Stop" : "Start", 25, y, 140, 42);
+        Button startStop = MakeButton(IsRunning() ? L("Stop", "Leállítás") : L("Start", "Indítás"), 25, y, 140, 42);
         startStop.Click += delegate
         {
             if (IsRunning()) StopBot("windows-tray-stop"); else StartBot(true, "windows-tray-start");
@@ -302,24 +358,24 @@ internal sealed class CodexBotTray : Form
         };
         controlPanel.Controls.Add(startStop);
 
-        Button restart = MakeButton("Restart", 185, y, 140, 42);
+        Button restart = MakeButton(L("Restart", "Újraindítás"), 185, y, 140, 42);
         restart.Click += delegate { RestartBot("windows-tray-restart"); RebuildControlPanel(); };
         controlPanel.Controls.Add(restart);
 
-        Button settings = MakeButton("Settings", 345, y, 140, 42);
+        Button settings = MakeButton(L("Settings", "Beállítások"), 345, y, 140, 42);
         settings.Click += delegate { OpenSettings(); RebuildControlPanel(); };
         controlPanel.Controls.Add(settings);
 
         y += 58;
-        Button log = MakeButton("Open Log", 25, y, 140, 42);
+        Button log = MakeButton(L("Open Log", "Log megnyitása"), 25, y, 140, 42);
         log.Click += delegate { OpenLog(); };
         controlPanel.Controls.Add(log);
 
-        Button folder = MakeButton("Open Folder", 185, y, 140, 42);
+        Button folder = MakeButton(L("Open Folder", "Mappa megnyitása"), 185, y, 140, 42);
         folder.Click += delegate { OpenFolder(); };
         controlPanel.Controls.Add(folder);
 
-        Button refreshUsage = MakeButton("Refresh Usage", 345, y, 140, 42);
+        Button refreshUsage = MakeButton(L("Refresh Usage", "Használat frissítése"), 345, y, 140, 42);
         refreshUsage.Click += delegate { RefreshUsage(true); };
         controlPanel.Controls.Add(refreshUsage);
 
@@ -348,7 +404,7 @@ internal sealed class CodexBotTray : Form
         controlPanel.Controls.Add(usagePanel);
 
         LinkLabel usageLink = new LinkLabel();
-        usageLink.Text = "Open Codex usage settings";
+        usageLink.Text = L("Open Codex usage settings", "Codex használati beállítások megnyitása");
         usageLink.Left = 25;
         usageLink.Top = controlPanel.ClientSize.Height - 32;
         usageLink.Width = 220;
@@ -368,12 +424,14 @@ internal sealed class CodexBotTray : Form
         lifecyclePanel.Controls.Clear();
 
         GitSnapshot snapshot = GetGitSnapshot(fetch);
-        Label title = MakeLabel("Desktop lifecycle", 14, 12, lifecyclePanel.Width - 28, 22, 10, FontStyle.Bold);
+        Label title = MakeLabel(L("Desktop lifecycle", "Desktop életciklus"), 14, 12, lifecyclePanel.Width - 28, 22, 10, FontStyle.Bold);
         title.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
         lifecyclePanel.Controls.Add(title);
 
         Label version = MakeLabel(
-            "Version: " + snapshot.Version + "  |  Local: " + snapshot.LocalCommit + "  |  Upstream: " + snapshot.UpstreamCommit,
+            L("Version: ", "Verzió: ") + snapshot.Version + "  |  "
+            + L("Local: ", "Helyi: ") + snapshot.LocalCommit + "  |  "
+            + L("Upstream: ", "Upstream: ") + snapshot.UpstreamCommit,
             14,
             38,
             lifecyclePanel.Width - 28,
@@ -385,7 +443,7 @@ internal sealed class CodexBotTray : Form
         lifecyclePanel.Controls.Add(version);
 
         Label repo = MakeLabel(
-            "Repository: " + snapshot.Status,
+            L("Repository: ", "Repo: ") + LocalizeGitStatus(snapshot.Status),
             14,
             62,
             lifecyclePanel.Width - 28,
@@ -401,7 +459,7 @@ internal sealed class CodexBotTray : Form
         detail.ForeColor = Color.FromArgb(180, 190, 205);
         lifecyclePanel.Controls.Add(detail);
 
-        Button check = MakeButton("Check Updates", 14, 114, 122, 30);
+        Button check = MakeButton(L("Check Updates", "Frissítés keresése"), 14, 114, 122, 30);
         check.Font = new Font("Segoe UI", 8, FontStyle.Bold);
         check.Click += delegate { RenderLifecyclePanel(true); };
         lifecyclePanel.Controls.Add(check);
@@ -411,12 +469,12 @@ internal sealed class CodexBotTray : Form
         github.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT"); };
         lifecyclePanel.Controls.Add(github);
 
-        Button releases = MakeButton("Releases", 242, 114, 86, 30);
+        Button releases = MakeButton(L("Releases", "Kiadások"), 242, 114, 86, 30);
         releases.Font = new Font("Segoe UI", 8, FontStyle.Bold);
         releases.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT/releases"); };
         lifecyclePanel.Controls.Add(releases);
 
-        Button safeUpdate = MakeButton("Safe Update", 338, 114, 94, 30);
+        Button safeUpdate = MakeButton(L("Safe Update", "Safe update"), 338, 114, 94, 30);
         safeUpdate.Font = new Font("Segoe UI", 8, FontStyle.Bold);
         safeUpdate.Enabled = snapshot.CanSafeUpdate;
         safeUpdate.BackColor = snapshot.CanSafeUpdate ? Color.FromArgb(55, 110, 80) : Color.FromArgb(55, 58, 66);
@@ -427,7 +485,7 @@ internal sealed class CodexBotTray : Form
         };
         lifecyclePanel.Controls.Add(safeUpdate);
 
-        Button setup = MakeButton("Setup", 440, 114, 62, 30);
+        Button setup = MakeButton(L("Setup", "Setup"), 440, 114, 62, 30);
         setup.Font = new Font("Segoe UI", 8, FontStyle.Bold);
         setup.Click += delegate { OpenLocalFile(Path.Combine(botDir, "SETUP.md")); };
         lifecyclePanel.Controls.Add(setup);
@@ -438,7 +496,7 @@ internal sealed class CodexBotTray : Form
         lifecyclePanel.Controls.Add(tools);
 
         CheckBox autostart = new CheckBox();
-        autostart.Text = "Launch on login";
+        autostart.Text = L("Launch on login", "Indítás bejelentkezéskor");
         autostart.Left = 14;
         autostart.Top = 150;
         autostart.Width = lifecyclePanel.Width - 28;
@@ -457,7 +515,9 @@ internal sealed class CodexBotTray : Form
             {
                 autostart.CheckedChanged -= delegate { };
                 MessageBox.Show(
-                    "Could not change Windows startup setting. Open the Startup folder and create/remove the shortcut manually.\n\n" + SafeError(ex.Message),
+                    L("Could not change Windows startup setting. Open the Startup folder and create/remove the shortcut manually.",
+                      "Nem sikerült módosítani a Windows startup beállítást. Nyisd meg a Startup mappát, és hozd létre vagy töröld kézzel a shortcutot.")
+                    + "\n\n" + SafeError(ex.Message),
                     "Autostart",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
@@ -471,6 +531,18 @@ internal sealed class CodexBotTray : Form
         {
             MessageBox.Show(snapshot.FetchMessage, "Check for Updates", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
+    }
+
+    private string LocalizeGitStatus(string status)
+    {
+        if (!isHungarian) return status;
+        if (status == "Local changes present") return "helyi módosítások vannak";
+        if (status == "Diverged") return "eltért az origintól";
+        if (status == "Behind origin") return "origin mögött van";
+        if (status == "Ahead of origin") return "origin előtt van";
+        if (status == "Clean and synced") return "tiszta és szinkronban van";
+        if (status == "Git unavailable") return "Git nem érhető el";
+        return status;
     }
 
     private Label MakeLabel(string text, int left, int top, int width, int height, int size, FontStyle style)
@@ -507,7 +579,7 @@ internal sealed class CodexBotTray : Form
         bool running = IsRunning();
         if (statusLabel != null)
         {
-            statusLabel.Text = running ? "Bot status: Running" : "Bot status: Stopped";
+            statusLabel.Text = running ? L("Bot status: Running", "Bot állapot: fut") : L("Bot status: Stopped", "Bot állapot: leállítva");
         }
         if (statusDot != null)
         {
@@ -623,12 +695,12 @@ internal sealed class CodexBotTray : Form
         }
         if (!File.Exists(Path.Combine(botDir, "dist", "index.js")))
         {
-            if (showErrors) MessageBox.Show("dist/index.js is missing. Run npm run build first.", "Cannot Start Bot", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (showErrors) MessageBox.Show(L("dist/index.js is missing. Run npm run build first.", "Hiányzik a dist/index.js. Előbb futtasd: npm run build."), L("Cannot Start Bot", "A bot nem indítható"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (!File.Exists(envPath))
         {
-            if (showErrors) MessageBox.Show(".env is missing. Open Settings and save local configuration first.", "Configuration Missing", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (showErrors) MessageBox.Show(L(".env is missing. Open Settings and save local configuration first.", "Hiányzik a .env. Nyisd meg a Beállításokat, és mentsd el a helyi konfigurációt."), L("Configuration Missing", "Hiányzó konfiguráció"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
@@ -700,32 +772,32 @@ internal sealed class CodexBotTray : Form
             string script = Path.Combine(botDir, "scripts", "operator-startup.ps1");
             if (!File.Exists(script))
             {
-                if (showResult) MessageBox.Show("Operator startup script is not available.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (showResult) MessageBox.Show(L("Operator startup script is not available.", "Az operator startup script nem érhető el."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return "skipped";
             }
 
             CommandResult result = RunCommand("powershell", "-NoProfile -ExecutionPolicy Bypass -File " + Quote(script), 90000);
             if (result.ExitCode == 0)
             {
-                if (showResult) MessageBox.Show("Operator tools are ready.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (showResult) MessageBox.Show(L("Operator tools are ready.", "Az operator tools készen áll."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return "ready";
             }
             if (result.ExitCode == 2)
             {
-                if (showResult) MessageBox.Show("Operator tools were skipped because the shared launcher was not found.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (showResult) MessageBox.Show(L("Operator tools were skipped because the shared launcher was not found.", "Az operator tools előkészítés kimaradt, mert a shared launcher nem található."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return "skipped";
             }
             if (result.ExitCode == 3)
             {
-                if (showResult) MessageBox.Show("Operator tools preflight is already running.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (showResult) MessageBox.Show(L("Operator tools preflight is already running.", "Az operator tools preflight már fut."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return "running";
             }
-            if (showResult) MessageBox.Show("Operator tools preflight failed. Check operator-startup.log.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (showResult) MessageBox.Show(L("Operator tools preflight failed. Check operator-startup.log.", "Az operator tools preflight hibázott. Nézd meg az operator-startup.log fájlt."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return "failed";
         }
         catch
         {
-            if (showResult) MessageBox.Show("Operator tools preflight failed. Check operator-startup.log.", "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (showResult) MessageBox.Show(L("Operator tools preflight failed. Check operator-startup.log.", "Az operator tools preflight hibázott. Nézd meg az operator-startup.log fájlt."), "Operator Tools", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return "failed";
         }
     }
@@ -744,7 +816,7 @@ internal sealed class CodexBotTray : Form
     private void OpenSettings()
     {
         Form form = new Form();
-        form.Text = "Attys DC BOT Settings";
+        form.Text = L("Attys DC BOT Settings", "Attys DC BOT beállítások");
         form.StartPosition = FormStartPosition.CenterParent;
         form.Size = new Size(760, 640);
         form.MinimumSize = new Size(680, 560);
@@ -791,7 +863,7 @@ internal sealed class CodexBotTray : Form
             y += 34;
         }
 
-        Button save = MakeButton("Save", 12, form.ClientSize.Height - 54, 110, 36);
+        Button save = MakeButton(L("Save", "Mentés"), 12, form.ClientSize.Height - 54, 110, 36);
         save.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
         save.Click += delegate
         {
@@ -805,7 +877,7 @@ internal sealed class CodexBotTray : Form
         };
         form.Controls.Add(save);
 
-        Button cancel = MakeButton("Cancel", 134, form.ClientSize.Height - 54, 110, 36);
+        Button cancel = MakeButton(L("Cancel", "Mégse"), 134, form.ClientSize.Height - 54, 110, 36);
         cancel.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
         cancel.Click += delegate { form.Close(); };
         form.Controls.Add(cancel);
@@ -854,15 +926,15 @@ internal sealed class CodexBotTray : Form
             {
                 snapshot.FetchFailed = true;
                 snapshot.FetchMessage = fetchResult.TimedOut
-                    ? "Git fetch timed out. Local repository state was not changed."
-                    : "Git fetch failed. Local repository state was not changed.";
+                    ? L("Git fetch timed out. Local repository state was not changed.", "A git fetch időtúllépésbe futott. A helyi repo állapota nem változott.")
+                    : L("Git fetch failed. Local repository state was not changed.", "A git fetch hibázott. A helyi repo állapota nem változott.");
             }
         }
 
         CommandResult head = RunCommand("git", "rev-parse --short HEAD", 8000);
         if (head.ExitCode != 0)
         {
-            snapshot.Detail = "Git is unavailable or this folder is not a git repository.";
+            snapshot.Detail = L("Git is unavailable or this folder is not a git repository.", "A Git nem érhető el, vagy ez a mappa nem git repo.");
             return snapshot;
         }
 
@@ -918,12 +990,12 @@ internal sealed class CodexBotTray : Form
             snapshot.Status = "Clean and synced";
         }
 
-        snapshot.Detail = "Upstream: " + snapshot.UpstreamName
-            + "  |  ahead " + snapshot.Ahead.ToString(CultureInfo.InvariantCulture)
-            + " / behind " + snapshot.Behind.ToString(CultureInfo.InvariantCulture);
+        snapshot.Detail = L("Upstream: ", "Upstream: ") + snapshot.UpstreamName
+            + "  |  " + L("ahead ", "előtte ") + snapshot.Ahead.ToString(CultureInfo.InvariantCulture)
+            + " / " + L("behind ", "mögötte ") + snapshot.Behind.ToString(CultureInfo.InvariantCulture);
         if (snapshot.Dirty)
         {
-            snapshot.Detail += "  |  update actions stay read-only";
+            snapshot.Detail += "  |  " + L("update actions stay read-only", "a frissítési műveletek read-only módban maradnak");
         }
         return snapshot;
     }
@@ -951,27 +1023,29 @@ internal sealed class CodexBotTray : Form
         GitSnapshot snapshot = GetGitSnapshot(true);
         if (!snapshot.GitAvailable)
         {
-            MessageBox.Show("Git is unavailable, so safe update cannot run.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(L("Git is unavailable, so safe update cannot run.", "A Git nem érhető el, ezért a safe update nem futtatható."), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (snapshot.Dirty)
         {
-            MessageBox.Show("Local changes are present. Safe update stops here and does not stash or reset your work.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(L("Local changes are present. Safe update stops here and does not stash or reset your work.", "Helyi módosítások vannak. A safe update itt megáll, és nem stash-el vagy resetel semmit."), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         if (snapshot.Ahead > 0 && snapshot.Behind > 0)
         {
-            MessageBox.Show("The repository has diverged from origin. Safe update stops here for manual review.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(L("The repository has diverged from origin. Safe update stops here for manual review.", "A repo eltért az origintól. A safe update itt megáll kézi ellenőrzéshez."), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (snapshot.Behind <= 0)
         {
-            MessageBox.Show("No newer origin commit is available.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(L("No newer origin commit is available.", "Nincs újabb origin commit."), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
 
         DialogResult confirm = MessageBox.Show(
-            "Run safe update now?\n\nThis will run git pull --ff-only, install dependencies only if package files changed, run build/check, and restart the bot. It will not stash, reset, or rewrite history.",
+            L(
+                "Run safe update now?\n\nThis will run git pull --ff-only, install dependencies only if package files changed, run build/check, and restart the bot. It will not stash, reset, or rewrite history.",
+                "Futtassuk most a safe update-et?\n\nEz git pull --ff-only-t futtat, csak package fájl változásnál telepít dependency-t, build/check után újraindítja a botot. Nem stash-el, nem resetel, és nem ír történelmet."),
             "Safe Update",
             MessageBoxButtons.OKCancel,
             MessageBoxIcon.Question);
@@ -980,11 +1054,11 @@ internal sealed class CodexBotTray : Form
         try
         {
             RunSafeUpdate();
-            MessageBox.Show("Safe update completed. The bot was restarted if local config allowed it.", "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(L("Safe update completed. The bot was restarted if local config allowed it.", "A safe update kész. A bot újraindult, ha a helyi konfiguráció engedte."), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Safe update stopped:\n\n" + SafeError(ex.Message), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(L("Safe update stopped:", "A safe update megállt:") + "\n\n" + SafeError(ex.Message), "Safe Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
     }
 
@@ -1192,7 +1266,7 @@ internal sealed class CodexBotTray : Form
     {
         if (!File.Exists(filePath))
         {
-            MessageBox.Show("File not found: " + Path.GetFileName(filePath), "Open File", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(L("File not found: ", "Fájl nem található: ") + Path.GetFileName(filePath), L("Open File", "Fájl megnyitása"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         Process.Start("notepad.exe", Quote(filePath));
@@ -1398,8 +1472,8 @@ internal sealed class CodexBotTray : Form
 
         if (usageData == null)
         {
-            if (usageStatusLabel != null) usageStatusLabel.Text = "Codex usage: cache missing or unavailable";
-            Label empty = MakeLabel("Usage unavailable. Use Refresh Usage after `codex login status` is healthy.", 16, 18, usagePanel.Width - 32, 44, 10, FontStyle.Regular);
+            if (usageStatusLabel != null) usageStatusLabel.Text = L("Codex usage: cache missing or unavailable", "Codex használat: cache hiányzik vagy nem érhető el");
+            Label empty = MakeLabel(L("Usage unavailable. Use Refresh Usage after `codex login status` is healthy.", "A használati adatok nem érhetők el. Használd a Használat frissítése gombot, miután a `codex login status` rendben van."), 16, 18, usagePanel.Width - 32, 44, 10, FontStyle.Regular);
             empty.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
             usagePanel.Controls.Add(empty);
             return;
@@ -1408,15 +1482,15 @@ internal sealed class CodexBotTray : Form
         if (usageStatusLabel != null)
         {
             usageStatusLabel.Text = usageFetchedAt > 0
-                ? "Codex usage cache: " + FormatAge(usageFetchedAt)
-                : "Codex usage cache: loaded";
+                ? L("Codex usage cache: ", "Codex usage cache: ") + FormatAge(usageFetchedAt)
+                : L("Codex usage cache: loaded", "Codex usage cache: betöltve");
         }
 
         int y = 16;
         string planType = ReadString(usageData, "planType");
         if (!string.IsNullOrWhiteSpace(planType))
         {
-            Label plan = MakeLabel("Plan: " + planType, 16, y, usagePanel.Width - 32, 24, 10, FontStyle.Bold);
+            Label plan = MakeLabel(L("Plan: ", "Csomag: ") + planType, 16, y, usagePanel.Width - 32, 24, 10, FontStyle.Bold);
             plan.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
             usagePanel.Controls.Add(plan);
             y += 34;
@@ -1425,7 +1499,7 @@ internal sealed class CodexBotTray : Form
         ArrayList rows = ReadUsageRows(usageData);
         if (rows.Count == 0)
         {
-            Label none = MakeLabel("Usage cache exists, but no displayable limit windows were found.", 16, y, usagePanel.Width - 32, 40, 10, FontStyle.Regular);
+            Label none = MakeLabel(L("Usage cache exists, but no displayable limit windows were found.", "Van usage cache, de nincs megjeleníthető limitablak."), 16, y, usagePanel.Width - 32, 40, 10, FontStyle.Regular);
             usagePanel.Controls.Add(none);
             return;
         }
@@ -1443,7 +1517,7 @@ internal sealed class CodexBotTray : Form
 
             Dictionary<string, object> window = row["window"] as Dictionary<string, object>;
             int percentLeft = UsagePercentLeft(window);
-            Label label = MakeLabel(UsageLabel(window) + " - " + percentLeft.ToString(CultureInfo.InvariantCulture) + "% left", 16, y, usagePanel.Width - 32, 22, 10, FontStyle.Regular);
+            Label label = MakeLabel(UsageLabel(window) + " - " + percentLeft.ToString(CultureInfo.InvariantCulture) + L("% left", "% maradt"), 16, y, usagePanel.Width - 32, 22, 10, FontStyle.Regular);
             label.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
             usagePanel.Controls.Add(label);
             y += 26;
@@ -1519,10 +1593,10 @@ internal sealed class CodexBotTray : Form
     private string UsageLabel(Dictionary<string, object> window)
     {
         double minutes = ReadDouble(window, "windowDurationMins", 0);
-        if (Math.Abs(minutes - 300) < 0.1) return "5-hour limit";
-        if (Math.Abs(minutes - 10080) < 0.1) return "7-day limit";
-        if (minutes > 0) return ((int)minutes).ToString(CultureInfo.InvariantCulture) + "-minute limit";
-        return "Usage limit";
+        if (Math.Abs(minutes - 300) < 0.1) return L("5-hour limit", "5 órás limit");
+        if (Math.Abs(minutes - 10080) < 0.1) return L("7-day limit", "7 napos limit");
+        if (minutes > 0) return ((int)minutes).ToString(CultureInfo.InvariantCulture) + L("-minute limit", " perces limit");
+        return L("Usage limit", "Használati limit");
     }
 
     private string UsageResetText(Dictionary<string, object> window)
@@ -1530,16 +1604,16 @@ internal sealed class CodexBotTray : Form
         double resetsAt = ReadDouble(window, "resetsAt", 0);
         if (resetsAt <= 0) return "";
         DateTime reset = UnixEpoch().AddSeconds((long)resetsAt).ToLocalTime();
-        return "Resets " + reset.ToString("g", CultureInfo.CurrentCulture);
+        return L("Resets ", "Visszaáll: ") + reset.ToString("g", CultureInfo.CurrentCulture);
     }
 
     private string FormatAge(long fetchedAt)
     {
         DateTime fetched = UnixEpoch().AddMilliseconds(fetchedAt).ToLocalTime();
         TimeSpan age = DateTime.Now - fetched;
-        if (age.TotalMinutes < 1) return "updated just now";
-        if (age.TotalHours < 1) return "updated " + ((int)age.TotalMinutes).ToString(CultureInfo.InvariantCulture) + "m ago";
-        return "updated " + ((int)age.TotalHours).ToString(CultureInfo.InvariantCulture) + "h ago";
+        if (age.TotalMinutes < 1) return L("updated just now", "frissítve épp most");
+        if (age.TotalHours < 1) return L("updated ", "frissítve ") + ((int)age.TotalMinutes).ToString(CultureInfo.InvariantCulture) + L("m ago", " perce");
+        return L("updated ", "frissítve ") + ((int)age.TotalHours).ToString(CultureInfo.InvariantCulture) + L("h ago", " órája");
     }
 
     private static DateTime UnixEpoch()

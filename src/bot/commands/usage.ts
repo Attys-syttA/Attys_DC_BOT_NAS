@@ -28,27 +28,27 @@ function formatResetText(
       hour: "numeric",
       minute: "2-digit",
     });
-    return L(`Resets ${formatted}`, `${formatted} 초기화`);
+    return L(`Resets ${formatted}`, `${formatted} visszaáll`);
   }
 
   const formatted = resetDate.toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
-  return L(`Resets on ${formatted}`, `${formatted} 초기화`);
+  return L(`Resets on ${formatted}`, `${formatted} visszaáll`);
 }
 
 function usageLabel(windowDurationMins: number | undefined): string {
   if (windowDurationMins === 300) {
-    return L("5-hour limit", "5시간 한도");
+    return L("5-hour limit", "5 órás limit");
   }
   if (windowDurationMins === 10080) {
-    return L("7-day limit", "7일 한도");
+    return L("7-day limit", "7 napos limit");
   }
   if (windowDurationMins) {
-    return L(`${windowDurationMins}-minute limit`, `${windowDurationMins}분 한도`);
+    return L(`${windowDurationMins}-minute limit`, `${windowDurationMins} perces limit`);
   }
-  return L("Usage limit", "사용량 한도");
+  return L("Usage limit", "Használati limit");
 }
 
 function footerText(fetchedAt: number | null, now = Date.now()): string {
@@ -71,12 +71,12 @@ function describeUsage(usage: CodexUsageData): string {
     const percentLeft = getUsagePercentLeft(row.window);
     const reset = formatResetText(row.window.resetsAt, now);
     lines.push(
-      `**${usageLabel(row.window.windowDurationMins)}**  \`${progressBar(percentLeft)}\`  **${percentLeft}% ${L("left", "남음")}**${reset ? `  ·  ${reset}` : ""}`,
+      `**${usageLabel(row.window.windowDurationMins)}**  \`${progressBar(percentLeft)}\`  **${percentLeft}% ${L("left", "maradt")}**${reset ? `  ·  ${reset}` : ""}`,
     );
   }
 
   if (usage.planType) {
-    lines.unshift(`**${L("Plan", "플랜")}**: \`${usage.planType}\``);
+    lines.unshift(`**${L("Plan", "Csomag")}**: \`${usage.planType}\``);
   }
 
   return lines.join("\n\n");
@@ -105,14 +105,14 @@ export async function execute(interaction: ChatInputCommandInteraction): Promise
     await interaction.editReply({
       content: L(
         "Codex usage unavailable: app-server did not return usable data and the local cache is missing or unreadable. Check `codex login status`, then try Refresh Usage again.",
-        "Codex 사용량 정보를 가져오지 못했습니다. app-server 응답이나 로컬 캐시를 사용할 수 없습니다. `codex login status`를 확인한 뒤 다시 시도하세요.",
+        "Nem sikerült lekérni a Codex használati adatokat. Nincs használható app-server válasz vagy helyi cache. Ellenőrizd a `codex login status` eredményét, majd próbáld újra.",
       ),
     });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setTitle(L("📊 Codex Usage", "📊 Codex 사용량"))
+    .setTitle(L("📊 Codex Usage", "📊 Codex használat"))
     .setDescription(describeUsage(usage))
     .setColor(0x10b981)
     .setFooter({ text: footerText(fetchedAt) })

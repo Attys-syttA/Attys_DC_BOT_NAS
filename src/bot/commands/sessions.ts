@@ -132,7 +132,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project. Use `/register` first.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다. 먼저 `/register`를 사용하세요."),
+      content: L("This channel is not registered to any project. Use `/register` first.", "Ez a csatorna nincs projekthez regisztrálva. Előbb használd a `/register` parancsot."),
     });
     return;
   }
@@ -150,10 +150,10 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         {
-          title: L("✨ New Session", "✨ 새 세션"),
+          title: L("✨ New Session", "✨ Új session"),
           description: L(
             `No existing Codex sessions found for \`${projectLabel}\`.\nA new session is ready — your next message will start a new conversation.`,
-            `\`${projectLabel}\`에 대한 기존 Codex 세션이 없습니다.\n새 세션이 준비되었습니다 — 다음 메시지부터 새로운 대화가 시작됩니다.`
+            `A(z) \`${projectLabel}\` projekthez nincs meglévő Codex session.\nAz új session készen áll - a következő üzenettől új beszélgetés indul.`
           ),
           color: 0x00ff00,
         },
@@ -164,7 +164,7 @@ export async function execute(
 
   if (sessions.length === 0) {
     await interaction.editReply({
-      content: L("No Codex sessions matched that filter.", "해당 필터와 일치하는 Codex 세션이 없습니다."),
+      content: L("No Codex sessions matched that filter.", "Nincs a szűrőnek megfelelő Codex session."),
     });
     return;
   }
@@ -174,8 +174,8 @@ export async function execute(
 
   const options: Array<{ label: string; description: string; value: string; default?: boolean }> = [
     {
-      label: L("✨ Create New Session", "✨ 새 세션 만들기"),
-      description: L("Start a new conversation without an existing session", "기존 세션 없이 새로운 대화를 시작합니다"),
+      label: L("✨ Create New Session", "✨ Új session létrehozása"),
+      description: L("Start a new conversation without an existing session", "Új beszélgetés indítása meglévő session nélkül"),
       value: "__new_session__",
     },
   ];
@@ -193,7 +193,7 @@ export async function execute(
 
   const select = new StringSelectMenuBuilder()
     .setCustomId("session-select")
-    .setPlaceholder(L("Select a session to inspect or resume", "확인하거나 재개할 세션을 선택하세요"))
+    .setPlaceholder(L("Select a session to inspect or resume", "Válassz sessiont megtekintéshez vagy folytatáshoz"))
     .addOptions(options);
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
@@ -201,10 +201,10 @@ export async function execute(
   await interaction.editReply({
     embeds: [
       {
-        title: L("Codex Sessions", "Codex 세션"),
+        title: L("Codex Sessions", "Codex Session"),
         description: L(
           `Project: \`${sanitizePublicFileLabel(project.project_path)}\`\nChoose a session to view its last response, resume it, or delete it.`,
-          `프로젝트: \`${sanitizePublicFileLabel(project.project_path)}\`\n세션을 선택하면 마지막 응답을 보고, 재개하거나, 삭제할 수 있습니다.`
+          `Projekt: \`${sanitizePublicFileLabel(project.project_path)}\`\nVálassz sessiont az utolsó válasz megtekintéséhez, folytatáshoz vagy törléshez.`
         ),
         footer: {
           text: `Showing ${sessions.length} of ${allSessions.length} sessions`,

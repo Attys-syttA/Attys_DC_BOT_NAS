@@ -32,7 +32,7 @@ import re
 
 update_available = False
 current_version = "unknown"
-is_korean = False
+is_hungarian = False
 cached_release_notes = ""
 cached_new_version = ""
 usage_data = None
@@ -53,29 +53,29 @@ EXAMPLE_VALUES = {
 # --- Localization ---
 
 def load_language():
-    global is_korean
+    global is_hungarian
     try:
         if os.path.exists(LANG_PREF_FILE):
             saved = open(LANG_PREF_FILE).read().strip()
-            is_korean = (saved == "kr")
+            is_hungarian = saved in {"hu", "kr"}
     except Exception:
         pass
 
 
-def set_language(korean, icon):
-    global is_korean
-    is_korean = korean
+def set_language(hungarian, icon):
+    global is_hungarian
+    is_hungarian = hungarian
     try:
         with open(LANG_PREF_FILE, "w") as f:
-            f.write("kr" if korean else "en")
+            f.write("hu" if hungarian else "en")
     except Exception:
         pass
     update_icon(icon)
     icon.menu = create_menu()
 
 
-def L(en, kr):
-    return kr if is_korean else en
+def L(en, hu):
+    return hu if is_hungarian else en
 
 
 # --- Env Configuration Check ---
@@ -219,11 +219,11 @@ def fetch_release_notes():
             capture_output=True, text=True, cwd=BOT_DIR
         ).stdout.strip()
         fallback_notes = (
-            L("Commits included in this update:\n", "이번 업데이트에 포함된 커밋:\n") + commits
+            L("Commits included in this update:\n", "A frissítésben szereplő commitok:\n") + commits
             if commits else
             L(
                 "An update is available, but no release notes or commit summary were found.",
-                "업데이트가 가능하지만 릴리즈 노트나 커밋 요약을 찾지 못했습니다."
+                "Frissítés elérhető, de nem találtam release note-ot vagy commit összefoglalót."
             )
         )
 
@@ -267,7 +267,7 @@ def repo_has_local_changes():
 
 def _show_update_confirmation():
     """Show update confirmation dialog with release notes using yad or zenity."""
-    title = L("Update Available", "업데이트 가능")
+    title = L("Update Available", "Frissítés elérhető")
     version_info = f"{current_version} → {cached_new_version}" if cached_new_version else ""
 
     if cached_release_notes:
@@ -277,8 +277,8 @@ def _show_update_confirmation():
             result = subprocess.run(
                 ["yad", "--text-info", "--title=" + title,
                  "--width=500", "--height=400",
-                 "--button=" + L("Update:0", "업데이트:0"),
-                 "--button=" + L("Cancel:1", "취소:1"),
+                 "--button=" + L("Update:0", "Frissítés:0"),
+                 "--button=" + L("Cancel:1", "Mégse:1"),
                  "--fontname=monospace 10", "--wrap"],
                 input=text, text=True, capture_output=True
             )
@@ -290,8 +290,8 @@ def _show_update_confirmation():
             result = subprocess.run(
                 ["zenity", "--text-info", "--title=" + title,
                  "--width=500", "--height=400",
-                 "--ok-label=" + L("Update", "업데이트"),
-                 "--cancel-label=" + L("Cancel", "취소")],
+                 "--ok-label=" + L("Update", "Frissítés"),
+                 "--cancel-label=" + L("Cancel", "Mégse")],
                 input=text, text=True, capture_output=True
             )
             return result.returncode == 0
@@ -300,7 +300,7 @@ def _show_update_confirmation():
 
     # No release notes or no dialog tool — simple question
     msg = L("Do you want to update to the latest version?",
-            "최신 버전으로 업데이트하시겠습니까?")
+            "Frissítsünk a legújabb verzióra?")
     if version_info:
         msg = version_info + "\n\n" + msg
     try:
@@ -351,9 +351,9 @@ def perform_update(icon, item):
     icon.notify(
         L(
             "Update actions are read-only in Attys DC BOT. Use the documented safe update flow from the repo.",
-            "Attys DC BOT에서는 업데이트 동작이 읽기 전용입니다. 저장소의 안전 업데이트 절차를 사용하세요.",
+            "Az Attys DC BOT frissítési művelete itt read-only. Használd a repo safe update folyamatát.",
         ),
-        L("Update disabled", "업데이트 비활성화"),
+        L("Update disabled", "Frissítés letiltva"),
     )
 
 def create_icon(color):
@@ -378,8 +378,8 @@ def start_bot(icon, item):
     icon.menu = create_menu()
     if is_running():
         icon.notify(L("Bot is running. Click tray icon to manage.",
-                       "봇이 실행 중입니다. 트레이 아이콘을 클릭하여 관리하세요."),
-                    L("Attys DC BOT Started", "Attys DC BOT 시작됨"))
+                       "A bot fut. Kattints a tray ikonra a kezeléshez."),
+                    L("Attys DC BOT Started", "Attys DC BOT elindult"))
 
 
 def stop_bot(icon, item):
@@ -436,26 +436,26 @@ def _edit_settings_gtk(icon=None):
 
     env = _load_env()
     fields = [
-        ("DISCORD_BOT_TOKEN", L("Discord Bot Token", "Discord 봇 토큰")),
+        ("DISCORD_BOT_TOKEN", L("Discord Bot Token", "Discord bot token")),
         ("DISCORD_APPLICATION_ID", L("Discord Application ID", "Discord Application ID")),
-        ("DISCORD_GUILD_ID", L("Discord Guild ID (Server ID)", "Discord Guild ID (서버 ID)")),
-        ("DISCORD_NOTIFICATION_CHANNEL_ID", L("Notification Channel ID", "알림 채널 ID")),
-        ("ALLOWED_USER_IDS", L("Allowed User IDs (comma-separated)", "허용된 사용자 ID (쉼표로 구분)")),
-        ("ALLOWED_ROLE_IDS", L("Allowed Role IDs (comma-separated)", "허용된 역할 ID (쉼표로 구분)")),
-        ("BASE_PROJECT_DIR", L("Base Project Directory", "기본 프로젝트 디렉토리")),
-        ("DISCORD_DATABASE_PATH", L("SQLite Database Path", "SQLite 데이터베이스 경로")),
-        ("DISCORD_SESSION_STORE_PATH", L("Session Store Path", "세션 저장소 경로")),
-        ("RATE_LIMIT_PER_MINUTE", L("Rate Limit Per Minute", "분당 요청 제한")),
-        ("DISCORD_QUEUE_MAX_ITEMS", L("Queue Max Items", "큐 최대 항목 수")),
-        ("DISCORD_ENABLE_MESSAGE_PROMPTS", L("Message Prompts (true/false)", "메시지 프롬프트 (true/false)")),
-        ("DISCORD_ENABLE_ATTACHMENT_MESSAGES", L("Attachment Messages (true/false)", "첨부 메시지 (true/false)")),
-        ("DISCORD_EPHEMERAL_RESPONSES", L("Ephemeral Responses (true/false)", "임시 응답 (true/false)")),
-        ("SHOW_COST", L("Show Cost (true/false)", "비용 표시 (true/false)")),
-        ("DISCORD_REGISTER_COMMANDS", L("Register Slash Commands (true/false)", "Slash 명령 등록 (true/false)")),
-        ("DISCORD_ENABLE_RUN_TESTS", L("Enable Run Tests (true/false)", "테스트 실행 활성화 (true/false)")),
-        ("DISCORD_ENABLE_AUTO_APPROVE", L("Enable Auto Approve (true/false)", "자동 승인 활성화 (true/false)")),
-        ("DISCORD_ENABLE_SESSION_DELETE", L("Enable Session Delete (true/false)", "세션 삭제 활성화 (true/false)")),
-        ("DISCORD_ENABLE_BOT_LIFECYCLE", L("Enable Bot Lifecycle Command (true/false)", "봇 수명주기 명령 활성화 (true/false)")),
+        ("DISCORD_GUILD_ID", L("Discord Guild ID (Server ID)", "Discord Guild ID (szerver ID)")),
+        ("DISCORD_NOTIFICATION_CHANNEL_ID", L("Notification Channel ID", "Értesítési csatorna ID")),
+        ("ALLOWED_USER_IDS", L("Allowed User IDs (comma-separated)", "Engedélyezett user ID-k vesszővel elválasztva")),
+        ("ALLOWED_ROLE_IDS", L("Allowed Role IDs (comma-separated)", "Engedélyezett role ID-k vesszővel elválasztva")),
+        ("BASE_PROJECT_DIR", L("Base Project Directory", "Alap projektmappa")),
+        ("DISCORD_DATABASE_PATH", L("SQLite Database Path", "SQLite adatbázis útvonala")),
+        ("DISCORD_SESSION_STORE_PATH", L("Session Store Path", "Session store útvonala")),
+        ("RATE_LIMIT_PER_MINUTE", L("Rate Limit Per Minute", "Percenkénti rate limit")),
+        ("DISCORD_QUEUE_MAX_ITEMS", L("Queue Max Items", "Queue max elemszám")),
+        ("DISCORD_ENABLE_MESSAGE_PROMPTS", L("Message Prompts (true/false)", "Üzenet promptok (true/false)")),
+        ("DISCORD_ENABLE_ATTACHMENT_MESSAGES", L("Attachment Messages (true/false)", "Attachment üzenetek (true/false)")),
+        ("DISCORD_EPHEMERAL_RESPONSES", L("Ephemeral Responses (true/false)", "Ephemeral válaszok (true/false)")),
+        ("SHOW_COST", L("Show Cost (true/false)", "Költség mutatása (true/false)")),
+        ("DISCORD_REGISTER_COMMANDS", L("Register Slash Commands (true/false)", "Slash command regisztráció (true/false)")),
+        ("DISCORD_ENABLE_RUN_TESTS", L("Enable Run Tests (true/false)", "Run tests engedélyezése (true/false)")),
+        ("DISCORD_ENABLE_AUTO_APPROVE", L("Enable Auto Approve (true/false)", "Auto-approve engedélyezése (true/false)")),
+        ("DISCORD_ENABLE_SESSION_DELETE", L("Enable Session Delete (true/false)", "Session delete engedélyezése (true/false)")),
+        ("DISCORD_ENABLE_BOT_LIFECYCLE", L("Enable Bot Lifecycle Command (true/false)", "Bot lifecycle command engedélyezése (true/false)")),
     ]
     defaults = {
         "BASE_PROJECT_DIR": "",
@@ -474,24 +474,24 @@ def _edit_settings_gtk(icon=None):
         "DISCORD_ENABLE_BOT_LIFECYCLE": "false",
     }
     placeholders = {
-        "DISCORD_BOT_TOKEN": L("Paste your bot token here", "봇 토큰을 여기에 붙여넣으세요"),
+        "DISCORD_BOT_TOKEN": L("Paste your bot token here", "Ide illeszd a bot tokent"),
         "DISCORD_APPLICATION_ID": L("Application/client ID", "Application/client ID"),
-        "DISCORD_GUILD_ID": L("Right-click server > Copy Server ID", "서버 우클릭 > 서버 ID 복사"),
-        "DISCORD_NOTIFICATION_CHANNEL_ID": L("Channel for startup/completion notices", "시작/완료 알림 채널"),
-        "ALLOWED_USER_IDS": L("e.g. 123456789,987654321", "예: 123456789,987654321"),
-        "ALLOWED_ROLE_IDS": L("Optional role IDs", "선택적 역할 ID"),
-        "BASE_PROJECT_DIR": L("e.g. /home/you/projects", "예: /home/you/projects"),
+        "DISCORD_GUILD_ID": L("Right-click server > Copy Server ID", "Jobb klikk a szerveren > Copy Server ID"),
+        "DISCORD_NOTIFICATION_CHANNEL_ID": L("Channel for startup/completion notices", "Csatorna indulási/befejezési értesítésekhez"),
+        "ALLOWED_USER_IDS": L("e.g. 123456789,987654321", "pl. 123456789,987654321"),
+        "ALLOWED_ROLE_IDS": L("Optional role IDs", "Opcionális role ID-k"),
+        "BASE_PROJECT_DIR": L("e.g. /home/you/projects", "pl. /home/you/projects"),
         "RATE_LIMIT_PER_MINUTE": "10",
-        "SHOW_COST": L("false recommended for Max plan", "Max 요금제는 false 권장"),
+        "SHOW_COST": L("false recommended for Max plan", "Max csomagnál false ajánlott"),
     }
 
     dialog = Gtk.Dialog(
-        title=L("Attys DC BOT Settings", "Attys DC BOT 설정"),
+        title=L("Attys DC BOT Settings", "Attys DC BOT beállítások"),
         flags=0,
     )
     dialog.add_buttons(
-        L("Cancel", "취소"), Gtk.ResponseType.CANCEL,
-        L("Save", "저장"), Gtk.ResponseType.OK
+        L("Cancel", "Mégse"), Gtk.ResponseType.CANCEL,
+        L("Save", "Mentés"), Gtk.ResponseType.OK
     )
     dialog.set_default_size(550, -1)
     dialog.set_position(Gtk.WindowPosition.CENTER)
@@ -506,11 +506,11 @@ def _edit_settings_gtk(icon=None):
 
     # Title
     title = Gtk.Label()
-    title.set_markup(f"<b><big>{L('Attys DC BOT Settings', 'Attys DC BOT 설정')}</big></b>")
+    title.set_markup(f"<b><big>{L('Attys DC BOT Settings', 'Attys DC BOT beállítások')}</big></b>")
     title.set_halign(Gtk.Align.START)
     content.pack_start(title, False, False, 0)
 
-    subtitle = Gtk.Label(label=L("Please fill in the required fields.", "필수 항목을 입력해주세요."))
+    subtitle = Gtk.Label(label=L("Please fill in the required fields.", "Töltsd ki a kötelező mezőket."))
     subtitle.set_halign(Gtk.Align.START)
     subtitle.get_style_context().add_class("dim-label")
     content.pack_start(subtitle, False, False, 0)
@@ -518,14 +518,14 @@ def _edit_settings_gtk(icon=None):
     # Setup guide link
     link = Gtk.LinkButton.new_with_label(
         "https://github.com/Attys-syttA/Attys_DC_BOT/blob/main/SETUP.md",
-        L("Open Setup Guide", "설정 가이드 열기")
+        L("Open Setup Guide", "Setup útmutató megnyitása")
     )
     link.set_halign(Gtk.Align.START)
     content.pack_start(link, False, False, 0)
 
     issue_link = Gtk.LinkButton.new_with_label(
         "https://github.com/Attys-syttA/Attys_DC_BOT/issues",
-        L("Bug Report / Feature Request (GitHub Issues)", "버그 신고 / 기능 요청 (GitHub Issues)")
+        L("Bug Report / Feature Request (GitHub Issues)", "Hibajelentés / funkciókérés (GitHub Issues)")
     )
     issue_link.set_halign(Gtk.Align.START)
     content.pack_start(issue_link, False, False, 0)
@@ -546,15 +546,15 @@ def _edit_settings_gtk(icon=None):
             entry.set_placeholder_text(placeholders.get(key, ""))
             hbox.pack_start(entry, True, True, 0)
 
-            browse_btn = Gtk.Button(label=L("Browse...", "찾아보기..."))
+            browse_btn = Gtk.Button(label=L("Browse...", "Tallózás..."))
             def on_browse(btn, e=entry):
                 chooser = Gtk.FileChooserDialog(
-                    title=L("Select Base Project Directory", "기본 프로젝트 디렉토리 선택"),
+                    title=L("Select Base Project Directory", "Alap projektmappa kiválasztása"),
                     action=Gtk.FileChooserAction.SELECT_FOLDER,
                 )
                 chooser.add_buttons(
-                    L("Cancel", "취소"), Gtk.ResponseType.CANCEL,
-                    L("Select", "선택"), Gtk.ResponseType.OK
+                    L("Cancel", "Mégse"), Gtk.ResponseType.CANCEL,
+                    L("Select", "Kiválasztás"), Gtk.ResponseType.OK
                 )
                 chooser.set_position(Gtk.WindowPosition.CENTER)
                 if chooser.run() == Gtk.ResponseType.OK:
@@ -575,7 +575,7 @@ def _edit_settings_gtk(icon=None):
 
         if key == "DISCORD_BOT_TOKEN" and len(current) > 10:
             entry.set_placeholder_text(
-                "****" + current[-6:] + L(" (enter full token to change)", " (변경하려면 전체 토큰 입력)")
+                "****" + current[-6:] + L(" (enter full token to change)", " (módosításhoz add meg a teljes tokent)")
             )
         elif current:
             entry.set_text(current)
@@ -588,7 +588,7 @@ def _edit_settings_gtk(icon=None):
 
     note = Gtk.Label(label=L(
         "* Max plan users should set Show Cost to false",
-        "* Max 요금제 사용자는 Show Cost를 false로 설정하세요"
+        "* Max csomagnál a Show Cost értéke legyen false"
     ))
     note.set_halign(Gtk.Align.START)
     note.get_style_context().add_class("dim-label")
@@ -619,7 +619,7 @@ def _edit_settings_gtk(icon=None):
                 buttons=Gtk.ButtonsType.OK,
                 text=L(
                     "Bot Token, Guild ID (Server ID), and User IDs are required.",
-                    "Bot Token, Guild ID (서버 ID), User IDs는 필수 항목입니다."
+                    "Bot Token, Guild ID (szerver ID) és User IDs kötelező."
                 )
             )
             err.run()
@@ -866,7 +866,7 @@ exec "$CODEX_BIN" app-server
         })
         init_response = _read_json_response(proc, 1, 5)
         if not init_response or init_response.get("id") != 1:
-            last_usage_error = L("Codex app-server did not respond to initialize.", "Codex app-server 초기화 응답이 없습니다.")
+            last_usage_error = L("Codex app-server did not respond to initialize.", "A Codex app-server nem válaszolt az initialize hívásra.")
             return None
 
         _send_json_line(proc, {
@@ -877,7 +877,7 @@ exec "$CODEX_BIN" app-server
         })
         response = _read_json_response(proc, 2, 5)
         if not response or response.get("id") != 2:
-            last_usage_error = L("Codex usage request timed out.", "Codex 사용량 요청이 시간 초과되었습니다.")
+            last_usage_error = L("Codex usage request timed out.", "A Codex használati adatok lekérése időtúllépésbe futott.")
             return None
         error = response.get("error")
         if isinstance(error, dict):
@@ -885,7 +885,7 @@ exec "$CODEX_BIN" app-server
             if isinstance(message, str) and message.strip():
                 last_usage_error = message.strip()
             else:
-                last_usage_error = L("Failed to load Codex usage.", "Codex 사용량을 불러오지 못했습니다.")
+                last_usage_error = L("Failed to load Codex usage.", "Nem sikerült betölteni a Codex használati adatokat.")
             return None
         last_usage_error = ""
         return normalize_usage(response.get("result") or {})
@@ -930,12 +930,12 @@ def usage_rows():
 def usage_label(window):
     mins = window.get("windowDurationMins")
     if mins == 300:
-        return L("5-hour limit", "5시간 한도")
+        return L("5-hour limit", "5 órás limit")
     if mins == 10080:
-        return L("7-day limit", "7일 한도")
+        return L("7-day limit", "7 napos limit")
     if mins:
-        return L(f"{mins}-minute limit", f"{mins}분 한도")
-    return L("Usage limit", "사용량 한도")
+        return L(f"{mins}-minute limit", f"{mins} perces limit")
+    return L("Usage limit", "Használati limit")
 
 
 def usage_percent_left(window):
@@ -950,15 +950,15 @@ def usage_reset_text(window):
     now = time.localtime()
     if (dt.tm_year, dt.tm_yday) == (now.tm_year, now.tm_yday):
         formatted = time.strftime("%p %I:%M", dt)
-        if is_korean:
-            formatted = formatted.replace("AM", "오전").replace("PM", "오후")
+        if is_hungarian:
+            formatted = time.strftime("%H:%M", dt)
         formatted = formatted.lstrip("0")
-        return L(f"Resets {formatted}", f"{formatted} 초기화")
+        return L(f"Resets {formatted}", f"Visszaáll {formatted}-kor")
 
     formatted = time.strftime("%b %d", dt).replace(" 0", " ")
-    if is_korean:
-        formatted = f"{dt.tm_mon}월 {dt.tm_mday}일"
-    return L(f"Resets on {formatted}", f"{formatted} 초기화")
+    if is_hungarian:
+        formatted = f"{dt.tm_mon}. {dt.tm_mday}."
+    return L(f"Resets on {formatted}", f"Visszaáll ekkor: {formatted}")
 
 
 def fetched_label():
@@ -966,10 +966,10 @@ def fetched_label():
         return ""
     ago = int(time.time() - usage_last_fetched)
     if ago < 60:
-        return L("Updated just now", "방금 갱신됨")
+        return L("Updated just now", "Frissítve épp most")
     if ago < 3600:
-        return L(f"Updated {ago // 60}m ago", f"{ago // 60}분 전 갱신")
-    return L(f"Updated {ago // 3600}h ago", f"{ago // 3600}시간 전 갱신")
+        return L(f"Updated {ago // 60}m ago", f"Frissítve {ago // 60} perce")
+    return L(f"Updated {ago // 3600}h ago", f"Frissítve {ago // 3600} órája")
 
 
 def show_control_panel(icon, item):
@@ -1032,22 +1032,22 @@ def _show_control_panel_gtk(icon):
 
         lang_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         en_btn = Gtk.Button(label="EN")
-        kr_btn = Gtk.Button(label="KR")
-        en_btn.set_relief(Gtk.ReliefStyle.NONE if is_korean else Gtk.ReliefStyle.NORMAL)
-        kr_btn.set_relief(Gtk.ReliefStyle.NORMAL if is_korean else Gtk.ReliefStyle.NONE)
+        hu_btn = Gtk.Button(label="HU")
+        en_btn.set_relief(Gtk.ReliefStyle.NONE if is_hungarian else Gtk.ReliefStyle.NORMAL)
+        hu_btn.set_relief(Gtk.ReliefStyle.NORMAL if is_hungarian else Gtk.ReliefStyle.NONE)
 
         def on_lang_en(_b):
             set_language(False, icon)
             rebuild()
 
-        def on_lang_kr(_b):
+        def on_lang_hu(_b):
             set_language(True, icon)
             rebuild()
 
         en_btn.connect("clicked", on_lang_en)
-        kr_btn.connect("clicked", on_lang_kr)
+        hu_btn.connect("clicked", on_lang_hu)
         lang_box.pack_start(en_btn, False, False, 0)
-        lang_box.pack_start(kr_btn, False, False, 0)
+        lang_box.pack_start(hu_btn, False, False, 0)
         header.pack_end(lang_box, False, False, 0)
 
         content_box.pack_start(header, False, False, 0)
@@ -1060,8 +1060,8 @@ def _show_control_panel_gtk(icon):
         dot_label.set_markup(f'<span foreground="{dot_color}" font="16">●</span>')
         status_box.pack_start(dot_label, False, False, 0)
         status_text = (
-            L("Setup Required", "설정 필요") if not has_env
-            else (L("Running", "실행 중") if running else L("Stopped", "중지됨"))
+            L("Setup Required", "Beállítás szükséges") if not has_env
+            else (L("Running", "Fut") if running else L("Stopped", "Leállítva"))
         )
         status_label = Gtk.Label()
         status_label.set_markup(f"<b><big>{status_text}</big></b>")
@@ -1078,12 +1078,12 @@ def _show_control_panel_gtk(icon):
             usage_vbox.set_margin_end(10)
 
             usage_title = Gtk.Label()
-            usage_title.set_markup(f"<b>{L('Codex Usage', 'Codex 사용량')}</b>")
+            usage_title.set_markup(f"<b>{L('Codex Usage', 'Codex használat')}</b>")
             usage_title.set_halign(Gtk.Align.START)
             usage_vbox.pack_start(usage_title, False, False, 0)
 
             if usage_data and usage_data.get("planType"):
-                plan_label = Gtk.Label(label=L("Plan", "플랜") + f": {usage_data['planType']}")
+                plan_label = Gtk.Label(label=L("Plan", "Csomag") + f": {usage_data['planType']}")
                 plan_label.set_halign(Gtk.Align.START)
                 plan_label.get_style_context().add_class("dim-label")
                 usage_vbox.pack_start(plan_label, False, False, 0)
@@ -1106,7 +1106,7 @@ def _show_control_panel_gtk(icon):
                 percent_left = usage_percent_left(window)
                 pct_lbl = Gtk.Label()
                 color = "red" if percent_left <= 10 else "orange" if percent_left <= 30 else "#4285f4"
-                pct_lbl.set_markup(f'<span foreground="{color}"><b>{percent_left}% {L("left", "남음")}</b></span>')
+                pct_lbl.set_markup(f'<span foreground="{color}"><b>{percent_left}% {L("left", "maradt")}</b></span>')
                 pct_lbl.set_halign(Gtk.Align.END)
                 line.pack_end(pct_lbl, False, False, 0)
                 usage_vbox.pack_start(line, False, False, 0)
@@ -1133,7 +1133,7 @@ def _show_control_panel_gtk(icon):
                 fetched_lbl.modify_font(Pango.FontDescription.from_string("8"))
                 bottom_row.pack_start(fetched_lbl, True, True, 0)
 
-            refresh_btn = Gtk.Button(label=L("Refresh", "새로고침"))
+            refresh_btn = Gtk.Button(label=L("Refresh", "Frissítés"))
             refresh_btn.set_relief(Gtk.ReliefStyle.NONE)
 
             def on_refresh(_b):
@@ -1146,12 +1146,12 @@ def _show_control_panel_gtk(icon):
             usage_event = Gtk.EventBox()
             usage_event.add(usage_vbox)
             usage_event.connect("button-press-event", lambda _w, _e: webbrowser.open(USAGE_URL))
-            usage_event.set_tooltip_text(L("Click to open usage page", "클릭하여 사용량 페이지 열기"))
+            usage_event.set_tooltip_text(L("Click to open usage page", "Kattints a használati oldal megnyitásához"))
             usage_frame.add(usage_event)
             content_box.pack_start(usage_frame, False, False, 4)
         else:
             if last_usage_error:
-                error_lbl = Gtk.Label(label=L("Usage info unavailable", "사용량 정보를 불러오지 못했습니다."))
+                error_lbl = Gtk.Label(label=L("Usage info unavailable", "A használati adatok nem érhetők el."))
                 error_lbl.set_halign(Gtk.Align.START)
                 error_lbl.get_style_context().add_class("dim-label")
                 content_box.pack_start(error_lbl, False, False, 0)
@@ -1163,7 +1163,7 @@ def _show_control_panel_gtk(icon):
                 detail_lbl.modify_font(Pango.FontDescription.from_string("8"))
                 content_box.pack_start(detail_lbl, False, False, 0)
 
-            fetch_btn = Gtk.Button(label=L("Load Usage Info", "사용량 정보 불러오기"))
+            fetch_btn = Gtk.Button(label=L("Load Usage Info", "Használati adatok betöltése"))
 
             def on_fetch(_b):
                 threading.Thread(target=lambda: (fetch_usage(force=True), GLib.idle_add(rebuild)), daemon=True).start()
@@ -1176,49 +1176,49 @@ def _show_control_panel_gtk(icon):
         if has_env:
             btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
             if running:
-                stop_btn = Gtk.Button(label=L("Stop Bot", "봇 중지"))
+                stop_btn = Gtk.Button(label=L("Stop Bot", "Bot leállítása"))
                 stop_btn.get_style_context().add_class("destructive-action")
                 stop_btn.connect("clicked", lambda _b: (stop_bot(icon, None), rebuild()))
                 btn_box.pack_start(stop_btn, True, True, 0)
 
-                restart_btn = Gtk.Button(label=L("Restart Bot", "봇 재시작"))
+                restart_btn = Gtk.Button(label=L("Restart Bot", "Bot újraindítása"))
                 restart_btn.connect("clicked", lambda _b: (restart_bot(icon, None), rebuild()))
                 btn_box.pack_start(restart_btn, True, True, 0)
             else:
-                start_btn = Gtk.Button(label=L("Start Bot", "봇 시작"))
+                start_btn = Gtk.Button(label=L("Start Bot", "Bot indítása"))
                 start_btn.get_style_context().add_class("suggested-action")
                 start_btn.connect("clicked", lambda _b: (start_bot(icon, None), rebuild()))
                 btn_box.pack_start(start_btn, True, True, 0)
             content_box.pack_start(btn_box, False, False, 4)
 
-        settings_btn = Gtk.Button(label=L("Settings...", "설정..."))
+        settings_btn = Gtk.Button(label=L("Settings...", "Beállítások..."))
         settings_btn.connect("clicked", lambda _b: edit_settings(icon, None))
         content_box.pack_start(settings_btn, False, False, 2)
 
         if has_env:
             util_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-            log_btn = Gtk.Button(label=L("View Log", "로그 보기"))
+            log_btn = Gtk.Button(label=L("View Log", "Log megnyitása"))
             log_btn.connect("clicked", lambda _b: open_log(icon, None))
             util_box.pack_start(log_btn, True, True, 0)
-            folder_btn = Gtk.Button(label=L("Open Folder", "폴더 열기"))
+            folder_btn = Gtk.Button(label=L("Open Folder", "Mappa megnyitása"))
             folder_btn.connect("clicked", lambda _b: open_folder(icon, None))
             util_box.pack_start(folder_btn, True, True, 0)
             content_box.pack_start(util_box, False, False, 2)
 
         content_box.pack_start(Gtk.Separator(), False, False, 4)
 
-        auto_check = Gtk.CheckButton(label=L("Launch on System Startup", "시스템 시작 시 자동 실행"))
+        auto_check = Gtk.CheckButton(label=L("Launch on System Startup", "Indítás a rendszerrel"))
         auto_check.set_active(is_autostart_enabled())
         auto_check.connect("toggled", lambda _b: toggle_autostart(icon, None))
         content_box.pack_start(auto_check, False, False, 2)
 
         if update_available:
-            upd_btn = Gtk.Button(label=L("Update available - review repo", "업데이트 가능 - 저장소 확인"))
+            upd_btn = Gtk.Button(label=L("Update available - review repo", "Frissítés elérhető - repo ellenőrzése"))
             upd_btn.get_style_context().add_class("suggested-action")
             upd_btn.connect("clicked", lambda _b: (win.destroy(), perform_update(icon, None)))
             content_box.pack_start(upd_btn, False, False, 2)
         else:
-            chk_btn = Gtk.Button(label=L("Check for Updates", "업데이트 확인"))
+            chk_btn = Gtk.Button(label=L("Check for Updates", "Frissítések keresése"))
 
             def on_check_update(_b):
                 check_for_updates()
@@ -1228,7 +1228,7 @@ def _show_control_panel_gtk(icon):
                         parent=win,
                         message_type=Gtk.MessageType.INFO,
                         buttons=Gtk.ButtonsType.OK,
-                        text=L("You are running the latest version.", "최신 버전을 사용 중입니다."),
+                        text=L("You are running the latest version.", "A legfrissebb verzió fut."),
                     )
                     dlg.run()
                     dlg.destroy()
@@ -1240,12 +1240,12 @@ def _show_control_panel_gtk(icon):
 
         info_label = Gtk.Label(label=L(
             "Closing this window does not stop the bot.\nThe bot runs in the background via systemd.",
-            "이 창을 닫아도 봇은 중지되지 않습니다.\n봇은 systemd를 통해 백그라운드에서 실행됩니다."))
+            "Az ablak bezárása nem állítja le a botot.\nA bot systemd-n keresztül fut a háttérben."))
         info_label.get_style_context().add_class("dim-label")
         info_label.modify_font(Pango.FontDescription.from_string("8"))
         content_box.pack_start(info_label, False, False, 0)
 
-        quit_btn = Gtk.Button(label=L("Quit", "종료"))
+        quit_btn = Gtk.Button(label=L("Quit", "Kilépés"))
         quit_btn.connect("clicked", lambda _b: (win.destroy(), quit_all(icon, None)))
         content_box.pack_start(quit_btn, False, False, 2)
 
@@ -1257,7 +1257,7 @@ def _show_control_panel_gtk(icon):
         content_box.pack_start(gh_link, False, False, 0)
         issue_link = Gtk.LinkButton.new_with_label(
             "https://github.com/Attys-syttA/Attys_DC_BOT/issues",
-            L("Bug Report / Feature Request (GitHub Issues)", "버그 신고 / 기능 요청 (GitHub Issues)"))
+            L("Bug Report / Feature Request (GitHub Issues)", "Hibajelentés / funkciókérés (GitHub Issues)"))
         content_box.pack_start(issue_link, False, False, 0)
 
         content_box.show_all()
@@ -1311,13 +1311,13 @@ def update_icon(icon):
     has_env = is_env_configured()
     if not has_env:
         color = (255, 165, 0, 255)  # orange
-        icon.title = L("Codex Bot: Setup Required", "Codex Bot: 설정 필요")
+        icon.title = L("Codex Bot: Setup Required", "Codex Bot: beállítás szükséges")
     elif running:
         color = (76, 175, 80, 255)  # green
-        icon.title = L("Codex Bot: Running", "Codex Bot: 실행 중")
+        icon.title = L("Codex Bot: Running", "Codex Bot: fut")
     else:
         color = (244, 67, 54, 255)  # red
-        icon.title = L("Codex Bot: Stopped", "Codex Bot: 중지됨")
+        icon.title = L("Codex Bot: Stopped", "Codex Bot: leállítva")
     icon.icon = create_icon(color)
 
 
@@ -1326,11 +1326,11 @@ def manual_check_update(icon, item):
     icon.menu = create_menu()
     if update_available:
         icon.notify(L("A new update is available. Click 'Update' in the menu.",
-                       "새 업데이트가 있습니다. 메뉴에서 '업데이트'를 클릭하세요."),
-                    L("Update Available", "업데이트 가능"))
+                       "Új frissítés érhető el. Kattints a menüben a Frissítés elemre."),
+                    L("Update Available", "Frissítés elérhető"))
     else:
-        icon.notify(L("No updates available.", "업데이트가 없습니다."),
-                    L("Up to Date", "최신 버전"))
+        icon.notify(L("No updates available.", "Nincs elérhető frissítés."),
+                    L("Up to Date", "Naprakész"))
 
 
 def create_menu():
@@ -1339,49 +1339,49 @@ def create_menu():
 
     # Default item: left-click opens control panel
     control_panel_item = pystray.MenuItem(
-        L("Control Panel", "컨트롤 패널"),
+        L("Control Panel", "Vezérlőpult"),
         show_control_panel,
         default=True,
         visible=False,
     )
 
-    version_item = pystray.MenuItem(L("Version: ", "버전: ") + current_version, None, enabled=False)
+    version_item = pystray.MenuItem(L("Version: ", "Verzió: ") + current_version, None, enabled=False)
     check_update_item = pystray.MenuItem(
-        L("Check for Updates", "업데이트 확인"),
+        L("Check for Updates", "Frissítések keresése"),
         manual_check_update, visible=not update_available
     )
     update_item = pystray.MenuItem(
-        L("Update available - review repo", "업데이트 가능 - 저장소 확인"),
+        L("Update available - review repo", "Frissítés elérhető - repo ellenőrzése"),
         perform_update, visible=update_available
     )
     autostart_item = pystray.MenuItem(
-        L("Launch on System Startup", "시스템 시작 시 자동 실행"),
+        L("Launch on System Startup", "Indítás a rendszerrel"),
         toggle_autostart, checked=lambda item: is_autostart_enabled()
     )
 
     # Language submenu
     lang_menu = pystray.Menu(
         pystray.MenuItem("English", lambda icon, item: set_language(False, icon),
-                         checked=lambda item: not is_korean),
-        pystray.MenuItem("한국어", lambda icon, item: set_language(True, icon),
-                         checked=lambda item: is_korean),
+                         checked=lambda item: not is_hungarian),
+        pystray.MenuItem("Magyar", lambda icon, item: set_language(True, icon),
+                         checked=lambda item: is_hungarian),
     )
     lang_item = pystray.MenuItem(
-        "Language: KR" if is_korean else "Language: EN",
+        "Language: HU" if is_hungarian else "Language: EN",
         lang_menu
     )
 
     # GitHub link
     github_item = pystray.MenuItem("GitHub: Attys-syttA/Attys_DC_BOT", open_github)
-    issues_item = pystray.MenuItem(L("Bug Report / Feature Request", "버그 신고 / 기능 요청"), open_github_issues)
+    issues_item = pystray.MenuItem(L("Bug Report / Feature Request", "Hibajelentés / funkciókérés"), open_github_issues)
 
     if not has_env:
         return pystray.Menu(
             control_panel_item,
-            pystray.MenuItem(L("Setup Required", "설정 필요"), None, enabled=False),
+            pystray.MenuItem(L("Setup Required", "Beállítás szükséges"), None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Control Panel", "컨트롤 패널"), show_control_panel),
-            pystray.MenuItem(L("Setup...", "설정..."), edit_settings),
+            pystray.MenuItem(L("Control Panel", "Vezérlőpult"), show_control_panel),
+            pystray.MenuItem(L("Setup...", "Beállítás..."), edit_settings),
             pystray.Menu.SEPARATOR,
             autostart_item,
             lang_item,
@@ -1392,21 +1392,21 @@ def create_menu():
             github_item,
             issues_item,
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Quit", "종료"), quit_all),
+            pystray.MenuItem(L("Quit", "Kilépés"), quit_all),
         )
 
     if running:
         return pystray.Menu(
             control_panel_item,
-            pystray.MenuItem(L("Running", "실행 중"), None, enabled=False),
+            pystray.MenuItem(L("Running", "Fut"), None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Control Panel", "컨트롤 패널"), show_control_panel),
-            pystray.MenuItem(L("Stop Bot", "봇 중지"), stop_bot),
-            pystray.MenuItem(L("Restart Bot", "봇 재시작"), restart_bot),
+            pystray.MenuItem(L("Control Panel", "Vezérlőpult"), show_control_panel),
+            pystray.MenuItem(L("Stop Bot", "Bot leállítása"), stop_bot),
+            pystray.MenuItem(L("Restart Bot", "Bot újraindítása"), restart_bot),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Settings...", "설정..."), edit_settings),
-            pystray.MenuItem(L("View Log", "로그 보기"), open_log),
-            pystray.MenuItem(L("Open Folder", "폴더 열기"), open_folder),
+            pystray.MenuItem(L("Settings...", "Beállítások..."), edit_settings),
+            pystray.MenuItem(L("View Log", "Log megnyitása"), open_log),
+            pystray.MenuItem(L("Open Folder", "Mappa megnyitása"), open_folder),
             pystray.Menu.SEPARATOR,
             autostart_item,
             lang_item,
@@ -1417,19 +1417,19 @@ def create_menu():
             github_item,
             issues_item,
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Quit", "종료"), quit_all),
+            pystray.MenuItem(L("Quit", "Kilépés"), quit_all),
         )
     else:
         return pystray.Menu(
             control_panel_item,
-            pystray.MenuItem(L("Stopped", "중지됨"), None, enabled=False),
+            pystray.MenuItem(L("Stopped", "Leállítva"), None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Control Panel", "컨트롤 패널"), show_control_panel),
-            pystray.MenuItem(L("Start Bot", "봇 시작"), start_bot),
+            pystray.MenuItem(L("Control Panel", "Vezérlőpult"), show_control_panel),
+            pystray.MenuItem(L("Start Bot", "Bot indítása"), start_bot),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Settings...", "설정..."), edit_settings),
-            pystray.MenuItem(L("View Log", "로그 보기"), open_log),
-            pystray.MenuItem(L("Open Folder", "폴더 열기"), open_folder),
+            pystray.MenuItem(L("Settings...", "Beállítások..."), edit_settings),
+            pystray.MenuItem(L("View Log", "Log megnyitása"), open_log),
+            pystray.MenuItem(L("Open Folder", "Mappa megnyitása"), open_folder),
             pystray.Menu.SEPARATOR,
             autostart_item,
             lang_item,
@@ -1440,7 +1440,7 @@ def create_menu():
             github_item,
             issues_item,
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem(L("Quit", "종료"), quit_all),
+            pystray.MenuItem(L("Quit", "Kilépés"), quit_all),
         )
 
 
@@ -1497,13 +1497,13 @@ def main():
     )
 
     if not is_env_configured():
-        # .env 없으면 패널을 자동으로 열어 설정에 바로 진입할 수 있게 한다.
+        # If .env is missing, open the panel so setup can start immediately.
         def auto_open_settings():
             time.sleep(1)
             show_control_panel(icon, None)
         threading.Thread(target=auto_open_settings, daemon=True).start()
     elif not is_running():
-        # .env 있고 봇이 안 돌면 자동 시작
+        # If .env exists and the bot is stopped, start it automatically.
         def auto_start():
             time.sleep(1)
             start_bot(icon, None)

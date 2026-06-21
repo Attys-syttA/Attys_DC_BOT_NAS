@@ -51,7 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var langPrefFile: String
     private var currentVersion: String = "unknown"
     private var updateAvailable: Bool = false
-    private var isKorean: Bool = false
+    private var isHungarian: Bool = false
     private var controlPanel: NSWindow?
     private var cachedReleaseNotes: String = ""
     private var cachedNewVersion: String = ""
@@ -72,19 +72,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Load saved language preference
         if let saved = try? String(contentsOfFile: langPrefFile, encoding: .utf8) {
-            isKorean = saved.trimmingCharacters(in: .whitespacesAndNewlines) == "kr"
+            isHungarian = saved.trimmingCharacters(in: .whitespacesAndNewlines) == "hu" || saved.trimmingCharacters(in: .whitespacesAndNewlines) == "kr"
         }
     }
 
     // MARK: - Localization
 
-    private func L(_ en: String, _ kr: String) -> String {
-        return isKorean ? kr : en
+    private func L(_ en: String, _ hu: String) -> String {
+        return isHungarian ? hu : en
     }
 
-    private func setLanguage(_ korean: Bool) {
-        isKorean = korean
-        try? (korean ? "kr" : "en").write(toFile: langPrefFile, atomically: true, encoding: .utf8)
+    private func setLanguage(_ hungarian: Bool) {
+        isHungarian = hungarian
+        try? (hungarian ? "hu" : "en").write(toFile: langPrefFile, atomically: true, encoding: .utf8)
         updateStatus()
         buildMenu()
         rebuildControlPanel()
@@ -135,7 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.fetchUsage()
         }
 
-        // 첫 실행 시 컨트롤 패널 표시 (.env 미설정이면 설정 다이얼로그도 함께)
+        // Elso inditaskor mutatja a control panelt (.env hianyaban a beallitasokat is).
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.showControlPanel()
             if !self.isEnvConfigured() {
@@ -242,9 +242,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let notes = commits.isEmpty
             ? L(
                 "An update is available, but no release notes or commit summary were found.",
-                "업데이트가 가능하지만 릴리즈 노트나 커밋 요약을 찾지 못했습니다."
+                "Frissítés elérhető, de nincs release note vagy commit összefoglaló."
             )
-            : L("Commits included in this update:\n", "이번 업데이트에 포함된 커밋:\n") + commits
+            : L("Commits included in this update:\n", "A frissítésben szereplő commitok:\n") + commits
         return (version: version, notes: notes)
     }
 
@@ -453,14 +453,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func usageLabel(for window: CodexRateLimitWindow) -> String {
         switch window.windowDurationMins {
         case 300:
-            return L("5-hour limit", "5시간 한도")
+            return L("5-hour limit", "5 órás limit")
         case 10080:
-            return L("7-day limit", "7일 한도")
+            return L("7-day limit", "7 napos limit")
         default:
             if let mins = window.windowDurationMins {
-                return L("\(mins)-minute limit", "\(mins)분 한도")
+                return L("\(mins)-minute limit", "\(mins) perces limit")
             }
-            return L("Usage limit", "사용량 한도")
+            return L("Usage limit", "Használati limit")
         }
     }
 
@@ -473,17 +473,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let date = Date(timeIntervalSince1970: TimeInterval(ts))
         let calendar = Calendar.current
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: isKorean ? "ko_KR" : "en_US_POSIX")
+        formatter.locale = Locale(identifier: isHungarian ? "hu_HU" : "en_US_POSIX")
 
         if calendar.isDateInToday(date) {
-            formatter.dateFormat = isKorean ? "a h:mm" : "h:mm a"
+            formatter.dateFormat = isHungarian ? "a h:mm" : "h:mm a"
             let time = formatter.string(from: date)
-            return L("Resets \(time)", "\(time) 초기화")
+            return L("Resets \(time)", "\(time) visszaáll")
         }
 
-        formatter.dateFormat = isKorean ? "M월 d일" : "MMM d"
+        formatter.dateFormat = isHungarian ? "MMM d." : "MMM d"
         let day = formatter.string(from: date)
-        return L("Resets on \(day)", "\(day) 초기화")
+        return L("Resets on \(day)", "\(day) visszaáll")
     }
 
     private func usageBarColor(percentLeft: Int) -> NSColor {
@@ -500,8 +500,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         checkForUpdates()
         if !updateAvailable {
             let alert = NSAlert()
-            alert.messageText = L("No Updates", "업데이트 없음")
-            alert.informativeText = L("You are running the latest version.", "최신 버전을 사용 중입니다.")
+            alert.messageText = L("No Updates", "Nincs frissítés")
+            alert.informativeText = L("You are running the latest version.", "A legfrissebb verzió fut.")
             alert.alertStyle = .informational
             alert.runModal()
         }
@@ -514,21 +514,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = L("Updating Attys DC BOT", "Attys DC BOT 업데이트 중")
+        window.title = L("Updating Attys DC BOT", "Attys DC BOT frissítése")
         window.center()
 
         let contentView = NSView(frame: window.contentView?.bounds ?? .zero)
         contentView.autoresizingMask = [.width, .height]
         window.contentView = contentView
 
-        let titleLabel = NSTextField(labelWithString: L("Update in progress...", "업데이트 진행 중..."))
+        let titleLabel = NSTextField(labelWithString: L("Update in progress...", "Frissítés folyamatban..."))
         titleLabel.font = NSFont.boldSystemFont(ofSize: 15)
         titleLabel.frame = NSRect(x: 20, y: 438, width: 680, height: 22)
         contentView.addSubview(titleLabel)
 
         let descLabel = NSTextField(labelWithString: L(
             "The log below shows each update step and command output.",
-            "아래 로그에 업데이트 단계와 명령 출력이 표시됩니다."
+            "Az alábbi log mutatja a frissítés lépéseit és a parancsok kimenetét."
         ))
         descLabel.textColor = .secondaryLabelColor
         descLabel.frame = NSRect(x: 20, y: 416, width: 680, height: 18)
@@ -600,10 +600,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func performUpdate() {
         let alert = NSAlert()
-        alert.messageText = L("Update actions are read-only", "업데이트 동작은 읽기 전용입니다")
+        alert.messageText = L("Update actions are read-only", "A frissítési művelet csak olvasási módú")
         alert.informativeText = L(
             "Attys DC BOT does not run automatic git/npm/restart updates from the macOS menu bar. Review the repository and use the documented safe update flow.",
-            "Attys DC BOT는 macOS 메뉴 막대에서 자동 git/npm/restart 업데이트를 실행하지 않습니다. 저장소를 확인하고 문서화된 안전 업데이트 절차를 사용하세요."
+            "Az Attys DC BOT macOS menüből nem futtat automatikus git/npm/restart frissítést. Ellenőrizd a repót, és használd a dokumentált biztonságos frissítési folyamatot."
         )
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
@@ -637,12 +637,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.main.async {
             if !hasEnv {
                 self.statusItem.button?.title = " \u{2699}\u{FE0F}"
-                self.statusItem.button?.toolTip = self.L("Codex Bot: Setup Required", "Codex Bot: 설정 필요")
+                self.statusItem.button?.toolTip = self.L("Codex Bot: Setup Required", "Codex Bot: beállítás szükséges")
             } else {
                 self.statusItem.button?.title = running ? " \u{1F7E2}" : " \u{1F534}"
                 self.statusItem.button?.toolTip = running
-                    ? self.L("Codex Bot: Running", "Codex Bot: 실행 중")
-                    : self.L("Codex Bot: Stopped", "Codex Bot: 중지됨")
+                    ? self.L("Codex Bot: Running", "Codex Bot: fut")
+                    : self.L("Codex Bot: Stopped", "Codex Bot: leállítva")
             }
         }
     }
@@ -653,55 +653,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let hasEnv = isEnvConfigured()
 
         if !hasEnv {
-            let noEnvItem = NSMenuItem(title: L("\u{2699}\u{FE0F} Setup Required", "\u{2699}\u{FE0F} 설정 필요"), action: nil, keyEquivalent: "")
+            let noEnvItem = NSMenuItem(title: L("\u{2699}\u{FE0F} Setup Required", "\u{2699}\u{FE0F} Beállítás szükséges"), action: nil, keyEquivalent: "")
             noEnvItem.isEnabled = false
             menu.addItem(noEnvItem)
             menu.addItem(NSMenuItem.separator())
 
-            let setupItem = NSMenuItem(title: L("Setup...", "설정..."), action: #selector(openSettings), keyEquivalent: "e")
+            let setupItem = NSMenuItem(title: L("Setup...", "Beállítások..."), action: #selector(openSettings), keyEquivalent: "e")
             setupItem.target = self
             menu.addItem(setupItem)
         } else {
             let statusText = running
-                ? L("\u{1F7E2} Running", "\u{1F7E2} 실행 중")
-                : L("\u{1F534} Stopped", "\u{1F534} 중지됨")
+                ? L("\u{1F7E2} Running", "\u{1F7E2} Fut")
+                : L("\u{1F534} Stopped", "\u{1F534} Leállítva")
             let statusItem = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
             statusItem.isEnabled = false
             menu.addItem(statusItem)
             menu.addItem(NSMenuItem.separator())
 
             // Control Panel
-            let panelItem = NSMenuItem(title: L("Open Control Panel", "컨트롤 패널 열기"), action: #selector(showControlPanel), keyEquivalent: "p")
+            let panelItem = NSMenuItem(title: L("Open Control Panel", "Control panel megnyitása"), action: #selector(showControlPanel), keyEquivalent: "p")
             panelItem.target = self
             menu.addItem(panelItem)
 
             menu.addItem(NSMenuItem.separator())
 
             if running {
-                let stopItem = NSMenuItem(title: L("Stop Bot", "봇 중지"), action: #selector(stopBot), keyEquivalent: "s")
+                let stopItem = NSMenuItem(title: L("Stop Bot", "Bot leállítása"), action: #selector(stopBot), keyEquivalent: "s")
                 stopItem.target = self
                 menu.addItem(stopItem)
 
-                let restartItem = NSMenuItem(title: L("Restart Bot", "봇 재시작"), action: #selector(restartBot), keyEquivalent: "r")
+                let restartItem = NSMenuItem(title: L("Restart Bot", "Bot újraindítása"), action: #selector(restartBot), keyEquivalent: "r")
                 restartItem.target = self
                 menu.addItem(restartItem)
             } else {
-                let startItem = NSMenuItem(title: L("Start Bot", "봇 시작"), action: #selector(startBot), keyEquivalent: "s")
+                let startItem = NSMenuItem(title: L("Start Bot", "Bot indítása"), action: #selector(startBot), keyEquivalent: "s")
                 startItem.target = self
                 menu.addItem(startItem)
             }
 
             menu.addItem(NSMenuItem.separator())
 
-            let settingsItem = NSMenuItem(title: L("Settings...", "설정..."), action: #selector(openSettings), keyEquivalent: "e")
+            let settingsItem = NSMenuItem(title: L("Settings...", "Beállítások..."), action: #selector(openSettings), keyEquivalent: "e")
             settingsItem.target = self
             menu.addItem(settingsItem)
 
-            let logItem = NSMenuItem(title: L("View Log", "로그 보기"), action: #selector(openLog), keyEquivalent: "l")
+            let logItem = NSMenuItem(title: L("View Log", "Log megtekintése"), action: #selector(openLog), keyEquivalent: "l")
             logItem.target = self
             menu.addItem(logItem)
 
-            let folderItem = NSMenuItem(title: L("Open Folder", "폴더 열기"), action: #selector(openFolder), keyEquivalent: "f")
+            let folderItem = NSMenuItem(title: L("Open Folder", "Mappa megnyitása"), action: #selector(openFolder), keyEquivalent: "f")
             folderItem.target = self
             menu.addItem(folderItem)
         }
@@ -709,43 +709,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
 
         // Auto-start toggle
-        let autoStartItem = NSMenuItem(title: L("Launch on System Startup", "시스템 시작 시 자동 실행"), action: #selector(toggleAutoStart), keyEquivalent: "")
+        let autoStartItem = NSMenuItem(title: L("Launch on System Startup", "Indítás rendszerindításkor"), action: #selector(toggleAutoStart), keyEquivalent: "")
         autoStartItem.target = self
         autoStartItem.state = isAutoStartEnabled() ? .on : .off
         menu.addItem(autoStartItem)
 
         // Language toggle submenu
-        let langItem = NSMenuItem(title: isKorean ? "Language: KR" : "Language: EN", action: nil, keyEquivalent: "")
+        let langItem = NSMenuItem(title: isHungarian ? "Language: HU" : "Language: EN", action: nil, keyEquivalent: "")
         let langMenu = NSMenu()
         let enItem = NSMenuItem(title: "English", action: #selector(switchToEN), keyEquivalent: "")
         enItem.target = self
-        enItem.state = !isKorean ? .on : .off
+        enItem.state = !isHungarian ? .on : .off
         langMenu.addItem(enItem)
-        let krItem = NSMenuItem(title: "한국어", action: #selector(switchToKR), keyEquivalent: "")
-        krItem.target = self
-        krItem.state = isKorean ? .on : .off
-        langMenu.addItem(krItem)
+        let huItem = NSMenuItem(title: "Magyar", action: #selector(switchToHU), keyEquivalent: "")
+        huItem.target = self
+        huItem.state = isHungarian ? .on : .off
+        langMenu.addItem(huItem)
         langItem.submenu = langMenu
         menu.addItem(langItem)
 
         // Version & update
-        let versionItem = NSMenuItem(title: L("Version: ", "버전: ") + currentVersion, action: nil, keyEquivalent: "")
+        let versionItem = NSMenuItem(title: L("Version: ", "Verzió: ") + currentVersion, action: nil, keyEquivalent: "")
         versionItem.isEnabled = false
         menu.addItem(versionItem)
 
         if updateAvailable {
-            let updateItem = NSMenuItem(title: L("\u{2B06}\u{FE0F} Update Available", "\u{2B06}\u{FE0F} 업데이트 가능"), action: #selector(performUpdate), keyEquivalent: "u")
+            let updateItem = NSMenuItem(title: L("\u{2B06}\u{FE0F} Update Available", "\u{2B06}\u{FE0F} Frissítés elérhető"), action: #selector(performUpdate), keyEquivalent: "u")
             updateItem.target = self
             menu.addItem(updateItem)
         } else {
-            let checkItem = NSMenuItem(title: L("Check for Updates", "업데이트 확인"), action: #selector(checkUpdateClicked), keyEquivalent: "")
+            let checkItem = NSMenuItem(title: L("Check for Updates", "Frissítések keresése"), action: #selector(checkUpdateClicked), keyEquivalent: "")
             checkItem.target = self
             menu.addItem(checkItem)
         }
 
         menu.addItem(NSMenuItem.separator())
 
-        let quitItem = NSMenuItem(title: L("Quit", "종료"), action: #selector(quitAll), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: L("Quit", "Kilépés"), action: #selector(quitAll), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -768,7 +768,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func switchToEN() { setLanguage(false) }
-    @objc private func switchToKR() { setLanguage(true) }
+    @objc private func switchToHU() { setLanguage(true) }
 
     // MARK: - Control Panel Window
 
@@ -847,8 +847,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         verSmallLabel.textColor = .secondaryLabelColor
         headerContainer.addSubview(verSmallLabel)
 
-        // Language toggle (EN | KR) at top-right
-        let enBtn = createLangButton(title: "EN", selected: !isKorean)
+        // Language toggle (EN | HU) at top-right
+        let enBtn = createLangButton(title: "EN", selected: !isHungarian)
         enBtn.frame = NSRect(x: contentWidth - 70, y: 18, width: 32, height: 22)
         enBtn.target = self
         enBtn.action = #selector(switchToEN)
@@ -860,11 +860,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         divider.textColor = .tertiaryLabelColor
         headerContainer.addSubview(divider)
 
-        let krBtn = createLangButton(title: "KR", selected: isKorean)
-        krBtn.frame = NSRect(x: contentWidth - 28, y: 18, width: 32, height: 22)
-        krBtn.target = self
-        krBtn.action = #selector(switchToKR)
-        headerContainer.addSubview(krBtn)
+        let huBtn = createLangButton(title: "HU", selected: isHungarian)
+        huBtn.frame = NSRect(x: contentWidth - 28, y: 18, width: 32, height: 22)
+        huBtn.target = self
+        huBtn.action = #selector(switchToHU)
+        headerContainer.addSubview(huBtn)
 
         elements.append((headerContainer, 52))
 
@@ -879,8 +879,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let statusColor: NSColor = !hasEnv ? .orange : (running ? .systemGreen : .systemRed)
         let statusText = !hasEnv
-            ? L("Setup Required", "설정 필요")
-            : (running ? L("Running", "실행 중") : L("Stopped", "중지됨"))
+            ? L("Setup Required", "Beállítás szükséges")
+            : (running ? L("Running", "Fut") : L("Stopped", "Leállítva"))
 
         let dot = StatusDot(color: statusColor)
         dot.frame = NSRect(x: 16, y: 15, width: 20, height: 20)
@@ -955,7 +955,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 nameLabel.textColor = .secondaryLabelColor
                 usageContainer.addSubview(nameLabel)
 
-                let pctLabel = NSTextField(labelWithString: L("\(row.percentLeft)% left", "\(row.percentLeft)% 남음"))
+                let pctLabel = NSTextField(labelWithString: L("\(row.percentLeft)% left", "\(row.percentLeft)% maradt"))
                 pctLabel.frame = NSRect(x: contentWidth - 150, y: yOffset + 22, width: 136, height: 16)
                 pctLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .semibold)
                 pctLabel.textColor = usageBarColor(percentLeft: row.percentLeft)
@@ -989,11 +989,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let ago = Int(Date().timeIntervalSince(fetched))
                 let fetchedText: String
                 if ago < 60 {
-                    fetchedText = L("Updated just now", "방금 갱신됨")
+                    fetchedText = L("Updated just now", "Most frissült")
                 } else if ago < 3600 {
-                    fetchedText = L("Updated \(ago / 60)m ago", "\(ago / 60)분 전 갱신")
+                    fetchedText = L("Updated \(ago / 60)m ago", "\(ago / 60) perce frissült")
                 } else {
-                    fetchedText = L("Updated \(ago / 3600)h ago", "\(ago / 3600)시간 전 갱신")
+                    fetchedText = L("Updated \(ago / 3600)h ago", "\(ago / 3600) órája frissült")
                 }
 
                 let fetchedLabel = NSTextField(labelWithString: fetchedText)
@@ -1017,7 +1017,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             elements.append((usageContainer, totalUsageHeight))
         } else {
             let fetchBtn = createStyledButton(
-                title: L("Load Usage Info", "사용량 정보 불러오기"), width: contentWidth,
+                title: L("Load Usage Info", "Usage információ betöltése"), width: contentWidth,
                 bgColor: NSColor(white: 0.5, alpha: 0.08), fgColor: .secondaryLabelColor
             )
             fetchBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 30)
@@ -1031,7 +1031,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let controlContainer = NSView(frame: NSRect(x: 0, y: 0, width: contentWidth, height: 40))
             if running {
                 let stopBtn = createStyledButton(
-                    title: L("Stop Bot", "봇 중지"), width: halfWidth,
+                    title: L("Stop Bot", "Bot leállítása"), width: halfWidth,
                     bgColor: NSColor.systemRed.withAlphaComponent(0.12), fgColor: .systemRed
                 )
                 stopBtn.frame = NSRect(x: 0, y: 0, width: halfWidth, height: 36)
@@ -1040,7 +1040,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 controlContainer.addSubview(stopBtn)
 
                 let restartBtn = createStyledButton(
-                    title: L("Restart Bot", "봇 재시작"), width: halfWidth,
+                    title: L("Restart Bot", "Bot újraindítása"), width: halfWidth,
                     bgColor: NSColor.systemOrange.withAlphaComponent(0.12), fgColor: .systemOrange
                 )
                 restartBtn.frame = NSRect(x: halfWidth + 10, y: 0, width: halfWidth, height: 36)
@@ -1049,7 +1049,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 controlContainer.addSubview(restartBtn)
             } else {
                 let startBtn = createStyledButton(
-                    title: L("Start Bot", "봇 시작"), width: contentWidth,
+                    title: L("Start Bot", "Bot indítása"), width: contentWidth,
                     bgColor: NSColor.systemGreen.withAlphaComponent(0.15), fgColor: .systemGreen
                 )
                 startBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 36)
@@ -1062,7 +1062,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Settings button
         let settingsBtn = createStyledButton(
-            title: L("Settings...", "설정..."), width: contentWidth,
+            title: L("Settings...", "Beállítások..."), width: contentWidth,
             bgColor: NSColor.systemBlue.withAlphaComponent(0.12), fgColor: .systemBlue
         )
         settingsBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 36)
@@ -1074,7 +1074,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Log & Folder buttons
             let utilContainer = NSView(frame: NSRect(x: 0, y: 0, width: contentWidth, height: 40))
             let logBtn = createStyledButton(
-                title: L("View Log", "로그 보기"), width: halfWidth,
+                title: L("View Log", "Log megtekintése"), width: halfWidth,
                 bgColor: NSColor(white: 0.5, alpha: 0.1), fgColor: .labelColor
             )
             logBtn.frame = NSRect(x: 0, y: 0, width: halfWidth, height: 36)
@@ -1083,7 +1083,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             utilContainer.addSubview(logBtn)
 
             let folderBtn = createStyledButton(
-                title: L("Open Folder", "폴더 열기"), width: halfWidth,
+                title: L("Open Folder", "Mappa megnyitása"), width: halfWidth,
                 bgColor: NSColor(white: 0.5, alpha: 0.1), fgColor: .labelColor
             )
             folderBtn.frame = NSRect(x: halfWidth + 10, y: 0, width: halfWidth, height: 36)
@@ -1098,7 +1098,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         elements.append((createSeparator(width: contentWidth), 12))
 
         // Auto-start checkbox
-        let autoStartBtn = NSButton(checkboxWithTitle: L("Launch on System Startup", "시스템 시작 시 자동 실행"), target: self, action: #selector(toggleAutoStart))
+        let autoStartBtn = NSButton(checkboxWithTitle: L("Launch on System Startup", "Indítás rendszerindításkor"), target: self, action: #selector(toggleAutoStart))
         autoStartBtn.state = isAutoStartEnabled() ? .on : .off
         autoStartBtn.font = NSFont.systemFont(ofSize: 12)
         elements.append((autoStartBtn, 26))
@@ -1106,7 +1106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Update button
         if updateAvailable {
             let updateBtn = createStyledButton(
-                title: L("Update available - review repo", "업데이트 가능 - 클릭하여 업데이트"), width: contentWidth,
+                title: L("Update available - review repo", "Frissítés elérhető - repo ellenőrzése"), width: contentWidth,
                 bgColor: .systemBlue, fgColor: .white
             )
             updateBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 36)
@@ -1115,7 +1115,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             elements.append((updateBtn, 44))
         } else {
             let checkUpdateBtn = createStyledButton(
-                title: L("Check for Updates", "업데이트 확인"), width: contentWidth,
+                title: L("Check for Updates", "Frissítések keresése"), width: contentWidth,
                 bgColor: NSColor(white: 0.5, alpha: 0.1), fgColor: .labelColor
             )
             checkUpdateBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 36)
@@ -1130,7 +1130,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Info message
         let infoLabel = NSTextField(wrappingLabelWithString: L(
             "Closing this window does not stop the bot.\nThe bot runs in the background. Check the menu bar icon for status.",
-            "이 창을 닫아도 봇은 중지되지 않습니다.\n봇은 백그라운드에서 실행됩니다. 메뉴바 아이콘에서 상태를 확인하세요."
+            "Az ablak bezárása nem állítja le a botot.\nA bot a háttérben fut tovább. Az állapotot a menubar ikonon ellenőrizheted."
         ))
         infoLabel.font = NSFont.systemFont(ofSize: 11)
         infoLabel.textColor = .tertiaryLabelColor
@@ -1139,7 +1139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Quit button
         let quitBtn = createStyledButton(
-            title: L("Quit Bot", "봇 종료"), width: contentWidth,
+            title: L("Quit Bot", "Bot kiléptetése"), width: contentWidth,
             bgColor: NSColor(white: 0.5, alpha: 0.08), fgColor: .secondaryLabelColor
         )
         quitBtn.frame = NSRect(x: 0, y: 0, width: contentWidth, height: 36)
@@ -1164,7 +1164,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Issues link
         let issueButton = NSButton(frame: NSRect(x: 0, y: 0, width: contentWidth, height: 20))
-        issueButton.title = L("Bug Report / Feature Request (GitHub Issues)", "버그 신고 / 기능 요청 (GitHub Issues)")
+        issueButton.title = L("Bug Report / Feature Request (GitHub Issues)", "Hibajelentés / feature kérés (GitHub Issues)")
         issueButton.bezelStyle = .inline
         issueButton.isBordered = false
         issueButton.font = NSFont.systemFont(ofSize: 11)
@@ -1177,7 +1177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Star request
         let starLabel = NSTextField(labelWithString: L(
             "If you find this useful, please give it a Star on GitHub!",
-            "유용하셨다면 GitHub에서 Star를 눌러주세요!"
+            "Ha hasznos volt, adj egy Star-t GitHubon!"
         ))
         starLabel.font = NSFont.systemFont(ofSize: 10)
         starLabel.textColor = .tertiaryLabelColor
@@ -1313,14 +1313,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ]
 
         let alert = NSAlert()
-        alert.messageText = L("Attys DC BOT Settings", "Attys DC BOT 설정")
+        alert.messageText = L("Attys DC BOT Settings", "Attys DC BOT beállítások")
         alert.informativeText = L(
             "Please fill in the required fields.",
-            "필수 항목을 입력해주세요."
+            "Töltsd ki a kötelező mezőket."
         )
         alert.alertStyle = .informational
-        alert.addButton(withTitle: L("Save", "저장"))
-        alert.addButton(withTitle: L("Cancel", "취소"))
+        alert.addButton(withTitle: L("Save", "Mentés"))
+        alert.addButton(withTitle: L("Cancel", "Mégse"))
 
         let width: CGFloat = 400
         let fieldHeight: CGFloat = 24
@@ -1328,34 +1328,34 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let spacing: CGFloat = 8
         let browseButtonWidth: CGFloat = 80
         let fields: [(label: String, key: String, placeholder: String, defaultValue: String)] = [
-            (L("Discord Bot Token:", "Discord 봇 토큰:"), "DISCORD_BOT_TOKEN",
-             L("Paste your bot token here", "봇 토큰을 여기에 붙여넣으세요"), ""),
+            (L("Discord Bot Token:", "Discord bot token:"), "DISCORD_BOT_TOKEN",
+             L("Paste your bot token here", "Ide illeszd be a bot tokent"), ""),
             (L("Discord Application ID:", "Discord Application ID:"), "DISCORD_APPLICATION_ID",
              L("Application/client ID", "Application/client ID"), ""),
-            (L("Discord Guild ID (Server ID):", "Discord Guild ID (서버 ID):"), "DISCORD_GUILD_ID",
-             L("Right-click server > Copy Server ID", "서버 우클릭 > 서버 ID 복사"), ""),
-            (L("Notification Channel ID:", "알림 채널 ID:"), "DISCORD_NOTIFICATION_CHANNEL_ID",
-             L("Channel for startup/completion notices", "시작/완료 알림 채널"), ""),
-            (L("Allowed User IDs (comma-separated):", "허용된 사용자 ID (쉼표로 구분):"), "ALLOWED_USER_IDS",
-             L("e.g. 123456789,987654321", "예: 123456789,987654321"), ""),
-            (L("Allowed Role IDs (comma-separated):", "허용된 역할 ID (쉼표로 구분):"), "ALLOWED_ROLE_IDS",
-             L("Optional role IDs", "선택적 역할 ID"), ""),
-            (L("Base Project Directory:", "기본 프로젝트 디렉토리:"), "BASE_PROJECT_DIR",
-             L("e.g. /Users/you/projects", "예: /Users/you/projects"), ""),
-            (L("SQLite Database Path:", "SQLite 데이터베이스 경로:"), "DISCORD_DATABASE_PATH",
+            (L("Discord Guild ID (Server ID):", "Discord Guild ID (szerver ID):"), "DISCORD_GUILD_ID",
+             L("Right-click server > Copy Server ID", "Jobb klikk a szerveren > Server ID másolása"), ""),
+            (L("Notification Channel ID:", "Értesítési csatorna ID:"), "DISCORD_NOTIFICATION_CHANNEL_ID",
+             L("Channel for startup/completion notices", "Indítási/befejezési értesítések csatornája"), ""),
+            (L("Allowed User IDs (comma-separated):", "Engedélyezett user ID-k (vesszővel elválasztva):"), "ALLOWED_USER_IDS",
+             L("e.g. 123456789,987654321", "pl. 123456789,987654321"), ""),
+            (L("Allowed Role IDs (comma-separated):", "Engedélyezett role ID-k (vesszővel elválasztva):"), "ALLOWED_ROLE_IDS",
+             L("Optional role IDs", "Opcionális role ID-k"), ""),
+            (L("Base Project Directory:", "Alap projekt könyvtár:"), "BASE_PROJECT_DIR",
+             L("e.g. /Users/you/projects", "pl. /Users/you/projects"), ""),
+            (L("SQLite Database Path:", "SQLite adatbázis útvonal:"), "DISCORD_DATABASE_PATH",
              ".discord-bot-state/bridge.sqlite", ".discord-bot-state/bridge.sqlite"),
-            (L("Session Store Path:", "세션 저장소 경로:"), "DISCORD_SESSION_STORE_PATH",
+            (L("Session Store Path:", "Session store útvonal:"), "DISCORD_SESSION_STORE_PATH",
              ".discord-bot-state/sessions.json", ".discord-bot-state/sessions.json"),
-            (L("Rate Limit Per Minute:", "분당 요청 제한:"), "RATE_LIMIT_PER_MINUTE", "10", "10"),
-            (L("Queue Max Items:", "큐 최대 항목 수:"), "DISCORD_QUEUE_MAX_ITEMS", "10", "10"),
-            (L("Message Prompts (true/false):", "메시지 프롬프트 (true/false):"), "DISCORD_ENABLE_MESSAGE_PROMPTS", "true", "true"),
-            (L("Attachment Messages (true/false):", "첨부 메시지 (true/false):"), "DISCORD_ENABLE_ATTACHMENT_MESSAGES", "false", "false"),
-            (L("Ephemeral Responses (true/false):", "임시 응답 (true/false):"), "DISCORD_EPHEMERAL_RESPONSES", "true", "true"),
-            (L("Register Slash Commands (true/false):", "Slash 명령 등록 (true/false):"), "DISCORD_REGISTER_COMMANDS", "false", "false"),
-            (L("Enable Run Tests (true/false):", "테스트 실행 활성화 (true/false):"), "DISCORD_ENABLE_RUN_TESTS", "false", "false"),
-            (L("Enable Auto Approve (true/false):", "자동 승인 활성화 (true/false):"), "DISCORD_ENABLE_AUTO_APPROVE", "false", "false"),
-            (L("Enable Session Delete (true/false):", "세션 삭제 활성화 (true/false):"), "DISCORD_ENABLE_SESSION_DELETE", "false", "false"),
-            (L("Enable Bot Lifecycle Command (true/false):", "봇 수명주기 명령 활성화 (true/false):"), "DISCORD_ENABLE_BOT_LIFECYCLE", "false", "false"),
+            (L("Rate Limit Per Minute:", "Percenkénti kéréslimit:"), "RATE_LIMIT_PER_MINUTE", "10", "10"),
+            (L("Queue Max Items:", "Queue maximális elemszám:"), "DISCORD_QUEUE_MAX_ITEMS", "10", "10"),
+            (L("Message Prompts (true/false):", "Üzenet promptok (true/false):"), "DISCORD_ENABLE_MESSAGE_PROMPTS", "true", "true"),
+            (L("Attachment Messages (true/false):", "Csatolmány üzenetek (true/false):"), "DISCORD_ENABLE_ATTACHMENT_MESSAGES", "false", "false"),
+            (L("Ephemeral Responses (true/false):", "Ephemeral válaszok (true/false):"), "DISCORD_EPHEMERAL_RESPONSES", "true", "true"),
+            (L("Register Slash Commands (true/false):", "Slash parancsok regisztrálása (true/false):"), "DISCORD_REGISTER_COMMANDS", "false", "false"),
+            (L("Enable Run Tests (true/false):", "Tesztfuttatás engedélyezése (true/false):"), "DISCORD_ENABLE_RUN_TESTS", "false", "false"),
+            (L("Enable Auto Approve (true/false):", "Auto-jóváhagyás engedélyezése (true/false):"), "DISCORD_ENABLE_AUTO_APPROVE", "false", "false"),
+            (L("Enable Session Delete (true/false):", "Session törlés engedélyezése (true/false):"), "DISCORD_ENABLE_SESSION_DELETE", "false", "false"),
+            (L("Enable Bot Lifecycle Command (true/false):", "Bot lifecycle parancs engedélyezése (true/false):"), "DISCORD_ENABLE_BOT_LIFECYCLE", "false", "false"),
         ]
 
         // Setup guide link + fields height + Show Cost radio row
@@ -1371,7 +1371,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Clickable setup guide link
         y -= linkHeight
         let linkButton = NSButton(frame: NSRect(x: 0, y: y, width: width, height: linkHeight))
-        linkButton.title = L("Open Setup Guide", "설정 가이드 열기")
+        linkButton.title = L("Open Setup Guide", "Setup útmutató megnyitása")
         linkButton.bezelStyle = .inline
         linkButton.isBordered = false
         linkButton.font = NSFont.systemFont(ofSize: 12)
@@ -1382,7 +1382,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         y -= linkHeight
         let issueLink = NSButton(frame: NSRect(x: 0, y: y, width: width, height: linkHeight))
-        issueLink.title = L("Bug Report / Feature Request (GitHub Issues)", "버그 신고 / 기능 요청 (GitHub Issues)")
+        issueLink.title = L("Bug Report / Feature Request (GitHub Issues)", "Hibajelentés / feature kérés (GitHub Issues)")
         issueLink.bezelStyle = .inline
         issueLink.isBordered = false
         issueLink.font = NSFont.systemFont(ofSize: 12)
@@ -1416,7 +1416,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 textFields[field.key] = input
 
                 let browseBtn = NSButton(frame: NSRect(x: width - browseButtonWidth, y: y, width: browseButtonWidth, height: fieldHeight))
-                browseBtn.title = L("Browse...", "찾아보기...")
+                browseBtn.title = L("Browse...", "Tallózás...")
                 browseBtn.bezelStyle = .rounded
                 browseBtn.target = self
                 browseBtn.action = #selector(browseFolderClicked(_:))
@@ -1427,7 +1427,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 input.placeholderString = field.placeholder
 
                 if field.key == "DISCORD_BOT_TOKEN" && currentValue.count > 10 {
-                    input.placeholderString = "****" + String(currentValue.suffix(6)) + L(" (enter full token to change)", " (변경하려면 전체 토큰 입력)")
+                    input.placeholderString = "****" + String(currentValue.suffix(6)) + L(" (enter full token to change)", " (módosításhoz add meg a teljes tokent)")
                     input.stringValue = ""
                 } else if !currentValue.isEmpty {
                     input.stringValue = currentValue
@@ -1444,20 +1444,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Show Cost radio buttons
         y -= labelHeight
-        let showCostLabel = NSTextField(labelWithString: L("Show Cost:", "비용 표시:"))
+        let showCostLabel = NSTextField(labelWithString: L("Show Cost:", "Költség mutatása:"))
         showCostLabel.frame = NSRect(x: 0, y: y, width: width, height: labelHeight)
         showCostLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         accessory.addSubview(showCostLabel)
 
         y -= fieldHeight
-        let showCostTrue = NSButton(checkboxWithTitle: L("true (show cost)", "true (비용 표시)"), target: self, action: #selector(radioToggled(_:)))
+        let showCostTrue = NSButton(checkboxWithTitle: L("true (show cost)", "true (költség mutatása)"), target: self, action: #selector(radioToggled(_:)))
         showCostTrue.setButtonType(.radio)
         showCostTrue.frame = NSRect(x: 0, y: y, width: width / 2, height: fieldHeight)
         showCostTrue.font = NSFont.systemFont(ofSize: 12)
         showCostTrue.tag = 1001
         accessory.addSubview(showCostTrue)
 
-        let showCostFalse = NSButton(checkboxWithTitle: L("false (Max plan)", "false (Max 요금제)"), target: self, action: #selector(radioToggled(_:)))
+        let showCostFalse = NSButton(checkboxWithTitle: L("false (Max plan)", "false (Max csomag)"), target: self, action: #selector(radioToggled(_:)))
         showCostFalse.setButtonType(.radio)
         showCostFalse.frame = NSRect(x: width / 2, y: y, width: width / 2, height: fieldHeight)
         showCostFalse.font = NSFont.systemFont(ofSize: 12)
@@ -1478,7 +1478,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         y -= noteHeight
         let noteLabel = NSTextField(labelWithString: L(
             "* Max plan users should set Show Cost to false",
-            "* Max 요금제 사용자는 Show Cost를 false로 설정하세요"
+            "* Max csomagnál állítsd a Show Cost értékét false-ra"
         ))
         noteLabel.frame = NSRect(x: 0, y: y, width: width, height: noteHeight)
         noteLabel.font = NSFont.systemFont(ofSize: 10)
@@ -1502,15 +1502,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             newEnv["SHOW_COST"] = showCostTrue.state == .on ? "true" : "false"
 
-            // 필수 체크
+            // Kotelezo mezok ellenorzese.
             if (newEnv["DISCORD_BOT_TOKEN"] ?? "").isEmpty ||
                (newEnv["DISCORD_GUILD_ID"] ?? "").isEmpty ||
                (newEnv["ALLOWED_USER_IDS"] ?? "").isEmpty {
                 let errAlert = NSAlert()
-                errAlert.messageText = L("Required Fields Missing", "필수 항목 누락")
+                errAlert.messageText = L("Required Fields Missing", "Hiányzó kötelező mezők")
                 errAlert.informativeText = L(
                     "Bot Token, Guild ID (Server ID), and User IDs are required.",
-                    "Bot Token, Guild ID (서버 ID), User IDs는 필수 항목입니다."
+                    "A Bot Token, Guild ID (szerver ID) és User ID mezők kötelezők."
                 )
                 errAlert.alertStyle = .warning
                 errAlert.runModal()
@@ -1562,8 +1562,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = L("Select", "선택")
-        panel.message = L("Select Base Project Directory", "기본 프로젝트 디렉토리 선택")
+        panel.prompt = L("Select", "Kiválasztás")
+        panel.message = L("Select Base Project Directory", "Alap projekt könyvtár kiválasztása")
         if panel.runModal() == .OK, let url = panel.url {
             if let field = objc_getAssociatedObject(sender, &associatedFieldKey) as? NSTextField {
                 field.stringValue = url.path

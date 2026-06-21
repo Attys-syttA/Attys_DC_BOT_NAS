@@ -18,7 +18,7 @@ Finish the cross-platform source-parity closeout without weakening the local-fir
 - Implemented and pushed through `8cccd82`: Linux/macOS launchers, Linux Python tray/control panel, macOS Swift menu bar source, opt-in normal text+attachment message flow, canonical usage cache helpers, public-safe cross-platform docs/assets, cross-platform `safe-update:status/apply`, and `docs/SOURCE_PARITY_MATRIX.md`.
 - Local validation passed: `npm run check`, `git diff --check`, shell syntax checks for `install.sh`, `linux-start.sh`, `mac-start.sh`, Python compile for Linux tray/panel, `npm run safe-update:status`, `npm run secret:scan`, and Windows launcher smoke.
 - Windows launcher smoke result: bot status/start/status/stop/status completed and final state was `Stopped`. Non-blocking note: tray rebuild reported `CS0016` because `tray/CodexBotTray.exe` was locked by another process, but the bot lifecycle smoke completed.
-- Known blocker before moving the active plan to `done`: real platform acceptance is still needed for Linux desktop tray/control panel, macOS `swiftc` menu bar build/runtime, and iPad/mobile Discord file handoff.
+- Known blocker before moving the active plan to `done`: real platform acceptance is still needed for Linux desktop tray, macOS `swiftc` menu bar build/runtime, and iPad/mobile Discord file handoff.
 - Practical next step: test Linux under WSL2/WSLg or a Linux VM; test macOS via a real Mac or macOS CI build for compile-only evidence; test iPad/mobile directly in Discord against the live bot/server.
 
 ## Audit Summary
@@ -106,6 +106,12 @@ Finish the cross-platform source-parity closeout without weakening the local-fir
 ## Open Work
 
 1. Consider a later explicit destructive recovery/update mode only if `git stash` or `git reset --hard` should be allowed with strong confirmation.
-2. Consider Linux/macOS launcher parity only if the project stops being Windows-first.
-3. Add scrubbed or synthetic screenshots only when they reveal more than the current SVG.
-4. Keep using `/mappings` and `/doctor` for future legacy mapping drift checks.
+2. Linux headless acceptance is now proven on Debian WSL2 with Linux-native Node.js 20, `npm ci`, `typecheck`, tests, build, and `check`; keep using `docs/LINUX_WSL_DEBIAN.md` and `scripts/linux-wsl-acceptance.sh` as the repeatable path.
+3. Debian has Codex CLI installed user-locally and `codex login status` passes.
+4. Live Debian WSL bot smoke is proven: Discord startup notification, `/doctor`, `/health`, `/dashboard`, `/usage`, `/events`, `/logs`, `/register`, and `/ask` all worked, including a successful Codex response.
+5. `/health` command surface count now uses the same expected Discord command surface as `/doctor`.
+6. Linux GUI control panel runtime smoke is proven under Debian WSL2/WSLg for render, status, usage, Stop, and Restart; tray icon smoke still needs WSLg tray support or a real Linux desktop session.
+7. Operator UI language is now English/Hungarian (`EN/HU`) on Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menu bar, and Discord operator outputs; legacy `.tray-lang=kr` loads as Hungarian for compatibility.
+8. macOS menu bar runtime smoke still needs a real/remote Mac or macOS CI for compile-only evidence.
+9. Add scrubbed or synthetic screenshots only when they reveal more than the current SVG.
+10. Keep using `/mappings` and `/doctor` for future legacy mapping drift checks.

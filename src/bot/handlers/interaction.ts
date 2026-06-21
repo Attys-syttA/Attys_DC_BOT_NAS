@@ -31,7 +31,7 @@ export async function handleButtonInteraction(
 ): Promise<void> {
   if (!isAllowedPrincipal(interaction.user.id, interactionRoleIds(interaction))) {
     await interaction.reply({
-      content: L("You are not authorized.", "권한이 없습니다."),
+      content: L("You are not authorized.", "Nincs jogosultság."),
       ephemeral: true,
     });
     return;
@@ -44,7 +44,7 @@ export async function handleButtonInteraction(
 
   if (!requestId) {
     await interaction.reply({
-      content: L("Invalid button interaction.", "잘못된 버튼 상호작용입니다."),
+      content: L("Invalid button interaction.", "Érvénytelen gomb interakció."),
       ephemeral: true,
     });
     return;
@@ -53,12 +53,12 @@ export async function handleButtonInteraction(
   if (action === "stop") {
     const stopped = await sessionManager.stopSession(requestId);
     await interaction.update({
-      content: L("⏹️ Task has been stopped.", "⏹️ 작업이 중지되었습니다."),
+      content: L("⏹️ Task has been stopped.", "⏹️ A feladat le lett állítva."),
       components: [],
     });
     if (!stopped) {
       await interaction.followUp({
-        content: L("No active session.", "활성 세션이 없습니다."),
+        content: L("No active session.", "Nincs aktív session."),
         ephemeral: true,
       });
     }
@@ -69,7 +69,7 @@ export async function handleButtonInteraction(
     const confirmed = sessionManager.confirmQueue(requestId);
     if (!confirmed) {
       await interaction.update({
-        content: L("⏳ Queue request has expired.", "⏳ 큐 요청이 만료되었습니다."),
+        content: L("⏳ Queue request has expired.", "⏳ A queue kérés lejárt."),
         components: [],
       });
       return;
@@ -77,7 +77,7 @@ export async function handleButtonInteraction(
     const queueSize = sessionManager.getQueueSize(requestId);
     const maxQueueItems = getConfig().DISCORD_QUEUE_MAX_ITEMS;
     await interaction.update({
-      content: L(`📨 Message added to queue (${queueSize}/${maxQueueItems}). It will be processed after the current task.`, `📨 메시지가 큐에 추가되었습니다 (${queueSize}/${maxQueueItems}). 이전 작업 완료 후 자동으로 처리됩니다.`),
+      content: L(`📨 Message added to queue (${queueSize}/${maxQueueItems}). It will be processed after the current task.`, `📨 Az üzenet bekerült a queue-ba (${queueSize}/${maxQueueItems}). Az aktuális feladat után automatikusan feldolgozom.`),
       components: [],
     });
     return;
@@ -86,7 +86,7 @@ export async function handleButtonInteraction(
   if (action === "queue-no") {
     sessionManager.cancelQueue(requestId);
     await interaction.update({
-      content: L("Cancelled.", "취소되었습니다."),
+      content: L("Cancelled.", "Mégse."),
       components: [],
     });
     return;
@@ -101,10 +101,10 @@ export async function handleButtonInteraction(
     await interaction.update({
       embeds: [
         {
-          title: L("Session Selected", "세션 선택됨"),
+          title: L("Session Selected", "Session kiválasztva"),
           description: L(
             `Session: \`${sessionId.slice(0, 8)}...\`\n\nNext message you send will resume this Codex thread.`,
-            `세션: \`${sessionId.slice(0, 8)}...\`\n\n다음 메시지부터 이 Codex 스레드가 재개됩니다.`
+            `Session: \`${sessionId.slice(0, 8)}...\`\n\nA következő üzenettől ez a Codex thread folytatódik.`
           ),
           color: 0x00ff00,
         },
@@ -116,7 +116,7 @@ export async function handleButtonInteraction(
 
   if (action === "session-cancel") {
     await interaction.update({
-      content: L("Cancelled.", "취소되었습니다."),
+      content: L("Cancelled.", "Mégse."),
       embeds: [],
       components: [],
     });
@@ -130,12 +130,12 @@ export async function handleButtonInteraction(
 
     const resolved = sessionManager.resolveQuestion(actualRequestId, selectedLabel);
     if (!resolved) {
-      await interaction.reply({ content: L("This question has expired.", "이 질문은 만료되었습니다."), ephemeral: true });
+      await interaction.reply({ content: L("This question has expired.", "Ez a kérdés lejárt."), ephemeral: true });
       return;
     }
 
     await interaction.update({
-      content: L(`✅ Selected: **${selectedLabel}**`, `✅ 선택됨: **${selectedLabel}**`),
+      content: L(`✅ Selected: **${selectedLabel}**`, `✅ Kiválasztva: **${selectedLabel}**`),
       embeds: [],
       components: [],
     });
@@ -145,7 +145,7 @@ export async function handleButtonInteraction(
   if (action === "ask-other") {
     sessionManager.enableCustomInput(requestId, interaction.channelId);
     await interaction.update({
-      content: L("✏️ Type your answer...", "✏️ 답변을 입력하세요..."),
+      content: L("✏️ Type your answer...", "✏️ Írd be a válaszod..."),
       embeds: [],
       components: [],
     });
@@ -157,8 +157,8 @@ export async function handleButtonInteraction(
     await interaction.update({
       embeds: [
         {
-          title: L("Queue Cleared", "큐 초기화됨"),
-          description: L(`Cleared ${cleared} queued message(s).`, `${cleared}개의 대기 중이던 메시지를 취소했습니다.`),
+          title: L("Queue Cleared", "Queue törölve"),
+          description: L(`Cleared ${cleared} queued message(s).`, `${cleared} függő üzenet törölve.`),
           color: 0xff6600,
         },
       ],
@@ -175,7 +175,7 @@ export async function handleButtonInteraction(
 
     if (!removed) {
       await interaction.update({
-        content: L("This item is no longer in the queue.", "이 항목은 이미 큐에 없습니다."),
+        content: L("This item is no longer in the queue.", "Ez az elem már nincs a queue-ban."),
         embeds: [],
         components: [],
       });
@@ -188,8 +188,8 @@ export async function handleButtonInteraction(
       await interaction.update({
         embeds: [
           {
-            title: L("Message Removed", "메시지 취소됨"),
-            description: L(`Removed: ${preview}\n\nQueue is now empty.`, `취소됨: ${preview}\n\n큐가 비었습니다.`),
+            title: L("Message Removed", "Üzenet törölve"),
+            description: L(`Removed: ${preview}\n\nQueue is now empty.`, `Törölve: ${preview}\n\nA queue üres.`),
             color: 0xff6600,
           },
         ],
@@ -214,7 +214,7 @@ export async function handleButtonInteraction(
     );
     const clearButton = new ButtonBuilder()
       .setCustomId(`queue-clear:${channelId}`)
-      .setLabel(L("Clear All", "모두 취소"))
+      .setLabel(L("Clear All", "Összes törlése"))
       .setStyle(ButtonStyle.Danger);
 
     const allButtons = [...itemButtons.slice(0, 19), clearButton];
@@ -226,8 +226,8 @@ export async function handleButtonInteraction(
     await interaction.update({
       embeds: [
         {
-          title: L(`📋 Message Queue (${queue.length})`, `📋 메시지 큐 (${queue.length}개)`),
-          description: `~~${preview}~~ ${L("removed", "취소됨")}\n\n${list}`,
+          title: L(`📋 Message Queue (${queue.length})`, `📋 Üzenet queue (${queue.length})`),
+          description: `~~${preview}~~ ${L("removed", "törölve")}\n\n${list}`,
           color: 0x5865f2,
         },
       ],
@@ -242,7 +242,7 @@ export async function handleButtonInteraction(
     if (!project) {
       const projects = getAllProjects(interaction.guildId!);
       await interaction.update({
-        content: L("This mapping is already removed.", "이 매핑은 이미 제거되었습니다."),
+        content: L("This mapping is already removed.", "Ez a mapping már el lett távolítva."),
         ...renderMappingsPayload(projects, interaction.channelId),
       });
       return;
@@ -253,7 +253,7 @@ export async function handleButtonInteraction(
     recordOperatorEvent({ kind: "lifecycle", status: "mapping-remove", channelId });
     const projects = getAllProjects(interaction.guildId!);
     await interaction.update({
-      content: L(`Removed mapping for <#${channelId}>.`, `<#${channelId}> 매핑을 제거했습니다.`),
+      content: L(`Removed mapping for <#${channelId}>.`, `<#${channelId}> mapping eltávolítva.`),
       ...renderMappingsPayload(projects, interaction.channelId),
     });
     return;
@@ -264,7 +264,7 @@ export async function handleButtonInteraction(
       await interaction.update({
         content: L(
           "`session-delete` is disabled. Set `DISCORD_ENABLE_SESSION_DELETE=true` in `.env` to enable it.",
-          "`session-delete`가 비활성화되어 있습니다.",
+          "A `session-delete` ki van kapcsolva.",
         ),
         embeds: [],
         components: [],
@@ -285,10 +285,10 @@ export async function handleButtonInteraction(
       await interaction.update({
         embeds: [
           {
-            title: L("Session Deleted", "세션 삭제됨"),
+            title: L("Session Deleted", "Session törölve"),
             description: L(
               `Session \`${requestId.slice(0, 8)}...\` has been deleted.\nYour next message will start a new conversation.`,
-              `세션 \`${requestId.slice(0, 8)}...\`이(가) 삭제되었습니다.\n다음 메시지부터 새로운 대화가 시작됩니다.`
+              `Session \`${requestId.slice(0, 8)}...\` törölve.\nA következő üzenettől új beszélgetés indul.`
             ),
             color: 0xff6b6b,
           },
@@ -297,7 +297,7 @@ export async function handleButtonInteraction(
       });
     } else {
       await interaction.update({
-        content: L("Failed to delete session.", "세션 삭제에 실패했습니다."),
+        content: L("Failed to delete session.", "A session törlése sikertelen."),
         embeds: [],
         components: [],
       });
@@ -319,7 +319,7 @@ export async function handleButtonInteraction(
   const resolved = sessionManager.resolveApproval(requestId, decision);
   if (!resolved) {
     await interaction.reply({
-      content: L("This approval request has expired.", "이 승인 요청은 만료되었습니다."),
+      content: L("This approval request has expired.", "Ez a jóváhagyási kérés lejárt."),
       ephemeral: true,
     });
     return;
@@ -327,11 +327,11 @@ export async function handleButtonInteraction(
 
   const autoApproveEnabled = getConfig().DISCORD_ENABLE_AUTO_APPROVE;
   const labels: Record<string, string> = {
-    approve: L("✅ Approved", "✅ 승인됨"),
-    deny: L("❌ Denied", "❌ 거부됨"),
+    approve: L("✅ Approved", "✅ Jóváhagyva"),
+    deny: L("❌ Denied", "❌ Elutasítva"),
     "approve-all": autoApproveEnabled
-      ? L("⚡ Auto-approve enabled for this channel", "⚡ 이 채널에서 자동 승인이 활성화되었습니다")
-      : L("✅ Approved for this request. Auto-approve is disabled in config.", "✅ 이 요청만 승인되었습니다."),
+      ? L("⚡ Auto-approve enabled for this channel", "⚡ Az auto-jóváhagyás bekapcsolva ebben a csatornában")
+      : L("✅ Approved for this request. Auto-approve is disabled in config.", "✅ Csak ez a kérés lett jóváhagyva."),
   };
 
   await interaction.update({
@@ -345,7 +345,7 @@ export async function handleSelectMenuInteraction(
 ): Promise<void> {
   if (!isAllowedPrincipal(interaction.user.id, interactionRoleIds(interaction))) {
     await interaction.reply({
-      content: L("You are not authorized.", "권한이 없습니다."),
+      content: L("You are not authorized.", "Nincs jogosultság."),
       ephemeral: true,
     });
     return;
@@ -362,12 +362,12 @@ export async function handleSelectMenuInteraction(
 
     const resolved = sessionManager.resolveQuestion(askRequestId, answer);
     if (!resolved) {
-      await interaction.reply({ content: L("This question has expired.", "이 질문은 만료되었습니다."), ephemeral: true });
+      await interaction.reply({ content: L("This question has expired.", "Ez a kérdés lejárt."), ephemeral: true });
       return;
     }
 
     await interaction.update({
-      content: L(`✅ Selected: **${answer}**`, `✅ 선택됨: **${answer}**`),
+      content: L(`✅ Selected: **${answer}**`, `✅ Kiválasztva: **${answer}**`),
       embeds: [],
       components: [],
     });
@@ -387,8 +387,8 @@ export async function handleSelectMenuInteraction(
     await interaction.update({
       embeds: [
         {
-          title: L("✨ New Session", "✨ 새 세션"),
-          description: L("New session is ready.\nA new conversation will start from your next message.", "새 세션이 준비되었습니다.\n다음 메시지부터 새로운 대화가 시작됩니다."),
+          title: L("✨ New Session", "✨ Új session"),
+          description: L("New session is ready.\nA new conversation will start from your next message.", "Az új session készen áll.\nA következő üzenettől új beszélgetés indul."),
           color: 0x00ff00,
         },
       ],
@@ -404,28 +404,28 @@ export async function handleSelectMenuInteraction(
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
       .setCustomId(`session-resume:${selectedSessionId}`)
-      .setLabel(L("Resume", "재개"))
+      .setLabel(L("Resume", "Folytatás"))
       .setStyle(ButtonStyle.Success)
       .setEmoji("▶️"),
     new ButtonBuilder()
       .setCustomId(`session-delete:${selectedSessionId}`)
-      .setLabel(L("Delete", "삭제"))
+      .setLabel(L("Delete", "Törlés"))
       .setStyle(ButtonStyle.Danger)
       .setEmoji("🗑️")
       .setDisabled(!deleteEnabled),
     new ButtonBuilder()
       .setCustomId(`session-cancel:${selectedSessionId}`)
-      .setLabel(L("Cancel", "취소"))
+      .setLabel(L("Cancel", "Mégse"))
       .setStyle(ButtonStyle.Secondary),
   );
 
   await interaction.editReply({
     embeds: [
       {
-        title: L("Codex Session", "Codex 세션"),
+        title: L("Codex Session", "Codex Session"),
         description: [
           `ID: \`${selectedSessionId.slice(0, 8)}...\``,
-          lastMessage ? `${L("Last response", "마지막 응답")}:\n> ${lastMessage.slice(0, 800)}` : L("No assistant response yet.", "아직 assistant 응답이 없습니다."),
+          lastMessage ? `${L("Last response", "Utolsó válasz")}:\n> ${lastMessage.slice(0, 800)}` : L("No assistant response yet.", "Még nincs assistant válasz."),
         ].join("\n\n"),
         color: 0x5865f2,
       },

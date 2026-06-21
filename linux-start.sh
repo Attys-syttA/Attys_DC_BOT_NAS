@@ -59,7 +59,6 @@ Environment=HOME=$HOME
 Environment=PATH=$(dirname "$NODE_BIN"):$PATH
 Environment=ATTYS_BOT_LAUNCH_REASON=linux-launcher
 Environment=ATTYS_OPERATOR_TOOLS_STATUS=skipped
-ExecStartPre=/bin/sh -c 'touch "$LOCK_FILE"'
 ExecStart=$NODE_BIN $SCRIPT_DIR/dist/index.js
 ExecStopPost=/bin/sh -c 'rm -f "$LOCK_FILE"'
 Restart=on-failure
@@ -96,7 +95,8 @@ is_running() {
   if supports_systemd_user && systemctl --user is-active "$SERVICE_NAME" >/dev/null 2>&1; then
     return 0
   fi
-  pgrep -f "$SCRIPT_DIR/dist/index.js" >/dev/null 2>&1
+  pgrep -f "$SCRIPT_DIR/dist/index.js" >/dev/null 2>&1 ||
+    pgrep -f "node dist/index.js" >/dev/null 2>&1
 }
 
 stop_bot() {
@@ -104,6 +104,7 @@ stop_bot() {
     systemctl --user stop "$SERVICE_NAME" >/dev/null 2>&1 || true
   fi
   pkill -f "$SCRIPT_DIR/dist/index.js" >/dev/null 2>&1 || true
+  pkill -f "node dist/index.js" >/dev/null 2>&1 || true
   rm -f "$LOCK_FILE"
 }
 
@@ -141,8 +142,6 @@ case "${1:-}" in
     ensure_sqlite
     export ATTYS_BOT_LAUNCH_REASON=linux-foreground
     export ATTYS_OPERATOR_TOOLS_STATUS=skipped
-    touch "$LOCK_FILE"
-    trap 'rm -f "$LOCK_FILE"' EXIT
     exec "$NODE_BIN" "$SCRIPT_DIR/dist/index.js"
     ;;
 esac
@@ -159,8 +158,7 @@ if supports_systemd_user; then
   echo "Bot started in background via systemd --user."
 else
   ATTYS_BOT_LAUNCH_REASON=linux-launcher ATTYS_OPERATOR_TOOLS_STATUS=skipped \
-    nohup "$NODE_BIN" "$SCRIPT_DIR/dist/index.js" >> "$LOG_FILE" 2>> "$ERR_LOG_FILE" &
-  echo "$!" > "$LOCK_FILE"
+    setsid nohup "$NODE_BIN" "$SCRIPT_DIR/dist/index.js" </dev/null >> "$LOG_FILE" 2>> "$ERR_LOG_FILE" &
   echo "Bot started in background via nohup."
 fi
 

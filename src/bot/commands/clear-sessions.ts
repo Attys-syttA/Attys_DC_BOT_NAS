@@ -21,7 +21,7 @@ export async function execute(
     await interaction.editReply({
       content: L(
         "`/clear-sessions` is disabled. Set `DISCORD_ENABLE_SESSION_DELETE=true` in `.env` to enable it.",
-        "`/clear-sessions`가 비활성화되어 있습니다.",
+        "A `/clear-sessions` ki van kapcsolva.",
       ),
     });
     return;
@@ -32,7 +32,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project. Use `/register` first.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다. 먼저 `/register`를 사용하세요."),
+      content: L("This channel is not registered to any project. Use `/register` first.", "Ez a csatorna nincs projekthez regisztrálva. Előbb használd a `/register` parancsot."),
     });
     return;
   }
@@ -40,7 +40,7 @@ export async function execute(
   const threads = listStoredThreads(project.project_path);
   if (threads.length === 0) {
     await interaction.editReply({
-      content: L("No session files to delete.", "삭제할 세션 파일이 없습니다."),
+      content: L("No session files to delete.", "Nincs törölhető session fájl."),
     });
     return;
   }
@@ -53,10 +53,10 @@ export async function execute(
   await interaction.editReply({
     embeds: [
       {
-        title: L("Sessions Cleared", "세션 정리됨"),
+        title: L("Sessions Cleared", "Sessionök törölve"),
         description: [
           `Project: \`${sanitizePublicFileLabel(project.project_path)}\``,
-          L(`Deleted **${deleted}** session(s)`, `**${deleted}**개의 세션이 삭제되었습니다`),
+          L(`Deleted **${deleted}** session(s)`, `**${deleted}** session törölve`),
         ].join("\n"),
         color: 0xff6b6b,
       },

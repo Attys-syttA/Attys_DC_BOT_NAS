@@ -29,12 +29,12 @@ export async function handleMessage(message: Message): Promise<void> {
   if (!hasPendingCustomInput && !shouldHandlePrompt) return;
 
   if (!isAllowedPrincipal(message.author.id, messageRoleIds(message))) {
-    await message.reply(L("You are not authorized to use this bot.", "이 봇을 사용할 권한이 없습니다."));
+    await message.reply(L("You are not authorized to use this bot.", "Nincs jogosultságod a bot használatához."));
     return;
   }
 
   if (!checkRateLimit(message.author.id)) {
-    await message.reply(L("Rate limit exceeded. Please wait a moment.", "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요."));
+    await message.reply(L("Rate limit exceeded. Please wait a moment.", "Túllépted a rate limitet. Várj egy kicsit, majd próbáld újra."));
     return;
   }
 
@@ -49,7 +49,7 @@ export async function handleMessage(message: Message): Promise<void> {
   if (hasAttachments && !text) {
     await message.reply(L(
       "I can see an attachment, but I need an instruction too. Use `Apps` -> `Send to Codex` on this message, or send `/ask prompt:` with file fields.",
-      "첨부 파일은 보이지만 지시문도 필요합니다. 이 메시지에서 `Apps` -> `Send to Codex`를 사용하거나 파일 필드와 함께 `/ask prompt:`를 보내세요.",
+      "Látom a csatolt fájlt, de utasítás is kell hozzá. Használd ezen az üzeneten az `Apps` -> `Send to Codex` műveletet, vagy küldj `/ask prompt:` parancsot a file mezővel.",
     ));
     return;
   }
@@ -79,12 +79,12 @@ export async function handleMessage(message: Message): Promise<void> {
 
   if (sessionManager.isActive(message.channelId)) {
     if (sessionManager.hasQueue(message.channelId)) {
-      await message.reply(L("⏳ A message is already waiting to be queued. Please press the button first.", "⏳ 이미 큐 추가 대기 중인 메시지가 있습니다. 버튼을 먼저 눌러주세요."));
+      await message.reply(L("⏳ A message is already waiting to be queued. Please press the button first.", "⏳ Már van egy queue megerősítésre váró üzenet. Előbb nyomd meg a gombot."));
       return;
     }
     if (sessionManager.isQueueFull(message.channelId)) {
       const maxQueueItems = getConfig().DISCORD_QUEUE_MAX_ITEMS;
-      await message.reply(L(`⏳ Queue is full (max ${maxQueueItems}). Please wait for the current task to finish.`, `⏳ 큐가 가득 찼습니다 (최대 ${maxQueueItems}개). 현재 작업 완료를 기다려주세요.`));
+      await message.reply(L(`⏳ Queue is full (max ${maxQueueItems}). Please wait for the current task to finish.`, `⏳ A queue megtelt (maximum ${maxQueueItems}). Várd meg, amíg az aktuális feladat elkészül.`));
       return;
     }
 
@@ -93,18 +93,18 @@ export async function handleMessage(message: Message): Promise<void> {
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(`queue-yes:${message.channelId}`)
-        .setLabel(L("Add to Queue", "큐에 추가"))
+        .setLabel(L("Add to Queue", "Queue-ba rakás"))
         .setStyle(ButtonStyle.Success)
         .setEmoji("✅"),
       new ButtonBuilder()
         .setCustomId(`queue-no:${message.channelId}`)
-        .setLabel(L("Cancel", "취소"))
+        .setLabel(L("Cancel", "Mégse"))
         .setStyle(ButtonStyle.Secondary)
         .setEmoji("❌"),
     );
 
     await message.reply({
-      content: L("⏳ A previous task is in progress. Process this automatically when done?", "⏳ 이전 작업이 진행 중입니다. 완료 후 자동으로 처리할까요?"),
+      content: L("⏳ A previous task is in progress. Process this automatically when done?", "⏳ Egy korábbi feladat még fut. Feldolgozzam automatikusan, ha kész?"),
       components: [row],
     });
     return;

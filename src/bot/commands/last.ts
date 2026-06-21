@@ -56,7 +56,7 @@ export async function execute(
 
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project. Use `/register` first.", "이 채널은 프로젝트에 등록되지 않았습니다. `/register`를 먼저 사용하세요."),
+      content: L("This channel is not registered to any project. Use `/register` first.", "Ez a csatorna nincs projekthez regisztrálva. Előbb használd: `/register`."),
     });
     return;
   }
@@ -64,7 +64,7 @@ export async function execute(
   const session = getSession(channelId);
   if (!session?.session_id) {
     await interaction.editReply({
-      content: L("No active session. Select a session from `/sessions`.", "활성 세션이 없습니다. `/sessions`에서 세션을 선택하세요."),
+      content: L("No active session. Select a session from `/sessions`.", "Nincs aktív session. Válassz sessiont a `/sessions` paranccsal."),
     });
     return;
   }
@@ -73,7 +73,7 @@ export async function execute(
 
   if (!lastMessage) {
     await interaction.editReply({
-      content: L("No Codex response in this session.", "이 세션에 Codex 응답이 없습니다."),
+      content: L("No Codex response in this session.", "Ebben a sessionben nincs Codex válasz."),
     });
     return;
   }

@@ -30,8 +30,8 @@ export async function execute(
   if (!project) {
     await interaction.editReply({
       content: selectedChannel
-        ? L("The selected channel is not registered to any project.", "선택한 채널은 어떤 프로젝트에도 등록되어 있지 않습니다.")
-        : L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+        ? L("The selected channel is not registered to any project.", "A kiválasztott csatorna nincs projekthez regisztrálva.")
+        : L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }
@@ -43,8 +43,8 @@ export async function execute(
   await interaction.editReply({
     embeds: [
         {
-          title: L("Project Unregistered", "프로젝트 등록 해제됨"),
-          description: L(`Removed <#${channelId}> link to \`${sanitizePublicFileLabel(project.project_path)}\``, `<#${channelId}>의 \`${sanitizePublicFileLabel(project.project_path)}\` 연결이 해제되었습니다`),
+          title: L("Project Unregistered", "Projekt regisztráció törölve"),
+          description: L(`Removed <#${channelId}> link to \`${sanitizePublicFileLabel(project.project_path)}\``, `<#${channelId}> kapcsolata törölve: \`${sanitizePublicFileLabel(project.project_path)}\``),
           color: 0xff0000,
       },
     ],

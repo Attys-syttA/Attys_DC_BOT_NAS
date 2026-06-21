@@ -92,12 +92,12 @@ export async function execute(
   const scriptPath = path.join(repoRoot, "scripts", "operator-startup.ps1");
   if (!fs.existsSync(scriptPath)) {
     await interaction.editReply({
-      content: L("Operator tools script is missing.", "Operator tools 스크립트를 찾을 수 없습니다."),
+      content: L("Operator tools script is missing.", "Az operator tools script hiányzik."),
     });
     return;
   }
 
-  await interaction.editReply({ content: L("Running operator tools preflight locally...", "로컬 operator tools preflight 실행 중...") });
+  await interaction.editReply({ content: L("Running operator tools preflight locally...", "Helyi operator tools preflight fut...") });
   const result = await runLocalCommand("powershell", [
     "-NoProfile",
     "-ExecutionPolicy",

@@ -49,20 +49,20 @@ export async function execute(
   const project = getProject(interaction.channelId);
   if (!project) {
     await interaction.editReply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
     });
     return;
   }
 
   if (!checkRateLimit(interaction.user.id)) {
     await interaction.editReply({
-      content: L("Rate limit exceeded. Please wait a moment.", "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요."),
+      content: L("Rate limit exceeded. Please wait a moment.", "Túllépted a rate limitet. Várj egy kicsit, majd próbáld újra."),
     });
     return;
   }
 
   if (!interaction.channel?.isTextBased() || interaction.channel.isDMBased()) {
-    await interaction.editReply({ content: L("This command must be used in a server text channel.", "이 명령은 서버 텍스트 채널에서 사용해야 합니다.") });
+    await interaction.editReply({ content: L("This command must be used in a server text channel.", "Ezt a parancsot szerver text csatornában kell használni.") });
     return;
   }
 
@@ -144,7 +144,7 @@ export async function handleModalSubmit(
   const project = getProject(interaction.channelId);
   if (!project) {
     await interaction.reply({
-      content: L("This channel is not registered to any project.", "이 채널은 어떤 프로젝트에도 등록되어 있지 않습니다."),
+      content: L("This channel is not registered to any project.", "Ez a csatorna nincs projekthez regisztrálva."),
       flags: ["Ephemeral"],
     });
     return true;
@@ -152,7 +152,7 @@ export async function handleModalSubmit(
 
   if (!checkRateLimit(interaction.user.id)) {
     await interaction.reply({
-      content: L("Rate limit exceeded. Please wait a moment.", "요청 한도를 초과했습니다. 잠시 후 다시 시도하세요."),
+      content: L("Rate limit exceeded. Please wait a moment.", "Túllépted a rate limitet. Várj egy kicsit, majd próbáld újra."),
       flags: ["Ephemeral"],
     });
     return true;
@@ -160,7 +160,7 @@ export async function handleModalSubmit(
 
   const prompt = interaction.fields.getTextInputValue(PROMPT_INPUT_ID).trim();
   if (!prompt) {
-    await interaction.reply({ content: L("Prompt is empty.", "프롬프트가 비어 있습니다."), flags: ["Ephemeral"] });
+    await interaction.reply({ content: L("Prompt is empty.", "A prompt üres."), flags: ["Ephemeral"] });
     return true;
   }
 
@@ -190,7 +190,7 @@ async function sendToCodex(
   const finalPrompt = prompt + buildAttachmentPromptSuffix(downloadedAttachments);
   const channelId = interaction.channelId;
   if (!channelId || !interaction.channel?.isTextBased() || interaction.channel.isDMBased()) {
-    await interaction.editReply({ content: L("This command must be used in a server text channel.", "이 명령은 서버 텍스트 채널에서 사용해야 합니다.") });
+    await interaction.editReply({ content: L("This command must be used in a server text channel.", "Ezt a parancsot szerver text csatornában kell használni.") });
     return;
   }
   const channel = interaction.channel as TextChannel;
@@ -198,13 +198,13 @@ async function sendToCodex(
   if (sessionManager.isActive(channelId)) {
     if (sessionManager.hasQueue(channelId)) {
       await interaction.editReply({
-        content: L("⏳ A message is already waiting to be queued. Please press the button first.", "⏳ 이미 큐 추가 대기 중인 메시지가 있습니다. 버튼을 먼저 눌러주세요."),
+        content: L("⏳ A message is already waiting to be queued. Please press the button first.", "⏳ Már van egy queue megerősítésre váró üzenet. Előbb nyomd meg a gombot."),
       });
       return;
     }
     if (sessionManager.isQueueFull(channelId)) {
       await interaction.editReply({
-        content: L(`⏳ Queue is full (max ${getConfig().DISCORD_QUEUE_MAX_ITEMS}). Please wait for the current task to finish.`, `⏳ 큐가 가득 찼습니다 (최대 ${getConfig().DISCORD_QUEUE_MAX_ITEMS}개). 현재 작업 완료를 기다려주세요.`),
+        content: L(`⏳ Queue is full (max ${getConfig().DISCORD_QUEUE_MAX_ITEMS}). Please wait for the current task to finish.`, `⏳ A queue megtelt (maximum ${getConfig().DISCORD_QUEUE_MAX_ITEMS}). Várd meg, amíg az aktuális feladat elkészül.`),
       });
       return;
     }
@@ -213,19 +213,19 @@ async function sendToCodex(
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setCustomId(`queue-yes:${channelId}`)
-        .setLabel(L("Add to Queue", "큐에 추가"))
+        .setLabel(L("Add to Queue", "Queue-ba rakás"))
         .setStyle(ButtonStyle.Success)
         .setEmoji("✅"),
       new ButtonBuilder()
         .setCustomId(`queue-no:${channelId}`)
-        .setLabel(L("Cancel", "취소"))
+        .setLabel(L("Cancel", "Mégse"))
         .setStyle(ButtonStyle.Secondary)
         .setEmoji("❌"),
     );
 
     await interaction.editReply({
       content: [
-        L("⏳ A previous task is in progress. Process this automatically when done?", "⏳ 이전 작업이 진행 중입니다. 완료 후 자동으로 처리할까요?"),
+        L("⏳ A previous task is in progress. Process this automatically when done?", "⏳ Egy korábbi feladat még fut. Feldolgozzam automatikusan, ha kész?"),
         ...attachmentNotes,
       ].join("\n"),
       components: [row],

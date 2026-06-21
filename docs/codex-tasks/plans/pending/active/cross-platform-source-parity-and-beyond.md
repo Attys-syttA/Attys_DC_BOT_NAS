@@ -22,22 +22,45 @@ Status: active
 - Fazon 8 local validation kesz: `npm run check`, `git diff --check`, shell syntax, Python compile, `npm run safe-update:status`, secret scan zold.
 - Windows launcher smoke kesz: `--status`, start, `--status`, `--stop`, final `--status`; a bot leallt. Megjegyzes: tray exe rebuild kozben `CS0016` lock hiba volt, mert a tray binaryt mas folyamat fogta, de a bot launcher smoke sikeresen lefutott.
 - Source parity matrix elkeszult: `docs/SOURCE_PARITY_MATRIX.md`.
+- Debian WSL2 headless Linux acceptance elindult es bizonyitott:
+  - `/etc/wsl.conf` alatt `appendWindowsPath = false`;
+  - Linux-native Node.js `v20.20.2` es npm `10.8.2`;
+  - Linux repo copy: `~/codex_works/Attys_DC_BOT`;
+  - `npm ci`, `npm run typecheck`, `npm test`, `npm run build`, `npm run check` zold;
+  - 37 test file es 247 test passed;
+  - `docs/LINUX_WSL_DEBIAN.md` es `scripts/linux-wsl-acceptance.sh` rogzitik az ujrafuttathato acceptance utat.
+- Debian WSL2 runtime elokeszites:
+  - Codex CLI user-local telepites kesz (`/home/Attys/.local/bin/codex`, `codex-cli 0.141.0`);
+  - `codex login` user-interaktiv lepes elkeszult;
+  - `.env.wsl.example` bekerult Linuxos `BASE_PROJECT_DIR=/home/Attys/codex_works` alapertelmezessel.
+- Debian WSL2 live runtime smoke elkeszult:
+  - `linux-start.sh --status` futonak latja a botot;
+  - Discord startup notification Linux foreground diagnostics ok;
+  - `/doctor`, `/health`, `/dashboard`, `/usage`, `/events`, `/logs` mukodott;
+  - `/register` utan a csatorna WSL projecthez kapcsolodott;
+  - `/ask` sikeresen elerte a Debian WSL alol futo Codexet es valaszt adott;
+  - operator eventben `startup online` es `task completed` rogzult.
+- Runtime bugfix: a `/health` slash command surface count most ugyanazt az `expectedCommandNames()` command surface-t hasznalja, mint a `/doctor`, nem a help-entry darabszamot.
+- Launcher bugfix: a Linux foreground/systemd/nohup es macOS foreground launcher mar nem irja inditas elott a `.bot.lock` fajlt, mert azt az app singleton lockja kezeli; ez javitja az `Another bot instance is already running` hamis inditasi hibat.
+- WSL background fix: a Linux `nohup` fallback `setsid` es `</dev/null` leválasztas mellett indul, igy a bot nem-interaktiv `wsl.exe` parancs utan is eletben marad.
+- Operator UI localization: a Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menubar es Discord operator outputok masodik nyelve magyar lett; a nyelvvalaszto `EN/HU`, a regi `.tray-lang=kr` ertek kompatibilitasbol magyar modkent tolto be.
 
 ## Nyitott reszek
 
 - Fazon 8 local validation/source parity matrix commit es push.
-- Linux tray/control panel GUI runtime smoke tenyleges Linux desktop hoston kesobb platformtesztet igenyelhet.
+- Linux control panel GUI runtime smoke WSLg alatt bizonyitott; Linux tray ikon smoke tovabbra is WSLg tray supportot vagy teljes Linux desktopot igenyel.
 - macOS menubar Swift build/runtime smoke tenyleges macOS hoston kesobb platformtesztet igenyelhet.
 - iPad/mobile Discord file handoff es live Discord command smoke emberi acceptance-et igenyel.
 - Linux acceptance Windowsrol realisan WSL2/WSLg vagy Linux VM alatt kozelitheto:
-  - headless/script smoke: WSL2 Ubuntu;
-  - GUI tray/control panel smoke: WSLg vagy teljes Linux VM;
+  - headless/script smoke: Debian WSL2 bizonyitott;
+  - GUI control panel smoke: Debian WSLg bizonyitott;
+  - Linux tray ikon smoke: WSLg tray support vagy teljes Linux VM;
   - Docker csak headless build/testre eleg, tray desktop smoke-ra nem.
 - macOS acceptance Windows sandboxban nem realis/jogtiszta cel:
   - Swift compile bizonyitekhez macOS GitHub Actions runner vagy remote Mac hasznalhato;
   - menu bar runtime smokehoz valodi macOS desktop kell.
 - Kovetkezo konkret lepes:
-  1. Linux smoke dontes: WSL2/WSLg vagy Linux VM legyen-e a helyi acceptance kornyezet.
+  1. Linux GUI smoke dontes: WSLg vagy teljes Linux VM legyen-e a helyi tray/control-panel acceptance kornyezet.
   2. macOS smoke dontes: macOS CI compile-only eleg-e ideiglenesen, vagy kell valodi Mac runtime smoke.
   3. iPad/mobile smoke: live Discordon `Send to Codex` file handoff modalos prompttal, majd `/last`, `/events`, `/logs`, `/usage`.
 
@@ -493,9 +516,9 @@ Implementacios lepesek:
      - based on/local-first direction from `chadingTV/codex-discord`;
      - Attys-specific changes: safety, Windows tools, explicit file handoff, public-safe diagnostics.
 5. Localization dontes:
-   - Forras repo tartalmaz koreai docsokat.
+   - A forras repo tartalmaz legacy secondary-language docsokat.
    - Nalatok minimal cel: English README/SETUP + magyar `/sugo`.
-   - Ha "minden docs parity" kell, kesobb kulon tervben lehet `docs/README.hu.md` es/vagy `docs/SETUP.hu.md`; koreai docs nem kotelezo Attys repohoz, hacsak nincs explicit igeny.
+   - Ha "minden docs parity" kell, kesobb kulon tervben lehet `docs/README.hu.md` es/vagy `docs/SETUP.hu.md`; a legacy secondary-language docs nem kotelezo Attys repohoz, hacsak nincs explicit igeny.
 6. Release checklist frissitese:
    - macOS smoke;
    - Linux smoke;
@@ -650,7 +673,7 @@ CI/publish:
 
 - Legyen-e defaultbol bekapcsolva a normal message prompt/attachment flow, vagy maradjon default: slash/context-command only?
 - Kell-e magyar teljes SETUP/README a public English docs mellett?
-- Kell-e koreai docs parity a forras repo miatt, vagy ez nem relevans az Attys repo kozonsegenek?
+- Kell-e legacy secondary-language docs parity a forras repo miatt, vagy ez nem relevans az Attys repo kozonsegenek?
 - Van-e elerheto macOS gep a Swift menubar valos build/smoke teszthez?
 - Van-e elerheto Linux desktop session a tray/control panel valos smoke teszthez?
 - Engedelyezheto-e valaha stash-alapu advanced update, vagy maradjon csak safe ff-only?

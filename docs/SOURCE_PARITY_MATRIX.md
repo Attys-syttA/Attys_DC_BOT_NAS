@@ -21,6 +21,7 @@ Status labels:
 | Linux control panel | Python Tk control panel | implemented differently | `tray/codex_control_panel.py` is Attys-branded and routes lifecycle through the launcher. |
 | macOS menu bar | Swift menu bar app | implemented differently | `menubar/CodexBotMenu.swift` is Attys-branded, shares `mac-start.sh`/launchd contract, and keeps update actions read-only. |
 | Usage cache | `~/.codex/rate-limits-cache.json` | implemented | `/usage`, Windows panel, Linux panel, and macOS menu bar use the same cache shape. |
+| Operator UI language | English/legacy secondary-language source UI | adapted | Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menu bar, and Discord operator outputs use English/Hungarian (`EN/HU`). |
 | Usage app-server refresh | Codex app-server JSON-RPC | implemented | Canonical TS helpers normalize live results and cache payloads. Desktop panels implement platform-local refreshers. |
 | Slash commands | Discord slash command surface | implemented differently | Attys has additional `/health`, `/events`, `/logs`, `/doctor`, `/dashboard`, `/tools`, and safety-gated commands. |
 | Message attachments | Normal Discord attachment prompt flow | implemented differently | `DISCORD_ENABLE_ATTACHMENT_MESSAGES=false` by default; opt-in normal text+attachment messages are supported. |
@@ -28,7 +29,10 @@ Status labels:
 | Promptless attachment handling | Source may process file prompt directly | implemented differently | Attys refuses blind attachment-only work and asks for a written instruction or `Send to Codex`. |
 | Auto-update | Tray auto-update | implemented differently | Cross-platform `safe-update:status/apply` is clean-only, ff-only, no stash/reset. Desktop update actions remain conservative. |
 | Public-safe diagnostics | Basic logs/status | implemented beyond source | `/health`, `/events`, scrubbed `/logs`, notification channel, and public-safe docs/assets are included. |
-| Korean docs | `docs/README.kr.md`, `docs/SETUP.kr.md` | not included | Attys audience is English public docs plus Hungarian `/sugo`; full localization is future work only if requested. |
-| Linux GUI runtime smoke | Real Linux desktop tray smoke | future work | Requires a Linux desktop session with tray dependencies. |
+| Legacy secondary-language docs | `docs/README.kr.md`, `docs/SETUP.kr.md` | not included | Attys audience is English public docs plus Hungarian `/sugo`; full localization is future work only if requested. |
+| Linux headless WSL smoke | Linux build/test/script validation | implemented | Debian WSL2 validates Linux-native Node.js 20, `better-sqlite3`, shell syntax, Python syntax, launcher read-only commands, and full npm checks through `scripts/linux-wsl-acceptance.sh`. |
+| Linux WSL runtime smoke | Live Discord/Codex bot run from Linux | implemented | Debian WSL2 foreground/background launcher starts `/usr/bin/node dist/index.js`; `/doctor`, `/health`, `/dashboard`, `/usage`, `/events`, `/logs`, and `/ask` were live-smoked, including a successful Codex response. |
+| Linux GUI control panel smoke | WSLg Tk control panel runtime | implemented | Debian WSL2/WSLg opens `tray/codex_control_panel.py`, shows running status and usage, and Stop/Restart work; file/folder/settings opening has WSL-aware fallback. |
+| Linux tray runtime smoke | Real Linux desktop tray smoke | future work | Requires a Linux desktop session with tray dependencies and system tray support. |
 | macOS Swift runtime smoke | Real macOS menu bar smoke | future work | Requires macOS with Xcode Command Line Tools. |
 | iPad/mobile Discord smoke | Remote operator acceptance | future work | Requires the user's Discord client and live bot/server context. |

@@ -8,6 +8,7 @@ import json
 import os
 import select
 import signal
+import shutil
 import subprocess
 import sys
 import time
@@ -15,6 +16,7 @@ import tkinter as tk
 import urllib.request
 import webbrowser
 from pathlib import Path
+from tkinter import messagebox
 from tkinter import ttk
 
 
@@ -50,7 +52,7 @@ EXAMPLE_VALUES = {
 }
 
 
-is_korean = False
+is_hungarian = False
 current_version = "unknown"
 update_available = False
 cached_new_version = ""
@@ -62,27 +64,28 @@ control_panel = None
 
 
 def load_language():
-    global is_korean
+    global is_hungarian
     try:
         if LANG_PREF_FILE.exists():
-            is_korean = LANG_PREF_FILE.read_text().strip() == "kr"
+            saved = LANG_PREF_FILE.read_text().strip().lower()
+            is_hungarian = saved in {"hu", "kr"}
     except Exception:
         pass
 
 
-def set_language(korean: bool):
-    global is_korean
-    is_korean = korean
+def set_language(hungarian: bool):
+    global is_hungarian
+    is_hungarian = hungarian
     try:
-        LANG_PREF_FILE.write_text("kr" if korean else "en")
+        LANG_PREF_FILE.write_text("hu" if hungarian else "en")
     except Exception:
         pass
     if control_panel:
         control_panel.refresh_ui()
 
 
-def L(en: str, kr: str) -> str:
-    return kr if is_korean else en
+def L(en: str, hu: str) -> str:
+    return hu if is_hungarian else en
 
 
 def load_env() -> dict[str, str]:
@@ -172,19 +175,74 @@ def check_for_updates() -> None:
         cached_new_version = ""
 
 
+def is_wsl() -> bool:
+    try:
+        return "microsoft" in Path("/proc/version").read_text(encoding="utf-8").lower()
+    except OSError:
+        return False
+
+
+def windows_path_for(path: Path) -> str | None:
+    try:
+        result = subprocess.run(
+            ["wslpath", "-w", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        converted = result.stdout.strip()
+        if result.returncode == 0 and converted:
+            return converted
+    except Exception:
+        pass
+    distro = os.environ.get("WSL_DISTRO_NAME", "")
+    if distro and path.is_absolute():
+        win_suffix = str(path).replace("/", "\\")
+        return f"\\\\wsl.localhost\\{distro}{win_suffix}"
+    return None
+
+
+def open_path(target: Path) -> None:
+    openers = [
+        shutil.which("xdg-open"),
+        shutil.which("wslview"),
+    ]
+    for opener in [value for value in openers if value]:
+        try:
+            subprocess.Popen([opener, str(target)])
+            return
+        except OSError:
+            pass
+
+    cmd_exe = Path("/mnt/c/Windows/System32/cmd.exe")
+    if is_wsl() and cmd_exe.exists():
+        converted = windows_path_for(target)
+        if converted:
+            try:
+                subprocess.Popen([str(cmd_exe), "/c", "start", "", converted])
+                return
+            except OSError:
+                pass
+
+    try:
+        webbrowser.open(target.as_uri() if target.is_absolute() else str(target))
+    except Exception as exc:
+        messagebox.showerror("Attys DC BOT", f"Could not open:\n{target}\n\n{exc}")
+
+
 def open_log():
     log_path = BOT_DIR / "bot.log"
     if log_path.exists():
-        subprocess.Popen(["xdg-open", str(log_path)])
+        open_path(log_path)
 
 
 def open_folder():
-    subprocess.Popen(["xdg-open", str(BOT_DIR)])
+    open_path(BOT_DIR)
 
 
 def open_settings():
     target = ENV_PATH if ENV_PATH.exists() else (BOT_DIR / ".env.example")
-    subprocess.Popen(["xdg-open", str(target)])
+    open_path(target)
 
 
 def open_usage_page():
@@ -377,7 +435,7 @@ exec "$CODEX_BIN" app-server
         })
         init_response = _read_json_response(proc, 1, 5)
         if not init_response or init_response.get("id") != 1:
-            last_usage_error = L("Codex app-server did not respond to initialize.", "Codex app-server 초기화 응답이 없습니다.")
+            last_usage_error = L("Codex app-server did not respond to initialize.", "A Codex app-server nem válaszolt az initialize hívásra.")
             return None
 
         _send_json_line(proc, {
@@ -388,7 +446,7 @@ exec "$CODEX_BIN" app-server
         })
         response = _read_json_response(proc, 2, 5)
         if not response or response.get("id") != 2:
-            last_usage_error = L("Codex usage request timed out.", "Codex 사용량 요청이 시간 초과되었습니다.")
+            last_usage_error = L("Codex usage request timed out.", "A Codex használati adatok lekérése időtúllépésbe futott.")
             return None
         error = response.get("error")
         if isinstance(error, dict):
@@ -396,7 +454,7 @@ exec "$CODEX_BIN" app-server
             if isinstance(message, str) and message.strip():
                 last_usage_error = message.strip()
             else:
-                last_usage_error = L("Failed to load Codex usage.", "Codex 사용량을 불러오지 못했습니다.")
+                last_usage_error = L("Failed to load Codex usage.", "Nem sikerült betölteni a Codex használati adatokat.")
             return None
         last_usage_error = ""
         result = response.get("result") or {}
@@ -494,12 +552,12 @@ def usage_rows() -> list[dict]:
 def usage_label(window: dict) -> str:
     mins = window.get("windowDurationMins")
     if mins == 300:
-        return L("5-hour limit", "5시간 한도")
+        return L("5-hour limit", "5 órás limit")
     if mins == 10080:
-        return L("7-day limit", "7일 한도")
+        return L("7-day limit", "7 napos limit")
     if mins:
-        return L(f"{mins}-minute limit", f"{mins}분 한도")
-    return L("Usage limit", "사용량 한도")
+        return L(f"{mins}-minute limit", f"{mins} perces limit")
+    return L("Usage limit", "Használati limit")
 
 
 def usage_percent_left(window: dict) -> int:
@@ -513,10 +571,10 @@ def usage_reset_text(window: dict) -> str:
     dt = time.localtime(int(ts))
     now = time.localtime()
     if (dt.tm_year, dt.tm_yday) == (now.tm_year, now.tm_yday):
-        formatted = time.strftime("%p %I:%M", dt).lstrip("0") if not is_korean else time.strftime("%p %I:%M", dt).replace("AM", "오전").replace("PM", "오후").lstrip("0")
-        return L(f"Resets {formatted}", f"{formatted} 초기화")
-    formatted = time.strftime("%b %-d", dt) if not is_korean else f"{dt.tm_mon}월 {dt.tm_mday}일"
-    return L(f"Resets on {formatted}", f"{formatted} 초기화")
+        formatted = time.strftime("%p %I:%M", dt).lstrip("0") if not is_hungarian else time.strftime("%H:%M", dt)
+        return L(f"Resets {formatted}", f"Visszaáll {formatted}-kor")
+    formatted = time.strftime("%b %-d", dt) if not is_hungarian else f"{dt.tm_mon}. {dt.tm_mday}."
+    return L(f"Resets on {formatted}", f"Visszaáll ekkor: {formatted}")
 
 
 def usage_bar_color(percent_left: int) -> str:
@@ -532,10 +590,10 @@ def fetched_label() -> str:
         return ""
     ago = int(time.time() - usage_last_fetched)
     if ago < 60:
-        return L("Updated just now", "방금 갱신됨")
+        return L("Updated just now", "Frissítve épp most")
     if ago < 3600:
-        return L(f"Updated {ago // 60}m ago", f"{ago // 60}분 전 갱신")
-    return L(f"Updated {ago // 3600}h ago", f"{ago // 3600}시간 전 갱신")
+        return L(f"Updated {ago // 60}m ago", f"Frissítve {ago // 60} perce")
+    return L(f"Updated {ago // 3600}h ago", f"Frissítve {ago // 3600} órája")
 
 
 class ControlPanel:
@@ -605,14 +663,14 @@ class ControlPanel:
         subtitle.grid(row=1, column=1, sticky="w")
         lang = tk.Frame(header, bg=BG_DARK)
         lang.grid(row=0, column=2, rowspan=2, sticky="e")
-        self.make_lang_button(lang, "EN", not is_korean, lambda: set_language(False)).pack(side="left")
+        self.make_lang_button(lang, "EN", not is_hungarian, lambda: set_language(False)).pack(side="left")
         tk.Label(lang, text="|", bg=BG_DARK, fg=FG_DIM, padx=6).pack(side="left")
-        self.make_lang_button(lang, "KR", is_korean, lambda: set_language(True)).pack(side="left")
+        self.make_lang_button(lang, "HU", is_hungarian, lambda: set_language(True)).pack(side="left")
         header.grid_columnconfigure(1, weight=1)
 
         self.separator()
 
-        status_text = L("Setup Required", "설정 필요") if not has_env else (L("Running", "실행 중") if current_running else L("Stopped", "중지됨"))
+        status_text = L("Setup Required", "Beállítás szükséges") if not has_env else (L("Running", "Fut") if current_running else L("Stopped", "Leállítva"))
         status_color = "#ff9f1a" if not has_env else ("#3ddc84" if current_running else "#ff5d5d")
         status_panel = self.round_panel(self.container)
         status_panel.pack(fill="x", pady=(0, ypad))
@@ -643,7 +701,7 @@ class ControlPanel:
                 line = tk.Frame(usage_panel, bg=BG_PANEL)
                 line.pack(fill="x", padx=14, pady=(10, 0))
                 tk.Label(line, text=usage_label(window), font=("Helvetica", 11, "bold"), bg=BG_PANEL, fg=FG_MUTED).pack(side="left")
-                tk.Label(line, text=L(f"{usage_percent_left(window)}% left", f"{usage_percent_left(window)}% 남음"), font=("Helvetica", 11, "bold"), bg=BG_PANEL, fg=usage_bar_color(usage_percent_left(window))).pack(side="right")
+                tk.Label(line, text=L(f"{usage_percent_left(window)}% left", f"{usage_percent_left(window)}% maradt"), font=("Helvetica", 11, "bold"), bg=BG_PANEL, fg=usage_bar_color(usage_percent_left(window))).pack(side="right")
                 bar = tk.Canvas(usage_panel, height=10, bg=BG_PANEL, highlightthickness=0)
                 bar.pack(fill="x", padx=14, pady=(6, 0))
                 bar.create_rectangle(0, 0, 380, 10, fill=BAR_BG, outline=BAR_BG)
@@ -661,7 +719,7 @@ class ControlPanel:
             error_panel.pack(fill="x", pady=(0, ypad))
             tk.Label(
                 error_panel,
-                text=L("Usage info unavailable", "사용량 정보를 불러오지 못했습니다."),
+                text=L("Usage info unavailable", "A használati adatok nem érhetők el."),
                 font=("Helvetica", 11, "bold"),
                 bg=BG_PANEL,
                 fg=FG_MUTED,
@@ -678,16 +736,16 @@ class ControlPanel:
 
             usage_button = self.make_button(
                 self.container,
-                L("Load Usage Info", "사용량 정보 불러오기"),
-                BUTTON_SECONDARY,
-                BUTTON_SECONDARY_ACTIVE,
+                L("Load Usage Info", "Használati adatok betöltése"),
+                BG_BUTTON,
+                FG_WHITE,
                 lambda: self.manual_usage_refresh(),
             )
             usage_button.pack(fill="x", pady=(0, ypad))
         else:
             usage_button = self.make_button(
                 self.container,
-                L("Load Usage Info", "사용량 정보 불러오기"),
+                L("Load Usage Info", "Használati adatok betöltése"),
                 BG_BUTTON,
                 FG_WHITE,
                 lambda: self.manual_usage_refresh(),
@@ -699,33 +757,33 @@ class ControlPanel:
             button_row = tk.Frame(self.container, bg=BG_DARK)
             button_row.pack(fill="x", pady=(0, ypad))
             if current_running:
-                self.make_button(button_row, L("Stop Bot", "봇 중지"), BTN_STOP, "#ff9d9d", lambda: self.run_and_refresh(stop_bot_service)).pack(side="left", fill="x", expand=True)
+                self.make_button(button_row, L("Stop Bot", "Bot leállítása"), BTN_STOP, "#ff9d9d", lambda: self.run_and_refresh(stop_bot_service)).pack(side="left", fill="x", expand=True)
                 tk.Frame(button_row, width=10, bg=BG_DARK).pack(side="left")
-                self.make_button(button_row, L("Restart Bot", "봇 재시작"), BTN_RESTART, "#ffc76a", lambda: self.run_and_refresh(restart_bot_service)).pack(side="left", fill="x", expand=True)
+                self.make_button(button_row, L("Restart Bot", "Bot újraindítása"), BTN_RESTART, "#ffc76a", lambda: self.run_and_refresh(restart_bot_service)).pack(side="left", fill="x", expand=True)
             else:
-                self.make_button(button_row, L("Start Bot", "봇 시작"), BTN_GREEN, "#b3f4bf", lambda: self.run_and_refresh(start_bot_service), full=True).pack(fill="x", expand=True)
+                self.make_button(button_row, L("Start Bot", "Bot indítása"), BTN_GREEN, "#b3f4bf", lambda: self.run_and_refresh(start_bot_service), full=True).pack(fill="x", expand=True)
 
-        self.make_button(self.container, L("Settings...", "설정..."), BTN_SETTINGS, "#78b3ff", open_settings, full=True).pack(fill="x", pady=(0, ypad))
+        self.make_button(self.container, L("Settings...", "Beállítások..."), BTN_SETTINGS, "#78b3ff", open_settings, full=True).pack(fill="x", pady=(0, ypad))
 
         util_row = tk.Frame(self.container, bg=BG_DARK)
         util_row.pack(fill="x", pady=(0, ypad))
-        self.make_button(util_row, L("View Log", "로그 보기"), BG_BUTTON, FG_WHITE, open_log).pack(side="left", fill="x", expand=True)
+        self.make_button(util_row, L("View Log", "Log megnyitása"), BG_BUTTON, FG_WHITE, open_log).pack(side="left", fill="x", expand=True)
         tk.Frame(util_row, width=10, bg=BG_DARK).pack(side="left")
-        self.make_button(util_row, L("Open Folder", "폴더 열기"), BG_BUTTON, FG_WHITE, open_folder).pack(side="left", fill="x", expand=True)
+        self.make_button(util_row, L("Open Folder", "Mappa megnyitása"), BG_BUTTON, FG_WHITE, open_folder).pack(side="left", fill="x", expand=True)
 
         self.separator()
 
         autostart_var = tk.BooleanVar(value=is_autostart_enabled())
         chk = ttk.Checkbutton(
             self.container,
-            text=L("Launch on System Startup", "시스템 시작 시 자동 실행"),
+            text=L("Launch on System Startup", "Indítás a rendszerrel"),
             variable=autostart_var,
             command=toggle_autostart,
             style="Panel.TCheckbutton",
         )
         chk.pack(anchor="w", pady=(0, ypad))
 
-        update_text = L("Update Available - review repo", "업데이트 가능 - 저장소 확인") if update_available else L("Check for Updates", "업데이트 확인")
+        update_text = L("Update Available - review repo", "Frissítés elérhető - repo ellenőrzése") if update_available else L("Check for Updates", "Frissítések keresése")
         self.make_button(self.container, update_text, BG_BUTTON, FG_WHITE, self.check_updates, full=True).pack(fill="x", pady=(0, ypad))
 
         self.separator()
@@ -734,7 +792,7 @@ class ControlPanel:
             self.container,
             text=L(
                 "Closing this window does not stop the bot.\nThe bot runs in the background. Check the tray icon for status.",
-                "이 창을 닫아도 봇은 중지되지 않습니다.\n봇은 백그라운드에서 실행됩니다. 트레이 아이콘에서 상태를 확인하세요.",
+                "Az ablak bezárása nem állítja le a botot.\nA bot a háttérben fut. Az állapotot a tray ikon mutatja.",
             ),
             justify="left",
             font=("Helvetica", 10),
@@ -746,7 +804,7 @@ class ControlPanel:
         links = tk.Frame(self.container, bg=BG_DARK)
         links.pack(fill="x", pady=(4, 0))
         self.make_link(links, "GitHub: Attys-syttA/Attys_DC_BOT", open_github).pack(anchor="center")
-        self.make_link(links, L("Bug Report / Feature Request", "버그 신고 / 기능 요청"), open_issues).pack(anchor="center", pady=(8, 0))
+        self.make_link(links, L("Bug Report / Feature Request", "Hibajelentés / funkciókérés"), open_issues).pack(anchor="center", pady=(8, 0))
 
     def check_updates(self) -> None:
         check_for_updates()

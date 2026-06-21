@@ -153,7 +153,7 @@ export async function startBot(): Promise<Client> {
       if (interaction.isChatInputCommand()) {
         if (!isAllowedPrincipal(interaction.user.id, interactionRoleIds(interaction))) {
           await interaction.reply({
-            content: L("You are not authorized to use this bot.", "이 봇을 사용할 권한이 없습니다."),
+            content: L("You are not authorized to use this bot.", "Nincs jogosultságod a bot használatához."),
             flags: ["Ephemeral"],
           });
           return;
@@ -166,7 +166,7 @@ export async function startBot(): Promise<Client> {
       } else if (interaction.isMessageContextMenuCommand()) {
         if (!isAllowedPrincipal(interaction.user.id, interactionRoleIds(interaction))) {
           await interaction.reply({
-            content: L("You are not authorized to use this bot.", "이 봇을 사용할 권한이 없습니다."),
+            content: L("You are not authorized to use this bot.", "Nincs jogosultságod a bot használatához."),
             flags: ["Ephemeral"],
           });
           return;
@@ -181,7 +181,7 @@ export async function startBot(): Promise<Client> {
       }
     } catch (error) {
       console.error("Interaction error:", error);
-      const content = L("An error occurred while processing your command.", "명령을 처리하는 중 오류가 발생했습니다.");
+      const content = L("An error occurred while processing your command.", "Hiba történt a parancs feldolgozása közben.");
       try {
         if (interaction.isRepliable()) {
           if (interaction.replied || interaction.deferred) {
@@ -203,7 +203,7 @@ export async function startBot(): Promise<Client> {
       console.error("messageCreate error:", error);
       try {
         if (message.channel.isSendable()) {
-          await message.reply(L("An error occurred while processing your message.", "메시지를 처리하는 중 오류가 발생했습니다."));
+          await message.reply(L("An error occurred while processing your message.", "Hiba történt az üzenet feldolgozása közben."));
         }
       } catch {
         // ignore

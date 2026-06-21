@@ -28,8 +28,8 @@ export async function execute(
     await interaction.editReply({
       embeds: [
         new EmbedBuilder()
-          .setTitle(L("Local Codex Dashboard", "로컬 Codex 대시보드"))
-          .setDescription(L("This channel is not registered to a project yet. Use `/register` first.", "이 채널은 아직 프로젝트에 등록되어 있지 않습니다. 먼저 `/register`를 사용하세요."))
+          .setTitle(L("Local Codex Dashboard", "Helyi Codex Dashboard"))
+          .setDescription(L("This channel is not registered to a project yet. Use `/register` first.", "Ez a csatorna még nincs projekthez regisztrálva. Előbb használd a `/register` parancsot."))
           .setColor(0xf59e0b),
       ],
     });
@@ -39,8 +39,8 @@ export async function execute(
   const session = getSession(channelId);
   const dbStatus = session?.status ?? "offline";
   const runtimeStatus = sessionManager.isActive(channelId)
-    ? L("active turn", "활성 작업")
-    : L("idle or stopped", "대기 또는 중지");
+    ? L("active turn", "Aktív feladat")
+    : L("idle or stopped", "várakozik vagy leállítva");
   const queueSize = sessionManager.getQueueSize(channelId);
   const runtime = sessionManager.getOperatorRuntimeSnapshot(channelId);
   const codexCommand = resolveCodexCommand();
@@ -53,38 +53,38 @@ export async function execute(
     .reverse();
 
   const embed = new EmbedBuilder()
-    .setTitle(L("Local Codex Dashboard", "로컬 Codex 대시보드"))
+    .setTitle(L("Local Codex Dashboard", "Helyi Codex Dashboard"))
     .setColor(0x5865f2)
     .setTimestamp()
     .addFields(
       {
-        name: L("Project", "프로젝트"),
+        name: L("Project", "Projekt"),
         value: `\`${sanitizePublicFileLabel(project.project_path)}\``,
         inline: false,
       },
       {
-        name: L("Session", "세션"),
+        name: L("Session", "Session"),
         value: [
-          `${L("Stored status", "저장된 상태")}: **${dbStatus}**`,
-          `${L("Runtime", "런타임")}: **${runtimeStatus}**`,
-          `${L("Thread", "스레드")}: ${session?.session_id ? `\`${session.session_id.slice(0, 8)}...\`` : L("new session on next prompt", "다음 프롬프트에서 새 세션")}`,
-          `${L("Last activity", "마지막 활동")}: ${session?.last_activity ?? "never"}`,
+          `${L("Stored status", "Mentett állapot")}: **${dbStatus}**`,
+          `${L("Runtime", "Runtime")}: **${runtimeStatus}**`,
+          `${L("Thread", "Thread")}: ${session?.session_id ? `\`${session.session_id.slice(0, 8)}...\`` : L("new session on next prompt", "új session a következő promptnál")}`,
+          `${L("Last activity", "Utolsó aktivitás")}: ${session?.last_activity ?? "never"}`,
         ].join("\n"),
         inline: false,
       },
       {
-        name: L("Controls", "컨트롤"),
+        name: L("Controls", "Vezérlés"),
         value: [
-          `${L("Queue", "큐")}: **${queueSize}**`,
-          `${L("Pending operator action", "대기 중인 operator 작업")}: **${describePendingOperatorAction(runtime)}**`,
-          `${L("Auto-approve", "자동 승인")}: **${project.auto_approve ? "on" : "off"}**`,
-          `${L("Codex command", "Codex 명령")}: \`${codexCommand}\``,
+          `${L("Queue", "Queue")}: **${queueSize}**`,
+          `${L("Pending operator action", "Függő operátori művelet")}: **${describePendingOperatorAction(runtime)}**`,
+          `${L("Auto-approve", "Auto-jóváhagyás")}: **${project.auto_approve ? "on" : "off"}**`,
+          `${L("Codex command", "Codex parancs")}: \`${codexCommand}\``,
           `${L("Operator tools", "Operator tools")}: **${operatorToolsStatus}**`,
         ].join("\n"),
         inline: false,
       },
       {
-        name: L("Recent operator events", "최근 operator 이벤트"),
+        name: L("Recent operator events", "Legutóbbi operátori események"),
         value: recentEvents.length > 0
           ? recentEvents.map((line) => `- ${line}`).join("\n")
           : "none",
@@ -97,7 +97,7 @@ export async function execute(
     buttons.push(
       new ButtonBuilder()
         .setCustomId(`stop:${channelId}`)
-        .setLabel(L("Stop", "중지"))
+        .setLabel(L("Stop", "Leállítás"))
         .setStyle(ButtonStyle.Danger),
     );
   }
@@ -105,7 +105,7 @@ export async function execute(
     buttons.push(
       new ButtonBuilder()
         .setCustomId(`queue-clear:${channelId}`)
-        .setLabel(L("Clear Queue", "큐 비우기"))
+        .setLabel(L("Clear Queue", "Queue ürítése"))
         .setStyle(ButtonStyle.Secondary),
     );
   }
