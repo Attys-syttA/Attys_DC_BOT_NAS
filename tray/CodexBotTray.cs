@@ -280,8 +280,8 @@ internal sealed class CodexBotTray : Form
         controlPanel = new Form();
         controlPanel.Text = "Attys DC BOT Control Panel";
         controlPanel.StartPosition = FormStartPosition.CenterScreen;
-        controlPanel.Size = new Size(640, 760);
-        controlPanel.MinimumSize = new Size(600, 660);
+        controlPanel.Size = new Size(700, 760);
+        controlPanel.MinimumSize = new Size(660, 660);
         controlPanel.BackColor = Color.FromArgb(24, 28, 36);
         controlPanel.ForeColor = Color.White;
         controlPanel.FormClosed += delegate { controlPanel = null; };
@@ -350,7 +350,7 @@ internal sealed class CodexBotTray : Form
         controlPanel.Controls.Add(statusLabel);
 
         int y = 108;
-        Button startStop = MakeButton(IsRunning() ? L("Stop", "Leállítás") : L("Start", "Indítás"), 25, y, 140, 42);
+        Button startStop = MakeButton(IsRunning() ? L("Stop", "Leállítás") : L("Start", "Indítás"), 25, y, 160, 42);
         startStop.Click += delegate
         {
             if (IsRunning()) StopBot("windows-tray-stop"); else StartBot(true, "windows-tray-start");
@@ -358,24 +358,24 @@ internal sealed class CodexBotTray : Form
         };
         controlPanel.Controls.Add(startStop);
 
-        Button restart = MakeButton(L("Restart", "Újraindítás"), 185, y, 140, 42);
+        Button restart = MakeButton(L("Restart", "Újraindítás"), 205, y, 160, 42);
         restart.Click += delegate { RestartBot("windows-tray-restart"); RebuildControlPanel(); };
         controlPanel.Controls.Add(restart);
 
-        Button settings = MakeButton(L("Settings", "Beállítások"), 345, y, 140, 42);
+        Button settings = MakeButton(L("Settings", "Beállítások"), 385, y, 160, 42);
         settings.Click += delegate { OpenSettings(); RebuildControlPanel(); };
         controlPanel.Controls.Add(settings);
 
         y += 58;
-        Button log = MakeButton(L("Open Log", "Log megnyitása"), 25, y, 140, 42);
+        Button log = MakeButton(L("Open Log", "Log megnyitása"), 25, y, 160, 42);
         log.Click += delegate { OpenLog(); };
         controlPanel.Controls.Add(log);
 
-        Button folder = MakeButton(L("Open Folder", "Mappa megnyitása"), 185, y, 140, 42);
+        Button folder = MakeButton(L("Open Folder", "Mappa megnyitása"), 205, y, 160, 42);
         folder.Click += delegate { OpenFolder(); };
         controlPanel.Controls.Add(folder);
 
-        Button refreshUsage = MakeButton(L("Refresh Usage", "Használat frissítése"), 345, y, 140, 42);
+        Button refreshUsage = MakeButton(L("Refresh Usage", "Használat frissítése"), 385, y, 160, 42);
         refreshUsage.Click += delegate { RefreshUsage(true); };
         controlPanel.Controls.Add(refreshUsage);
 
@@ -459,23 +459,41 @@ internal sealed class CodexBotTray : Form
         detail.ForeColor = Color.FromArgb(180, 190, 205);
         lifecyclePanel.Controls.Add(detail);
 
-        Button check = MakeButton(L("Check Updates", "Frissítés keresése"), 14, 114, 122, 30);
+        int rowTop = 114;
+        int rowLeft = 14;
+        int rowGap = 8;
+        int usableWidth = Math.Max(500, lifecyclePanel.Width - 28 - (rowGap * 5));
+        int checkWidth = Math.Max(132, usableWidth - 370);
+        int githubWidth = 76;
+        int releasesWidth = 86;
+        int safeUpdateWidth = 106;
+        int setupWidth = 58;
+        int toolsWidth = 60;
+
+        Button check = MakeButton(L("Check Updates", "Frissítés keresése"), rowLeft, rowTop, checkWidth, 30);
         check.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(check, 8, FontStyle.Bold);
         check.Click += delegate { RenderLifecyclePanel(true); };
         lifecyclePanel.Controls.Add(check);
+        rowLeft += checkWidth + rowGap;
 
-        Button github = MakeButton("GitHub", 146, 114, 86, 30);
+        Button github = MakeButton("GitHub", rowLeft, rowTop, githubWidth, 30);
         github.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(github, 8, FontStyle.Bold);
         github.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT"); };
         lifecyclePanel.Controls.Add(github);
+        rowLeft += githubWidth + rowGap;
 
-        Button releases = MakeButton(L("Releases", "Kiadások"), 242, 114, 86, 30);
+        Button releases = MakeButton(L("Releases", "Kiadások"), rowLeft, rowTop, releasesWidth, 30);
         releases.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(releases, 8, FontStyle.Bold);
         releases.Click += delegate { OpenUrl("https://github.com/Attys-syttA/Attys_DC_BOT/releases"); };
         lifecyclePanel.Controls.Add(releases);
+        rowLeft += releasesWidth + rowGap;
 
-        Button safeUpdate = MakeButton(L("Safe Update", "Safe update"), 338, 114, 94, 30);
+        Button safeUpdate = MakeButton(L("Safe Update", "Safe update"), rowLeft, rowTop, safeUpdateWidth, 30);
         safeUpdate.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(safeUpdate, 8, FontStyle.Bold);
         safeUpdate.Enabled = snapshot.CanSafeUpdate;
         safeUpdate.BackColor = snapshot.CanSafeUpdate ? Color.FromArgb(55, 110, 80) : Color.FromArgb(55, 58, 66);
         safeUpdate.Click += delegate
@@ -484,14 +502,18 @@ internal sealed class CodexBotTray : Form
             RenderLifecyclePanel(false);
         };
         lifecyclePanel.Controls.Add(safeUpdate);
+        rowLeft += safeUpdateWidth + rowGap;
 
-        Button setup = MakeButton(L("Setup", "Setup"), 440, 114, 62, 30);
+        Button setup = MakeButton(L("Setup", "Setup"), rowLeft, rowTop, setupWidth, 30);
         setup.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(setup, 8, FontStyle.Bold);
         setup.Click += delegate { OpenLocalFile(Path.Combine(botDir, "SETUP.md")); };
         lifecyclePanel.Controls.Add(setup);
+        rowLeft += setupWidth + rowGap;
 
-        Button tools = MakeButton("Tools", 510, 114, 62, 30);
+        Button tools = MakeButton("Tools", rowLeft, rowTop, toolsWidth, 30);
         tools.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+        FitButtonText(tools, 8, FontStyle.Bold);
         tools.Click += delegate { PrepareOperatorTools(true); };
         lifecyclePanel.Controls.Add(tools);
 
@@ -571,7 +593,28 @@ internal sealed class CodexBotTray : Form
         button.BackColor = Color.FromArgb(45, 58, 78);
         button.ForeColor = Color.White;
         button.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+        button.TextAlign = ContentAlignment.MiddleCenter;
+        FitButtonText(button, 10, FontStyle.Bold);
         return button;
+    }
+
+    private static void FitButtonText(Button button, float baseSize, FontStyle style)
+    {
+        float size = baseSize;
+        while (size > 7f)
+        {
+            using (Font candidate = new Font("Segoe UI", size, style))
+            {
+                Size measured = TextRenderer.MeasureText(button.Text, candidate);
+                if (measured.Width <= button.Width - 14)
+                {
+                    button.Font = new Font("Segoe UI", size, style);
+                    return;
+                }
+            }
+            size -= 0.5f;
+        }
+        button.Font = new Font("Segoe UI", 7f, style);
     }
 
     private void UpdateStatus()
