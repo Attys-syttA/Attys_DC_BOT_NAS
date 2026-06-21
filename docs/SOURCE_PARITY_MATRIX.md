@@ -34,5 +34,5 @@ Status labels:
 | Linux WSL runtime smoke | Live Discord/Codex bot run from Linux | implemented | Debian WSL2 foreground/background launcher starts `/usr/bin/node dist/index.js`; `/doctor`, `/health`, `/dashboard`, `/usage`, `/events`, `/logs`, and `/ask` were live-smoked, including a successful Codex response. |
 | Linux GUI control panel smoke | WSLg Tk control panel runtime | implemented | Debian WSL2/WSLg opens `tray/codex_control_panel.py`, shows running status and usage, and Stop/Restart work; file/folder/settings opening has WSL-aware fallback. |
 | Linux tray runtime smoke | Real Linux desktop tray smoke | future work | Requires a Linux desktop session with tray dependencies and system tray support. |
-| macOS Swift runtime smoke | Real macOS menu bar smoke | future work | Requires macOS with Xcode Command Line Tools. |
+| macOS Swift compile/runtime smoke | macOS menu bar compile/runtime evidence | partial | GitHub Actions compiles `menubar/CodexBotMenu.swift` on `macos-latest`; runtime smoke still requires a real macOS desktop. |
 | iPad/mobile Discord smoke | Remote operator acceptance | future work | Requires the user's Discord client and live bot/server context. |

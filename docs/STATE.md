@@ -112,6 +112,6 @@ Finish the cross-platform source-parity closeout without weakening the local-fir
 5. `/health` command surface count now uses the same expected Discord command surface as `/doctor`.
 6. Linux GUI control panel runtime smoke is proven under Debian WSL2/WSLg for render, status, usage, Stop, and Restart; tray icon smoke still needs WSLg tray support or a real Linux desktop session.
 7. Operator UI language is now English/Hungarian (`EN/HU`) on Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menu bar, and Discord operator outputs; legacy `.tray-lang=kr` loads as Hungarian for compatibility.
-8. macOS menu bar runtime smoke still needs a real/remote Mac or macOS CI for compile-only evidence.
+8. macOS menu bar compile-only evidence is now covered by the `macOS Swift Compile` GitHub Actions workflow; runtime smoke still needs a real/remote Mac.
 9. Add scrubbed or synthetic screenshots only when they reveal more than the current SVG.
 10. Keep using `/mappings` and `/doctor` for future legacy mapping drift checks.

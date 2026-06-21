@@ -44,12 +44,13 @@ Status: active
 - Launcher bugfix: a Linux foreground/systemd/nohup es macOS foreground launcher mar nem irja inditas elott a `.bot.lock` fajlt, mert azt az app singleton lockja kezeli; ez javitja az `Another bot instance is already running` hamis inditasi hibat.
 - WSL background fix: a Linux `nohup` fallback `setsid` es `</dev/null` leválasztas mellett indul, igy a bot nem-interaktiv `wsl.exe` parancs utan is eletben marad.
 - Operator UI localization: a Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menubar es Discord operator outputok masodik nyelve magyar lett; a nyelvvalaszto `EN/HU`, a regi `.tray-lang=kr` ertek kompatibilitasbol magyar modkent tolto be.
+- macOS Swift compile gate: bekerult a `macOS Swift Compile` GitHub Actions workflow, amely `macos-latest` runneren `swiftc`-vel forditja a `menubar/CodexBotMenu.swift` fajlt compile-only bizonyitekkent.
 
 ## Nyitott reszek
 
 - Fazon 8 local validation/source parity matrix commit es push.
 - Linux control panel GUI runtime smoke WSLg alatt bizonyitott; Linux tray ikon smoke tovabbra is WSLg tray supportot vagy teljes Linux desktopot igenyel.
-- macOS menubar Swift build/runtime smoke tenyleges macOS hoston kesobb platformtesztet igenyelhet.
+- macOS menubar Swift compile-only smoke GitHub Actionsben elokeszitve; runtime smoke tovabbra is tenyleges macOS hostot igenyel.
 - iPad/mobile Discord file handoff es live Discord command smoke emberi acceptance-et igenyel.
 - Linux acceptance Windowsrol realisan WSL2/WSLg vagy Linux VM alatt kozelitheto:
   - headless/script smoke: Debian WSL2 bizonyitott;
@@ -61,7 +62,7 @@ Status: active
   - menu bar runtime smokehoz valodi macOS desktop kell.
 - Kovetkezo konkret lepes:
   1. Linux GUI smoke dontes: WSLg vagy teljes Linux VM legyen-e a helyi tray/control-panel acceptance kornyezet.
-  2. macOS smoke dontes: macOS CI compile-only eleg-e ideiglenesen, vagy kell valodi Mac runtime smoke.
+  2. macOS smoke: CI compile-only gate futtatasa utan valodi Mac runtime smoke dontes.
   3. iPad/mobile smoke: live Discordon `Send to Codex` file handoff modalos prompttal, majd `/last`, `/events`, `/logs`, `/usage`.
 
 ## Cel
