@@ -45,6 +45,7 @@ Status: active
 - WSL background fix: a Linux `nohup` fallback `setsid` es `</dev/null` leválasztas mellett indul, igy a bot nem-interaktiv `wsl.exe` parancs utan is eletben marad.
 - Operator UI localization: a Windows tray/control panel, Linux Tk control panel, Linux tray, macOS menubar es Discord operator outputok masodik nyelve magyar lett; a nyelvvalaszto `EN/HU`, a regi `.tray-lang=kr` ertek kompatibilitasbol magyar modkent tolto be.
 - macOS Swift compile gate: bekerult a `macOS Swift Compile` GitHub Actions workflow, amely `macos-latest` runneren `swiftc`-vel forditja a `menubar/CodexBotMenu.swift` fajlt compile-only bizonyitekkent.
+- Windows/slash-only default: a `DISCORD_ENABLE_MESSAGE_PROMPTS` kodbeli es example alapertelmezese `false` lett, igy az uj telepitesek slash command/context-command alapon indulnak Message Content intent nelkul.
 
 ## Nyitott reszek
 
@@ -672,7 +673,7 @@ CI/publish:
 
 ## Nyitott emberi dontesek
 
-- Legyen-e defaultbol bekapcsolva a normal message prompt/attachment flow, vagy maradjon default: slash/context-command only?
+- Dontes: defaultbol slash/context-command only marad; a normal message prompt/attachment flow explicit opt-in.
 - Kell-e magyar teljes SETUP/README a public English docs mellett?
 - Kell-e legacy secondary-language docs parity a forras repo miatt, vagy ez nem relevans az Attys repo kozonsegenek?
 - Van-e elerheto macOS gep a Swift menubar valos build/smoke teszthez?

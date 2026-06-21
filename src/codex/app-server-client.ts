@@ -2,6 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
 import { EventEmitter } from "node:events";
 import { resolveCodexCommand } from "./command-resolver.js";
+import { windowsCmdInvocation } from "../utils/process.js";
 
 export interface CodexTurn {
   id: string;
@@ -71,10 +72,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function shouldUseShell(command: string): boolean {
-  return process.platform === "win32" && /\.(cmd|bat)$/i.test(command);
-}
-
 export class CodexAppServerClient extends EventEmitter {
   private static readonly REQUEST_TIMEOUT_MS = 15_000;
   private process: ChildProcessWithoutNullStreams | null = null;
@@ -97,9 +94,9 @@ export class CodexAppServerClient extends EventEmitter {
 
   private async startInternal(): Promise<void> {
     const codexCommand = resolveCodexCommand();
-    this.process = spawn(codexCommand, ["app-server"], {
+    const invocation = windowsCmdInvocation(codexCommand, ["app-server"]);
+    this.process = spawn(invocation.command, invocation.args, {
       stdio: ["pipe", "pipe", "pipe"],
-      shell: shouldUseShell(codexCommand),
       windowsHide: true,
     });
 

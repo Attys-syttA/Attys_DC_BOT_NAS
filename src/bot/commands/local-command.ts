@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { windowsCmdInvocation } from "../../utils/process.js";
 
 export interface LocalCommandResult {
   exitCode: number | null;
@@ -13,10 +14,10 @@ export function runLocalCommand(
   timeoutMs: number,
 ): Promise<LocalCommandResult> {
   return new Promise((resolve) => {
-    const child = spawn(command, args, {
+    const invocation = windowsCmdInvocation(command, args);
+    const child = spawn(invocation.command, invocation.args, {
       cwd,
       windowsHide: true,
-      shell: process.platform === "win32" && /\.(cmd|bat)$/i.test(command),
     });
 
     let output = "";

@@ -279,14 +279,14 @@ npm run dev
 
 1. In a Discord channel, run `/register`.
 2. Select or type a folder under `BASE_PROJECT_DIR`.
-3. Send a normal message or use the available slash commands; `/ask` can include up to three optional files or images.
+3. Use slash commands by default; `/ask` can include up to three optional files or images. Normal messages become prompts only if `DISCORD_ENABLE_MESSAGE_PROMPTS=true`.
 4. Use `/dashboard`, `/sessions`, `/last`, `/queue list`, and `/stop` to inspect or control the local Codex work.
 5. Use `/dashboard` to see whether Codex is waiting for approval, a question answer, custom input, or queue confirmation.
 6. Use `/doctor` if the bot starts but Codex or channel routing does not behave as expected.
 
 Optional local commands:
 
-- `/ask` gives a slash-command prompt path in addition to normal messages and can include `file`, `file2`, and `file3` attachments.
+- `/ask` gives the default slash-command prompt path and can include `file`, `file2`, and `file3` attachments.
 - For iPad/phone file handoff, the most reliable path is: upload the file as a normal Discord message, then choose `Apps` / `Alkalmazasok` -> `Send to Codex` on that message.
 - Optional source-repo parity: set `DISCORD_ENABLE_ATTACHMENT_MESSAGES=true` to let normal text+attachment messages become Codex prompts in registered channels. Attachment-only messages still ask for an instruction instead of starting blind work.
 - Normal message prompt and attachment-message modes require Discord's privileged Message Content intent.

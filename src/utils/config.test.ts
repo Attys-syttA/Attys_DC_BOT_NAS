@@ -52,7 +52,7 @@ describe("config", () => {
     expect(config.DISCORD_DATABASE_PATH).toBe(".discord-bot-state/bridge.sqlite");
     expect(config.DISCORD_SESSION_STORE_PATH).toBe(".discord-bot-state/sessions.json");
     expect(config.DISCORD_QUEUE_MAX_ITEMS).toBe(10);
-    expect(config.DISCORD_ENABLE_MESSAGE_PROMPTS).toBe(true);
+    expect(config.DISCORD_ENABLE_MESSAGE_PROMPTS).toBe(false);
     expect(config.DISCORD_ENABLE_ATTACHMENT_MESSAGES).toBe(false);
     expect(config.DISCORD_EPHEMERAL_RESPONSES).toBe(true);
     expect(config.DISCORD_REGISTER_COMMANDS).toBe(false);

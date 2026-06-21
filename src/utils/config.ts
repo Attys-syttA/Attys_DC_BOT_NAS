@@ -20,7 +20,7 @@ const envSchema = z.object({
   DISCORD_QUEUE_MAX_ITEMS: z.coerce.number().int().positive().default(10),
   DISCORD_ENABLE_MESSAGE_PROMPTS: z
     .enum(["true", "false"])
-    .default("true")
+    .default("false")
     .transform((v) => v === "true"),
   DISCORD_ENABLE_ATTACHMENT_MESSAGES: z
     .enum(["true", "false"])

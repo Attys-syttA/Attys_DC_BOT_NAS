@@ -115,3 +115,4 @@ Finish the cross-platform source-parity closeout without weakening the local-fir
 8. macOS menu bar compile-only evidence is now covered by the `macOS Swift Compile` GitHub Actions workflow; runtime smoke still needs a real/remote Mac.
 9. Add scrubbed or synthetic screenshots only when they reveal more than the current SVG.
 10. Keep using `/mappings` and `/doctor` for future legacy mapping drift checks.
+11. New installs now default to slash-only control: `DISCORD_ENABLE_MESSAGE_PROMPTS=false`; normal message prompts remain available as an explicit opt-in.

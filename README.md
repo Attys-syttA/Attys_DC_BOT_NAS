@@ -77,7 +77,7 @@ Because it reads local Codex thread storage where supported, sessions created fr
 
 - The bot stores channel-to-project mappings in local SQLite.
 - `/register` links a Discord channel to a local folder under `BASE_PROJECT_DIR`.
-- `/ask` or message prompts start or resume Codex work for that project.
+- `/ask` starts or resumes Codex work for that project; normal message prompts are optional.
 - Assistant output is streamed back to Discord and split safely for long messages and code blocks.
 - Operator events are written to ignored local logs and can be inspected from Discord without exposing secrets.
 
@@ -360,7 +360,7 @@ Important `.env` keys:
 | `BASE_PROJECT_DIR` | Workspace root that `/register` may use |
 | `DISCORD_DATABASE_PATH` | Local SQLite state path |
 | `DISCORD_SESSION_STORE_PATH` | Local session store path |
-| `DISCORD_ENABLE_MESSAGE_PROMPTS` | Whether normal text messages can become prompts |
+| `DISCORD_ENABLE_MESSAGE_PROMPTS` | Whether normal text messages can become prompts; default is `false` |
 | `DISCORD_ENABLE_ATTACHMENT_MESSAGES` | Whether normal text+attachment messages can become prompts |
 | `DISCORD_REGISTER_COMMANDS` | Whether startup registers slash commands |
 | `DISCORD_ENABLE_RUN_TESTS` | Enables `/run-tests` |
