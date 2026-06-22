@@ -5,27 +5,27 @@
 - Date: 2026-06-22
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT`
-- Phase: source parity implementation complete; Windows release-readiness closeout is the active remaining work
-- Git state: local `main` tracks `origin/main`; last verified synced at `2461513`
-- Active plan: `docs/codex-tasks/plans/pending/active/cross-platform-source-parity-and-beyond.md`
+- Phase: Windows prerelease baseline complete; external-platform acceptance is the active remaining work
+- Git state: local `main` tracks `origin/main`; last verified synced at `dbec36c`
+- Active plan: `docs/codex-tasks/plans/pending/active/external-platform-acceptance.md`
 
 ## Current Goal
 
-Keep the Windows-first baseline stable and rerun the release acceptance gates. Linux tray icon runtime, macOS menu bar runtime, and iPad/mobile file handoff remain external-platform future-work until real target-platform evidence exists.
+Keep the Windows-first baseline stable while Linux tray icon runtime, macOS menu bar runtime, and iPad/mobile file handoff remain external-platform acceptance work until real target-platform evidence exists.
 
 ## Current Cross-Platform Parity Status
 
 - Implemented and pushed through `8cccd82`: Linux/macOS launchers, Linux Python tray/control panel, macOS Swift menu bar source, opt-in normal text+attachment message flow, canonical usage cache helpers, public-safe cross-platform docs/assets, cross-platform `safe-update:status/apply`, and `docs/SOURCE_PARITY_MATRIX.md`.
 - Local validation passed: `npm run check`, `git diff --check`, shell syntax checks for `install.sh`, `linux-start.sh`, `mac-start.sh`, Python compile for Linux tray/panel, `npm run safe-update:status`, `npm run secret:scan`, and Windows launcher smoke.
 - Windows launcher smoke result: bot status/start/status/stop/status completed and final state was `Stopped`. Non-blocking note: tray rebuild reported `CS0016` because `tray/CodexBotTray.exe` was locked by another process, but the bot lifecycle smoke completed.
-- Known blocker before moving the active plan to `done`: first prerelease publication remains pending until commit/push, green GitHub Actions, and a clean release gate; Windows UI acceptance and Discord live smoke are now recorded from operator testing.
+- Windows/P1 release-readiness plan is done: `docs/codex-tasks/plans/done/windows-release-readiness-after-source-parity.md`.
 - 2026-06-22 evidence: local validation passed (`typecheck`, `test`, `build`, `check`, `git diff --check`, `ggshield`), Windows launcher lifecycle smoke passed, operator tools preflight completed OK, `doctor:local` passed, and final launcher state was `Stopped`.
-- First prerelease candidate is being prepared as package version `0.1.1-prerelease.1`, with recommended GitHub prerelease tag/title `v0.1.00001-pre`.
+- First prerelease is published as `v0.1.00001-pre`; package version is `0.1.1-prerelease.1`.
 - Windows tray rebuild note: widening the control panel required stopping the existing `CodexBotTray.exe` that locked the binary; after that, launcher smoke rebuilt the tray without `CS0016` and ended with the bot `Stopped`.
 - Windows UI acceptance note: on 2026-06-22 the operator tested the tray/control panel buttons, confirmed the window closes to the system tray, and confirmed it can be reopened from the tray.
 - Discord live smoke note: on 2026-06-22 the operator tested the plan's listed live commands/flows (`/doctor`, `/health`, `/dashboard`, `/register`, `/ask`, `Send to Codex`, approval accept/deny, Codex question answer, `/events`, `/logs`, `/last`, `/sessions`, `/usage`, `/bot status`) and reported no errors.
-- Deferred future-work: Linux tray icon runtime needs a real Linux desktop session with tray support; macOS menu bar runtime needs a real or remote Mac; iPad/mobile Discord file handoff needs a real operator-client smoke.
-- Practical next step: rerun final validation/secret scan after these evidence updates, then commit/push and wait for green GitHub Actions before the first prerelease.
+- Active external-platform work: Linux tray icon runtime needs a real Linux desktop session with tray support; macOS menu bar runtime needs a real or remote Mac; iPad/mobile Discord file handoff needs a real operator-client smoke.
+- Practical next step: run the external-platform acceptance slices when the needed target platform is available.
 
 ## Audit Summary
 
@@ -111,10 +111,8 @@ Keep the Windows-first baseline stable and rerun the release acceptance gates. L
 
 ## Open Work
 
-1. Keep the operator-reported Windows UI acceptance attached to the release evidence: tray/control panel buttons tested, close-to-tray behavior works, and the panel reopens from the system tray.
-2. Keep the operator-reported Discord live smoke result attached to the release evidence: `/doctor`, `/health`, `/dashboard`, `/register`, `/ask`, `Send to Codex`, approval accept/deny, Codex question answer, `/events`, `/logs`, `/last`, `/sessions`, `/usage`, and `/bot status`.
-3. Rerun final validation after these evidence updates: `npm run typecheck`, `npm test`, `npm run build`, `npm run check`, `git diff --check`, and `ggshield secret scan path --recursive --yes --use-gitignore .`.
-4. After commit/push and green GitHub Actions, create the first GitHub prerelease from the validated commit as `v0.1.00001-pre`; do not publish from a dirty worktree.
-5. Keep normal message prompts and normal text+attachment prompts documented as explicit opt-in only; do not change their defaults.
-6. Keep Linux tray icon runtime, macOS menu bar runtime, and iPad/mobile file handoff as future-work until real target-platform evidence exists.
-7. Consider a later explicit destructive recovery/update mode only if `git stash` or `git reset --hard` should be allowed with strong confirmation.
+1. Linux tray icon runtime smoke on a real Linux desktop session with tray support.
+2. macOS menu bar runtime smoke on a real or remote Mac.
+3. iPad/mobile Discord file handoff smoke with a live mobile Discord client.
+4. Keep normal message prompts and normal text+attachment prompts documented as explicit opt-in only; do not change their defaults.
+5. Consider a later explicit destructive recovery/update mode only if `git stash` or `git reset --hard` should be allowed with strong confirmation.

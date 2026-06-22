@@ -16,6 +16,8 @@
 - Windows tray gombsor polish: a `Frissítés keresése` / `Check Updates` gomb mar nem tolti ki a lifecycle sor maradek helyet, hanem a tobbi lifecycle gombhoz hasonloan szovegmeret + fix padding alapjan kap szelesseget.
 - Discord live smoke: a user vegigprobalta a tervben felsorolt live parancsokat/flow-kat (`/doctor`, `/health`, `/dashboard`, `/register`, `/ask`, `Send to Codex`, approval accept/deny, Codex question answer, `/events`, `/logs`, `/last`, `/sessions`, `/usage`, `/bot status`) es nem talalt hibat.
 - Windows UI acceptance: a user vegigprobalta a tray/control panel gombjait, az ablak bezaraskor a system tray-re csukodik, es onnan visszanyithato; ez bekerult a `docs/WINDOWS_ACCEPTANCE.md` 2026-06-22 evidence snapshotjaba.
+- Plan split: a Windows/P1 release-readiness terv `done/windows-release-readiness-after-source-parity.md` ala kerult, az aktiv folytatas pedig kulon `pending/active/external-platform-acceptance.md` lett Linux tray runtime, macOS menu bar runtime es iPad/mobile smoke acceptance-re.
+- Prerelease archive audit: a letoltott `Attys_DC_BOT-0.1.00001-pre.zip` es `.tar.gz` tartalma egyezik a `v0.1.00001-pre` taggel, `ggshield` nem talalt titkot, es nem volt bennuk `.env`, runtime SQLite, log, Codex auth state, `.discord-bot-state`, `.codex-uploads`, `node_modules`, `dist` vagy `.git`.
 
 ## 2026-06-17
 
