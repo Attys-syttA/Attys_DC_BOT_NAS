@@ -2,6 +2,8 @@
 
 ## 2026-08-18
 
+- Source-of-truth correction: the operator clarified that `Attys_DC_BOT` is the intended primary repository, and this NAS repository is historical/reference material from an earlier NAS experiment. Active BotOps contracts, Discord commands, NAS handoff/control-plane helpers, and limited worker execution are being consolidated into `Attys_DC_BOT`; this repository must not run as a second competing BotOps runtime.
+- Docs-only status correction: `AGENTS.md`, `docs/STATE.md`, and the active BotOps NAS/Windows control-plane plan now mark this repository as `superseded/reference`. No version bump, runtime change, worker loop, restart, deploy, commit, push, cleanup, or service install is part of this correction.
 - Windows worker target-root wiring: bekerult a `BOTOPS_WINDOWS_TARGET_REPO_ROOT`, amellyel a NAS repo worker kodja explicit, abszolut letezo celrepo gyokerre iranyithato; ervenytelen celnal fail-closed megall.
 - Config hardening: a `DISCORD_DATABASE_PATH` tovabbra is valaszthat BotOps DB-t, de onmagaban mar nem szamit bot runtime config jelenletnek, igy live restart smoke-nal kulon a celrepo `.env` vagy `BASE_PROJECT_DIR` kell.
 - Live restart smoke: a synthetic approved `service.restart` BotOps job `job-d61e9ed3-85d2-4c60-9f90-d2c6cc7e0d01` a live `Attys_DC_BOT` DB-ben `Completed` lett; a worker a live bot repot celzta, a bot PID `44748` -> `10440` lett, `bot.err.log` ures maradt, es a startup log `Registered 29 application commands` sort adott.

@@ -5,13 +5,20 @@
 - Date: 2026-08-18
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT_NAS`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT_NAS`
-- Phase: NAS BotOps control-plane baseline in progress
+- Phase: superseded/reference after source-of-truth correction
 - Package version: `0.1.1-prerelease.9`
 - Active plan: `docs/codex-tasks/plans/pending/active/botops-nas-windows-control-plane.md`
 
 ## Current Goal
 
-Make Discord the main operator surface while keeping execution staged, allowlisted, logged, and approval-gated across the NAS control plane and the limited Windows execution plane.
+Keep this repository as historical/reference material. Active Discord BotOps, NAS handoff/control-plane helpers, and limited worker execution are consolidated into `<CODEX_WORKS>\Attys_DC_BOT`.
+
+## 2026-08-18 Direction Correction
+
+- User clarified that `Attys_DC_BOT` is the intended primary repository and this NAS repository came from an older, weaker-NAS experiment.
+- The same-day worker-target-root and restart-smoke work here is superseded as reference material.
+- Useful fixed-worker ideas are being moved into `Attys_DC_BOT`; this repository must not become a second active BotOps runtime.
+- The untracked `docs/codex-tasks/plans/pending/not-started/GPT_beszelgetes_uj_tervrol.md` file is user-owned local material and was not touched.
 
 ## Current Safety Model
 
@@ -78,10 +85,9 @@ Make Discord the main operator surface while keeping execution staged, allowlist
 
 ## Open Work
 
-1. Keep the cross-repo Discord command integration aligned with the live `Attys_DC_BOT` production command surface.
-2. Decide whether restart worker execution should target only the bot repo, or later support additional fixed services with separate capabilities.
-3. Decide the NAS publication/deploy route for this repo.
-4. Decide whether worker supervisor start should later be attached to OS/service autostart; this still needs a separate approval gate.
+1. Do not continue active runtime implementation here.
+2. Use this repository only as reference while consolidating useful pieces into `Attys_DC_BOT`.
+3. Keep any future NAS write/deploy/rebuild/service work approval-gated in the source-of-truth repo.
 
 ## Latest Validation
 
@@ -126,3 +132,4 @@ Make Discord the main operator surface while keeping execution staged, allowlist
 - `git diff --check`: passed at `0.1.1-prerelease.9`.
 - `ggshield secret scan path --recursive --yes --use-gitignore .`: passed at `0.1.1-prerelease.9`.
 - Live restart smoke: `npm run worker:windows:once` completed the approved `service.restart` job against the live bot repo; follow-up `win-start.bat --status`, `npm run doctor:local`, and `npm run nas:bridge:status` passed in `Attys_DC_BOT`.
+- Direction correction validation passed: `npm run plans:check`, `git diff --check`, and targeted `ggshield secret scan path --recursive --yes --use-gitignore AGENTS.md docs\STATE.md docs\CHANGELOG.dev.md docs\codex-tasks\plans\pending\active\botops-nas-windows-control-plane.md`.

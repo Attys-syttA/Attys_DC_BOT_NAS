@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-This repository is `Attys_DC_BOT_NAS`, the NAS-side BotOps control-plane and fixed-task worker repository for the Discord-controlled Codex workflow.
+This repository is `Attys_DC_BOT_NAS`, a historical/reference NAS-side BotOps experiment for the Discord-controlled Codex workflow.
 
 Target GitHub repository:
 
@@ -10,23 +10,27 @@ Target GitHub repository:
 
 ## 2. Architecture
 
-Target direction:
+Current direction:
 
 ```text
 Discord
-  -> Attys_DC_BOT command surface
-  -> BotOps request / approval contract
-  -> NAS control plane queue, state, heartbeat, result store
-  -> fixed allowlisted NAS worker tasks
-  -> limited Windows worker/helper tasks through explicit approvals
+  -> Attys_DC_BOT source-of-truth
+  -> NAS handoff/control-plane helpers and limited workers maintained there
+  -> this repository only as reference/superseded material
 ```
+
+Source-of-truth rule:
+
+- Active BotOps contracts, Discord commands, NAS handoff/control-plane helpers, and limited worker execution belong in `Attys_DC_BOT`.
+- Do not add new runtime behavior here unless a later explicit migration plan reopens this repository.
+- Do not run this repository as a second competing BotOps runtime beside `Attys_DC_BOT`.
 
 Default safety model:
 
 - staged autonomy with explicit approval gates
 - no arbitrary shell execution from Discord
 - no automatic source writes, commit, push, deploy, cleanup, restart, or NAS-side write actions
-- NAS execution starts with fixed allowlisted status/check tasks only
+- NAS execution starts with fixed allowlisted status/check tasks only, from the source-of-truth repository
 
 Explicitly out of scope until a separate approved plan exists:
 

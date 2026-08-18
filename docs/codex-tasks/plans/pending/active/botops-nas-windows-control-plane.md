@@ -1,10 +1,12 @@
 # BotOps NAS + Windows Control Plane
 
-Status: active
+Status: superseded/reference
 
 ## Cel
 
 A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehajtas csak staged, allowlistes, naplozott es explicit approval-gated lepeseken keresztul tortenhet.
+
+2026-08-18 korrekcio: a source-of-truth nem ez a repo, hanem az `Attys_DC_BOT`. Ez a terv a korabbi NAS repo kiserlet referenciaja; uj runtime fejlesztest nem innen kell folytatni.
 
 ## Elkeszult reszek
 
@@ -70,23 +72,9 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
 
 ## Nyitott reszek
 
-1. Approval rejection reason rogzites:
-   - ha kesobb bekerul explicit reject command vagy UI, az indokot kulon eventkent kell rogziteni
-2. Worker lifecycle OS/service supervision:
-   - explicit kulon approval nelkul tovabbra sincs service install vagy OS autostart
-   - a mostani start/stop/restart helper parancsra indithato, PID/log alapu runtime felugyelet
-   - worker loop status/log csak public-safe lehet
-3. Production command surface decision:
-   - ha az eles Discord bot tovabbra is az `Attys_DC_BOT`, akkor a contractot es parancsokat kontrollaltan at kell venni oda is
-   - a NAS repo maradjon producer/control-plane truth, ha kulon NAS service lesz belole
-4. Supervised restart runtime smoke:
-   - `service.restart` worker capability, explicit target-root bekotes es live restart smoke elkeszult
-   - tovabbi service restart automatizalas csak uj, kulon capability/approval dontessel bovulhet
-5. Live smoke csak kulon approval utan:
-   - slash command registration
-   - bot restart
-   - NAS worker inditas vagy loop supervision
-   - Windows helper runtime check
+1. A hasznos worker/supervisor szeletek atvetele az `Attys_DC_BOT` repoba.
+2. A NAS repo tovabbi runtime fejlesztesenek lezarasa vagy archiv jellegu karbantartasa.
+3. Barmilyen uj NAS-side write/deploy/rebuild irany csak az `Attys_DC_BOT` terven es approval gate-en keresztul indulhat.
 
 ## Fail-Closed Szabalyok
 
@@ -100,4 +88,4 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
 
 ## Kovetkezo Lepes
 
-A kovetkezo implementacios szelet a production/runtime handoff ellenorzes vagy a NAS publication/deploy route dontese legyen. Service restart live smoke, deploy, commit es push tovabbra is kulon approval.
+Az aktualis kovetkezo lepes az `Attys_DC_BOT` oldali konszolidacio validalasa. Ez a repo nem indit uj worker loopt, service restartot, deployt, commitot vagy pusht automatikusan.
