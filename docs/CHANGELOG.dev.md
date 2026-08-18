@@ -2,6 +2,8 @@
 
 ## 2026-08-18
 
+- Windows service restart worker slice: `service.restart` now belongs to the Windows worker capability list, but remains approval-gated by the BotOps job contract. After exact fresh approval, it runs only the fixed `cmd /c win-start.bat` helper and fails closed on dirty worktree, missing config, stale/unknown bot lock, or missing helper script. It does not grant arbitrary shell, source write, commit, push, deploy, rebuild, cleanup, service install, or OS autostart.
+- Version bump: a package verzio `0.1.1-prerelease.8`, mert az approval-koteles Windows `service.restart` worker capability bekerult.
 - Worker lifecycle supervisor: bekerult az explicit `worker:nas:start|stop|restart|supervisor-status` es `worker:windows:start|stop|restart|supervisor-status` script keszlet, kozos PID/log alapu supervisor modullal.
 - Windows worker loop: a Windows worker CLI explicit `--loop` modot kapott, hogy ugyanugy felugyelheto legyen, mint a NAS worker.
 - Supervisor safety: a duplicate start nem indit masodik loopot, a stale PID csak explicit stopnal takarodik, a restart pedig fail-closed megall, ha a regi PID meg fut; nincs service install, OS autostart, source write, approval adas, commit, push, deploy vagy cleanup automatizmus.

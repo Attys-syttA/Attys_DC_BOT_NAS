@@ -30,12 +30,12 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
   - public-safe result iras
   - `worker:nas:status`, `worker:nas:once`, `worker:nas:loop` npm script
 - Bekerult az elso Windows fixed helper worker szelet:
-  - `status.read` es `audit.check` registry
+  - `status.read`, `audit.check` es approval-koteles `service.restart` registry
   - dirty worktree preflight
   - bot lock inspection process leallitas nelkul
   - config presence check ertekek kiirasa nelkul
   - `audit.check` csak fix `npm run check` helperrel fut, dirty/missing config mellett blokkol
-  - `service.restart` ebben a szeletben tovabbra sem worker capability
+  - `service.restart` csak exact fresh approval utan, fix `cmd /c win-start.bat` helperrel fut, es dirty worktree, missing config, stale/unknown bot lock vagy hianyzo helper mellett fail-closed megall
 - Bekerult az approval expiry hardening:
   - approval rogziti az `approved_by` es `approval_expires_at` mezoket
   - default TTL 15 perc
@@ -71,8 +71,8 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
 3. Production command surface decision:
    - ha az eles Discord bot tovabbra is az `Attys_DC_BOT`, akkor a contractot es parancsokat kontrollaltan at kell venni oda is
    - a NAS repo maradjon producer/control-plane truth, ha kulon NAS service lesz belole
-4. Supervised restart decision:
-   - `service.restart` kulon szeletet igenyel, mert elo folyamatot erint
+4. Supervised restart runtime smoke:
+   - `service.restart` worker capability elkeszult, de valos restart job live smoke csak kulon operatori paranccsal fusson
 5. Live smoke csak kulon approval utan:
    - slash command registration
    - bot restart
@@ -91,4 +91,4 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
 
 ## Kovetkezo Lepes
 
-A kovetkezo implementacios szelet a production command surface atveteli dontes vagy a service.restart kulon supervised worker szelete legyen. Service restart, deploy, commit es push tovabbra is kulon approval.
+A kovetkezo implementacios szelet a production/runtime handoff ellenorzes vagy a NAS publication/deploy route dontese legyen. Service restart live smoke, deploy, commit es push tovabbra is kulon approval.

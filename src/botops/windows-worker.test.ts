@@ -15,6 +15,7 @@ vi.mock("better-sqlite3", async () => {
 });
 
 import {
+  approveBotOpsJob,
   createOrGetBotOpsJob,
   getBotOpsJob,
   initDatabase,
@@ -36,13 +37,16 @@ function makeTempDir(): string {
   return dir;
 }
 
-function makeRunner(gitStatusOutput: string, npmCode = 0): FixedCommandRunner {
+function makeRunner(gitStatusOutput: string, npmCode = 0, cmdCode = 0): FixedCommandRunner {
   return (command, args) => {
     if (command === "git" && args.join(" ") === "status --porcelain") {
       return { code: 0, output: gitStatusOutput };
     }
     if (command === "npm" || command === "npm.cmd") {
       return { code: npmCode, output: npmCode === 0 ? "ok" : "failed" };
+    }
+    if (command === "cmd" && args.join(" ") === "/c win-start.bat") {
+      return { code: cmdCode, output: cmdCode === 0 ? "restarted" : "failed" };
     }
     return { code: 1, output: "unexpected command" };
   };
@@ -82,7 +86,12 @@ describe("Windows worker", () => {
       summary: "windows status",
     });
 
-    const result = runWindowsWorkerOnce(repo, "worker-1", makeRunner(" M src/file.ts"));
+    const result = runWindowsWorkerOnce(
+      repo,
+      "worker-1",
+      makeRunner(" M src/file.ts"),
+      new Date("2026-08-18T10:01:00.000Z"),
+    );
 
     expect(result.status).toBe("completed");
     expect(result.result).toContain("Windows worker status completed");
@@ -100,7 +109,12 @@ describe("Windows worker", () => {
       summary: "check",
     });
 
-    const result = runWindowsWorkerOnce(repo, "worker-1", makeRunner(" M src/file.ts"));
+    const result = runWindowsWorkerOnce(
+      repo,
+      "worker-1",
+      makeRunner(" M src/file.ts"),
+      new Date("2026-08-18T10:01:00.000Z"),
+    );
 
     expect(result.status).toBe("failed");
     expect(result.result).toBe("check helper blocked: worktree dirty");
@@ -133,7 +147,7 @@ describe("Windows worker", () => {
     expect(calls.some((call) => call.endsWith("run check"))).toBe(true);
   });
 
-  it("does not pick service restart jobs in this slice", () => {
+  it("does not pick service restart jobs without approval", () => {
     const repo = makeTempDir();
     createOrGetBotOpsJob({
       job_id: "restart-1",
@@ -145,6 +159,63 @@ describe("Windows worker", () => {
 
     expect(runWindowsWorkerOnce(repo, "worker-1", makeRunner("")).status).toBe("idle");
     expect(getBotOpsJob("restart-1")?.status).toBe("WaitingApproval");
+  });
+
+  it("blocks approved service restart jobs on a dirty worktree", () => {
+    const repo = makeTempDir();
+    fs.writeFileSync(path.join(repo, ".env"), "BASE_PROJECT_DIR=C:\\workspace\n");
+    fs.writeFileSync(path.join(repo, "win-start.bat"), "@echo off\n");
+    createOrGetBotOpsJob({
+      job_id: "restart-dirty",
+      requested_by: "operator",
+      target: "windows",
+      capability: "service.restart",
+      summary: "restart",
+    });
+    approveBotOpsJob("restart-dirty", "operator", new Date("2026-08-18T10:00:00.000Z"));
+
+    const result = runWindowsWorkerOnce(
+      repo,
+      "worker-1",
+      makeRunner(" M src/file.ts"),
+      new Date("2026-08-18T10:01:00.000Z"),
+    );
+
+    expect(result.status).toBe("failed");
+    expect(result.result).toBe("service restart blocked: worktree dirty");
+    expect(getBotOpsJob("restart-dirty")?.status).toBe("Failed");
+  });
+
+  it("runs only the fixed win-start restart helper after exact approval", () => {
+    const repo = makeTempDir();
+    fs.writeFileSync(path.join(repo, ".env"), "BASE_PROJECT_DIR=C:\\workspace\n");
+    fs.writeFileSync(path.join(repo, "win-start.bat"), "@echo off\n");
+    const calls: string[] = [];
+    const runner: FixedCommandRunner = (command, args) => {
+      calls.push(`${command} ${args.join(" ")}`);
+      if (command === "git") return { code: 0, output: "" };
+      if (command === "cmd" && args.join(" ") === "/c win-start.bat") {
+        return { code: 0, output: "restarted" };
+      }
+      return { code: 1, output: "unexpected" };
+    };
+    createOrGetBotOpsJob({
+      job_id: "restart-approved",
+      requested_by: "operator",
+      target: "windows",
+      capability: "service.restart",
+      summary: "restart",
+    });
+    approveBotOpsJob("restart-approved", "operator", new Date("2026-08-18T10:00:00.000Z"));
+
+    const result = runWindowsWorkerOnce(repo, "worker-1", runner, new Date("2026-08-18T10:01:00.000Z"));
+
+    expect(result.status).toBe("completed");
+    expect(result.result).toBe("service restart helper completed: win-start.bat returned success");
+    expect(calls).toContain("git status --porcelain");
+    expect(calls).toContain("cmd /c win-start.bat");
+    expect(calls.some((call) => call.includes("powershell"))).toBe(false);
+    expect(getBotOpsJob("restart-approved")?.status).toBe("Completed");
   });
 
   it("reports stale bot locks without stopping any process", () => {
@@ -161,7 +232,7 @@ describe("Windows worker", () => {
     );
 
     expect(formatted).toContain("worker: worker-1");
-    expect(formatted).toContain("capabilities: status.read, audit.check");
+    expect(formatted).toContain("capabilities: status.read, audit.check, service.restart");
     expect(formatted).toContain("worktree: clean");
     expect(formatted).not.toContain(":\\");
   });
@@ -174,7 +245,7 @@ describe("Windows worker", () => {
     expect(listBotOpsWorkerHeartbeats("windows")[0]).toMatchObject({
       worker_id: "worker-1",
       target: "windows",
-      capabilities: "status.read, audit.check",
+      capabilities: "status.read, audit.check, service.restart",
       status: "status",
       detail: "manual status check",
       heartbeat_at: "2026-08-18T10:00:00.000Z",

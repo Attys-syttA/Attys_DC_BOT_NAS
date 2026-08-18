@@ -42,7 +42,11 @@ export interface WindowsWorkerStatusSnapshot {
   config: "present" | "missing";
 }
 
-export const WINDOWS_WORKER_CAPABILITIES = ["status.read", "audit.check"] as const satisfies readonly BotOpsCapability[];
+export const WINDOWS_WORKER_CAPABILITIES = [
+  "status.read",
+  "audit.check",
+  "service.restart",
+] as const satisfies readonly BotOpsCapability[];
 
 export function defaultWindowsWorkerId(): string {
   return `windows-worker-${os.hostname()}`;
@@ -196,6 +200,46 @@ function runCheckHelper(
   };
 }
 
+function runServiceRestartHelper(
+  repoRoot: string,
+  workerId: string,
+  runner: FixedCommandRunner,
+): { ok: boolean; result: string } {
+  const snapshot = buildWindowsWorkerStatusSnapshot(repoRoot, workerId, runner);
+  if (snapshot.worktree !== "clean") {
+    return {
+      ok: false,
+      result: `service restart blocked: worktree ${snapshot.worktree}`,
+    };
+  }
+  if (snapshot.config === "missing") {
+    return {
+      ok: false,
+      result: "service restart blocked: config missing",
+    };
+  }
+  if (snapshot.bot_lock === "stale" || snapshot.bot_lock === "unknown") {
+    return {
+      ok: false,
+      result: `service restart blocked: bot lock ${snapshot.bot_lock}`,
+    };
+  }
+  if (!fs.existsSync(path.join(repoRoot, "win-start.bat"))) {
+    return {
+      ok: false,
+      result: "service restart blocked: win-start.bat missing",
+    };
+  }
+
+  const result = runner("cmd", ["/c", "win-start.bat"], repoRoot, 120_000);
+  return {
+    ok: result.code === 0,
+    result: result.code === 0
+      ? "service restart helper completed: win-start.bat returned success"
+      : "service restart helper failed: win-start.bat returned failure",
+  };
+}
+
 export function runWindowsWorkerOnce(
   repoRoot: string,
   workerId = defaultWindowsWorkerId(),
@@ -229,7 +273,9 @@ export function runWindowsWorkerOnce(
     ? runStatusHelper(repoRoot, workerId, runner)
     : job.capability === "audit.check"
       ? runCheckHelper(repoRoot, workerId, runner)
-      : { ok: false, result: `unsupported Windows capability: ${job.capability}` };
+      : job.capability === "service.restart"
+        ? runServiceRestartHelper(repoRoot, workerId, runner)
+        : { ok: false, result: `unsupported Windows capability: ${job.capability}` };
 
   completeBotOpsJob(
     job.job_id,
