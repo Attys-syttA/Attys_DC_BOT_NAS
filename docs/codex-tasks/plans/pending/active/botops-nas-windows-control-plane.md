@@ -50,13 +50,23 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
   - a NAS es Windows worker status/once utak public-safe heartbeatet irnak
   - `/nas status` es `/windows status` mutatja a legutobbi ismert worker heartbeateket
   - nincs worker loop inditas, service install, hatterfolyamat inditas vagy restart
+- Bekerult az elso explicit worker lifecycle supervision szelet:
+  - kozos PID/log alapu supervisor modul
+  - `worker:nas:start|stop|restart|supervisor-status`
+  - `worker:windows:start|stop|restart|supervisor-status`
+  - Windows worker `--loop` mod
+  - duplikalt start blokkolasa
+  - stale PID explicit stop alatti kezelese
+  - restart fail-closed, ha a korabbi PID nem allt le
+  - nincs service install, OS autostart, source write, approval adas, commit, push, deploy vagy cleanup automatizmus
 
 ## Nyitott reszek
 
 1. Approval rejection reason rogzites:
    - ha kesobb bekerul explicit reject command vagy UI, az indokot kulon eventkent kell rogziteni
-2. Worker lifecycle supervision:
-   - explicit operator approval nelkul nincs service install, autostart, restart vagy hatterben inditas
+2. Worker lifecycle OS/service supervision:
+   - explicit kulon approval nelkul tovabbra sincs service install vagy OS autostart
+   - a mostani start/stop/restart helper parancsra indithato, PID/log alapu runtime felugyelet
    - worker loop status/log csak public-safe lehet
 3. Production command surface decision:
    - ha az eles Discord bot tovabbra is az `Attys_DC_BOT`, akkor a contractot es parancsokat kontrollaltan at kell venni oda is
@@ -81,4 +91,4 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
 
 ## Kovetkezo Lepes
 
-A kovetkezo implementacios szelet a worker lifecycle supervision tervszeru elokeszitese vagy a production command surface atveteli dontes legyen. Service restart, deploy, commit es push tovabbra is kulon approval.
+A kovetkezo implementacios szelet a production command surface atveteli dontes vagy a service.restart kulon supervised worker szelete legyen. Service restart, deploy, commit es push tovabbra is kulon approval.

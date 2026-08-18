@@ -2,6 +2,11 @@
 
 ## 2026-08-18
 
+- Worker lifecycle supervisor: bekerult az explicit `worker:nas:start|stop|restart|supervisor-status` es `worker:windows:start|stop|restart|supervisor-status` script keszlet, kozos PID/log alapu supervisor modullal.
+- Windows worker loop: a Windows worker CLI explicit `--loop` modot kapott, hogy ugyanugy felugyelheto legyen, mint a NAS worker.
+- Supervisor safety: a duplicate start nem indit masodik loopot, a stale PID csak explicit stopnal takarodik, a restart pedig fail-closed megall, ha a regi PID meg fut; nincs service install, OS autostart, source write, approval adas, commit, push, deploy vagy cleanup automatizmus.
+- Worker lifecycle smoke: a NAS es Windows worker start/duplicate-start/status/stop/status kezi smoke zold lett; a masodik start nem duplazott, a stop utan a PID allapot `stopped` lett.
+- Version: `0.1.1-prerelease.7`.
 - BotOps baseline: a repo scope-ja NAS control-plane + fixed-task worker iranyra valtott, staged approval autonomiaval es arbitrary shell tiltassal.
 - Contract: bekerult a canonical BotOps capability/job/approval/target/lease contract, allowlisttel es exact approval match szaballyal.
 - SQLite: bekerult a `botops_jobs` tabla es az idempotens `job_id` alapu job letrehozas, hogy ugyanaz a request ne inditson duplikalt futast.

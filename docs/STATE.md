@@ -6,7 +6,7 @@
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT_NAS`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT_NAS`
 - Phase: NAS BotOps control-plane baseline in progress
-- Package version: `0.1.1-prerelease.6`
+- Package version: `0.1.1-prerelease.7`
 - Active plan: `docs/codex-tasks/plans/pending/active/botops-nas-windows-control-plane.md`
 
 ## Current Goal
@@ -57,14 +57,22 @@ Make Discord the main operator surface while keeping execution staged, allowlist
   - NAS and Windows worker status/once paths record fixed-capability worker status
   - `/nas status` and `/windows status` show the latest known heartbeat rows
   - no worker loop, service install, background launch, or restart was started
+- Added the first approved worker lifecycle supervisor slice:
+  - `worker:nas:start|stop|restart|supervisor-status`
+  - `worker:windows:start|stop|restart|supervisor-status`
+  - Windows worker gained an explicit `--loop` mode to match the NAS worker
+  - the supervisor records separate PID and stdout/stderr log files under ignored runtime state
+  - duplicate start is idempotent and reports the existing PID instead of launching another loop
+  - restart waits for the previous PID to exit and fails closed if it is still running
+  - no service install, OS autostart, source write, job approval, deploy, commit, push, or cleanup is performed automatically
 
 ## Open Work
 
-1. Add worker lifecycle launch supervision only after explicit operator approval.
-2. Add cross-repo Discord command integration if the live `Attys_DC_BOT` command surface remains the production control surface.
-3. Validate live Discord command registration only after explicit operator approval to restart or redeploy the bot.
-4. Decide whether `service.restart` should get a separate supervised worker slice.
-5. Decide the NAS publication/deploy route for this repo.
+1. Add cross-repo Discord command integration if the live `Attys_DC_BOT` command surface remains the production control surface.
+2. Validate live Discord command registration only after explicit operator approval to restart or redeploy the bot.
+3. Decide whether `service.restart` should get a separate supervised worker slice.
+4. Decide the NAS publication/deploy route for this repo.
+5. Decide whether worker supervisor start should later be attached to OS/service autostart; this still needs a separate approval gate.
 
 ## Latest Validation
 
@@ -92,3 +100,8 @@ Make Discord the main operator surface while keeping execution staged, allowlist
 - `npm run check`: passed at `0.1.1-prerelease.6`, 41 test files / 279 tests, build included.
 - `git diff --check`: passed at `0.1.1-prerelease.6`.
 - `ggshield secret scan path --recursive --yes --use-gitignore .`: passed at `0.1.1-prerelease.6`.
+- `npm test -- --run src/botops/worker-supervisor.test.ts src/botops/nas-worker.test.ts src/botops/windows-worker.test.ts src/db/database.test.ts`: passed at `0.1.1-prerelease.7`, 4 files / 42 tests.
+- `npm run typecheck`: passed after worker lifecycle supervisor.
+- `npm run worker:nas:supervisor-status`: passed; reported stopped state with public-safe log names.
+- `npm run worker:windows:supervisor-status`: passed; reported stopped state with public-safe log names.
+- Worker lifecycle smoke passed at `0.1.1-prerelease.7`: `worker:nas:start` started one loop, a second start reported `worker already running; no duplicate started`, `worker:nas:stop` returned `worker stopped`, and final supervisor status was `stopped`; the same start/duplicate/status/stop/status sequence passed for the Windows worker.
