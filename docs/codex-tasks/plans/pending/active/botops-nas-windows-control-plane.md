@@ -36,6 +36,14 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
   - config presence check ertekek kiirasa nelkul
   - `audit.check` csak fix `npm run check` helperrel fut, dirty/missing config mellett blokkol
   - `service.restart` csak exact fresh approval utan, fix `cmd /c win-start.bat` helperrel fut, es dirty worktree, missing config, stale/unknown bot lock vagy hianyzo helper mellett fail-closed megall
+- Bekerult az explicit Windows target-root bekotes:
+  - `BOTOPS_WINDOWS_TARGET_REPO_ROOT` abszolut, letezo celrepo gyokerre iranyitja a worker helper futasait
+  - ervenytelen celrepo eseten a worker fail-closed megall
+  - `DISCORD_DATABASE_PATH` csak a BotOps DB-t valasztja, nem potolja a bot runtime configot
+- Live `service.restart` smoke zold lett:
+  - synthetic approved BotOps job: `job-d61e9ed3-85d2-4c60-9f90-d2c6cc7e0d01`
+  - worker futas: NAS repo kod, live bot DB, live bot target root
+  - eredmeny: `Completed`, live bot status `Running`, PID `44748` -> `10440`, `bot.err.log` ures
 - Bekerult az approval expiry hardening:
   - approval rogziti az `approved_by` es `approval_expires_at` mezoket
   - default TTL 15 perc
@@ -72,7 +80,8 @@ A Discord bot legyen a fo operatori vezerlofelulet, de a NAS es Windows vegrehaj
    - ha az eles Discord bot tovabbra is az `Attys_DC_BOT`, akkor a contractot es parancsokat kontrollaltan at kell venni oda is
    - a NAS repo maradjon producer/control-plane truth, ha kulon NAS service lesz belole
 4. Supervised restart runtime smoke:
-   - `service.restart` worker capability elkeszult, de valos restart job live smoke csak kulon operatori paranccsal fusson
+   - `service.restart` worker capability, explicit target-root bekotes es live restart smoke elkeszult
+   - tovabbi service restart automatizalas csak uj, kulon capability/approval dontessel bovulhet
 5. Live smoke csak kulon approval utan:
    - slash command registration
    - bot restart

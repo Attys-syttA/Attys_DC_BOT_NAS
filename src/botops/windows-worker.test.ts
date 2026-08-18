@@ -26,6 +26,8 @@ import {
   formatWindowsWorkerStatus,
   recordWindowsWorkerStatus,
   readBotLockState,
+  readWorkerConfigState,
+  resolveWindowsWorkerRepoRoot,
   runWindowsWorkerOnce,
 } from "./windows-worker.js";
 
@@ -216,6 +218,39 @@ describe("Windows worker", () => {
     expect(calls).toContain("cmd /c win-start.bat");
     expect(calls.some((call) => call.includes("powershell"))).toBe(false);
     expect(getBotOpsJob("restart-approved")?.status).toBe("Completed");
+  });
+
+  it("requires real worker config instead of treating the database path as bot config", () => {
+    const repo = makeTempDir();
+    const originalDatabasePath = process.env.DISCORD_DATABASE_PATH;
+    process.env.DISCORD_DATABASE_PATH = path.join(repo, ".discord-bot-state", "bridge.sqlite");
+
+    try {
+      expect(readWorkerConfigState(repo)).toBe("missing");
+    } finally {
+      if (originalDatabasePath === undefined) {
+        delete process.env.DISCORD_DATABASE_PATH;
+      } else {
+        process.env.DISCORD_DATABASE_PATH = originalDatabasePath;
+      }
+    }
+  });
+
+  it("resolves an explicit absolute Windows worker target repo", () => {
+    const repo = makeTempDir();
+
+    expect(resolveWindowsWorkerRepoRoot(process.cwd(), repo)).toBe(path.resolve(repo));
+  });
+
+  it("fails closed for relative or missing Windows worker target repos", () => {
+    const repo = makeTempDir();
+
+    expect(() => resolveWindowsWorkerRepoRoot(repo, "relative-target")).toThrow(
+      "BOTOPS_WINDOWS_TARGET_REPO_ROOT must be an absolute path",
+    );
+    expect(() => resolveWindowsWorkerRepoRoot(repo, path.join(repo, "missing"))).toThrow(
+      "BOTOPS_WINDOWS_TARGET_REPO_ROOT must point to an existing directory",
+    );
   });
 
   it("reports stale bot locks without stopping any process", () => {

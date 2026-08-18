@@ -2,6 +2,10 @@
 
 ## 2026-08-18
 
+- Windows worker target-root wiring: bekerult a `BOTOPS_WINDOWS_TARGET_REPO_ROOT`, amellyel a NAS repo worker kodja explicit, abszolut letezo celrepo gyokerre iranyithato; ervenytelen celnal fail-closed megall.
+- Config hardening: a `DISCORD_DATABASE_PATH` tovabbra is valaszthat BotOps DB-t, de onmagaban mar nem szamit bot runtime config jelenletnek, igy live restart smoke-nal kulon a celrepo `.env` vagy `BASE_PROJECT_DIR` kell.
+- Live restart smoke: a synthetic approved `service.restart` BotOps job `job-d61e9ed3-85d2-4c60-9f90-d2c6cc7e0d01` a live `Attys_DC_BOT` DB-ben `Completed` lett; a worker a live bot repot celzta, a bot PID `44748` -> `10440` lett, `bot.err.log` ures maradt, es a startup log `Registered 29 application commands` sort adott.
+- Version: `0.1.1-prerelease.9`.
 - Windows service restart worker slice: `service.restart` now belongs to the Windows worker capability list, but remains approval-gated by the BotOps job contract. After exact fresh approval, it runs only the fixed `cmd /c win-start.bat` helper and fails closed on dirty worktree, missing config, stale/unknown bot lock, or missing helper script. It does not grant arbitrary shell, source write, commit, push, deploy, rebuild, cleanup, service install, or OS autostart.
 - Version bump: a package verzio `0.1.1-prerelease.8`, mert az approval-koteles Windows `service.restart` worker capability bekerult.
 - Worker lifecycle supervisor: bekerult az explicit `worker:nas:start|stop|restart|supervisor-status` es `worker:windows:start|stop|restart|supervisor-status` script keszlet, kozos PID/log alapu supervisor modullal.

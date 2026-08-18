@@ -6,7 +6,7 @@
 - Repository folder: `<CODEX_WORKS>\Attys_DC_BOT_NAS`
 - Target remote: `https://github.com/Attys-syttA/Attys_DC_BOT_NAS`
 - Phase: NAS BotOps control-plane baseline in progress
-- Package version: `0.1.1-prerelease.8`
+- Package version: `0.1.1-prerelease.9`
 - Active plan: `docs/codex-tasks/plans/pending/active/botops-nas-windows-control-plane.md`
 
 ## Current Goal
@@ -65,14 +65,23 @@ Make Discord the main operator surface while keeping execution staged, allowlist
   - duplicate start is idempotent and reports the existing PID instead of launching another loop
   - restart waits for the previous PID to exit and fails closed if it is still running
   - no service install, OS autostart, source write, job approval, deploy, commit, push, or cleanup is performed automatically
+- Added explicit Windows worker target-root wiring:
+  - `BOTOPS_WINDOWS_TARGET_REPO_ROOT` may point the Windows worker at a separate live bot repository
+  - the target root must be an absolute existing directory, otherwise the worker fails closed before running a helper
+  - `DISCORD_DATABASE_PATH` can select the BotOps database but no longer counts as bot runtime config by itself
+  - live restart smoke can now target the live `Attys_DC_BOT` repo while the worker code remains in this NAS repo
+- Live `service.restart` smoke completed:
+  - synthetic approved BotOps job `job-d61e9ed3-85d2-4c60-9f90-d2c6cc7e0d01` was created in the live bot database
+  - worker ran from this NAS repo with `DISCORD_DATABASE_PATH` targeting the live bot DB and `BOTOPS_WINDOWS_TARGET_REPO_ROOT` targeting the live bot repo
+  - result was `Completed`; the live bot PID changed from `44748` to `10440`
+  - live bot status returned `Running`, `bot.err.log` stayed empty, and startup log recorded `Registered 29 application commands`
 
 ## Open Work
 
 1. Keep the cross-repo Discord command integration aligned with the live `Attys_DC_BOT` production command surface.
-2. Run a live `service.restart` BotOps job smoke only after explicit operator command.
-3. Decide whether restart worker execution should target only the bot repo, or later support additional fixed services with separate capabilities.
-4. Decide the NAS publication/deploy route for this repo.
-5. Decide whether worker supervisor start should later be attached to OS/service autostart; this still needs a separate approval gate.
+2. Decide whether restart worker execution should target only the bot repo, or later support additional fixed services with separate capabilities.
+3. Decide the NAS publication/deploy route for this repo.
+4. Decide whether worker supervisor start should later be attached to OS/service autostart; this still needs a separate approval gate.
 
 ## Latest Validation
 
@@ -111,3 +120,9 @@ Make Discord the main operator surface while keeping execution staged, allowlist
 - `npm run worker:windows:status`: passed at `0.1.1-prerelease.8`; reported `status.read, audit.check, service.restart`, no queued/running/waiting jobs, dirty worktree, free bot lock, and missing config without exposing values.
 - `git diff --check`: passed at `0.1.1-prerelease.8`.
 - `ggshield secret scan path --recursive --yes --use-gitignore .`: passed at `0.1.1-prerelease.8`.
+- `npm test -- --run src/botops/windows-worker.test.ts src/db/database.test.ts src/botops/contract.test.ts`: passed at `0.1.1-prerelease.9`, 3 files / 42 tests, including explicit target-root resolution and DB-path-not-config fail-closed coverage.
+- `npm run typecheck`: passed after explicit Windows target-root wiring.
+- `npm run check`: passed at `0.1.1-prerelease.9`, 42 test files / 291 tests, build included.
+- `git diff --check`: passed at `0.1.1-prerelease.9`.
+- `ggshield secret scan path --recursive --yes --use-gitignore .`: passed at `0.1.1-prerelease.9`.
+- Live restart smoke: `npm run worker:windows:once` completed the approved `service.restart` job against the live bot repo; follow-up `win-start.bat --status`, `npm run doctor:local`, and `npm run nas:bridge:status` passed in `Attys_DC_BOT`.

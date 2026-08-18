@@ -5,6 +5,7 @@ import {
   defaultWindowsWorkerId,
   formatWindowsWorkerStatus,
   recordWindowsWorkerStatus,
+  resolveWindowsWorkerRepoRoot,
   runWindowsWorkerOnce,
 } from "../botops/windows-worker.js";
 
@@ -27,7 +28,7 @@ async function main(): Promise<void> {
 
   const mode = process.argv[2] ?? "--once";
   const workerId = process.env.BOTOPS_WINDOWS_WORKER_ID || defaultWindowsWorkerId();
-  const repoRoot = process.cwd();
+  const repoRoot = resolveWindowsWorkerRepoRoot();
 
   if (mode === "--status") {
     const snapshot = buildWindowsWorkerStatusSnapshot(repoRoot, workerId);

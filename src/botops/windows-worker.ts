@@ -48,8 +48,31 @@ export const WINDOWS_WORKER_CAPABILITIES = [
   "service.restart",
 ] as const satisfies readonly BotOpsCapability[];
 
+export const WINDOWS_TARGET_REPO_ROOT_ENV = "BOTOPS_WINDOWS_TARGET_REPO_ROOT";
+
 export function defaultWindowsWorkerId(): string {
   return `windows-worker-${os.hostname()}`;
+}
+
+export function resolveWindowsWorkerRepoRoot(
+  fallbackRepoRoot = process.cwd(),
+  configuredRepoRoot = process.env[WINDOWS_TARGET_REPO_ROOT_ENV],
+): string {
+  const configured = configuredRepoRoot?.trim();
+  if (configured && !path.isAbsolute(configured)) {
+    throw new Error(`${WINDOWS_TARGET_REPO_ROOT_ENV} must be an absolute path`);
+  }
+
+  const resolved = path.resolve(configured || fallbackRepoRoot);
+  try {
+    if (!fs.statSync(resolved).isDirectory()) {
+      throw new Error("not a directory");
+    }
+  } catch {
+    throw new Error(`${WINDOWS_TARGET_REPO_ROOT_ENV} must point to an existing directory`);
+  }
+
+  return resolved;
 }
 
 export function defaultFixedCommandRunner(
@@ -103,7 +126,7 @@ export function readBotLockState(repoRoot: string): "free" | "active" | "stale" 
 }
 
 export function readWorkerConfigState(repoRoot: string): "present" | "missing" {
-  if (process.env.BASE_PROJECT_DIR || process.env.DISCORD_DATABASE_PATH) return "present";
+  if (process.env.BASE_PROJECT_DIR) return "present";
   return fs.existsSync(path.join(repoRoot, ".env")) ? "present" : "missing";
 }
 
