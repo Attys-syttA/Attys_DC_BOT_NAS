@@ -9,7 +9,7 @@ const CATEGORY_LABELS = {
 } as const;
 
 const CATEGORY_ORDER = ["codex", "sessions", "repo", "ops", "safety"] as const;
-const HELP_LIST_DESCRIPTION_MAX = 58;
+const HELP_LIST_DESCRIPTION_MAX = 42;
 const TOPIC_CHOICES = [
   { name: "kezdetek", value: "kezdetek" },
   { name: "fajlfeltoltes", value: "fajlfeltoltes" },
@@ -21,11 +21,14 @@ function compactDescription(value: string): string {
     : value;
 }
 
-export function commandChoices() {
+export function commandChoices(focused = "") {
+  const normalizedFocused = focused.trim().toLowerCase();
   const commandEntries = HELP_ENTRIES
     .filter((entry) => entry.name !== "sugo")
     .map((entry) => ({ name: entry.name, value: entry.name }));
-  return [...TOPIC_CHOICES, ...commandEntries];
+  return [...TOPIC_CHOICES, ...commandEntries]
+    .filter((choice) => !normalizedFocused || choice.name.includes(normalizedFocused))
+    .slice(0, 25);
 }
 
 export function renderHelpList(commandName: string): string {

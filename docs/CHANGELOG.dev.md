@@ -1,5 +1,20 @@
 # Development Changelog
 
+## 2026-08-18
+
+- BotOps baseline: a repo scope-ja NAS control-plane + fixed-task worker iranyra valtott, staged approval autonomiaval es arbitrary shell tiltassal.
+- Contract: bekerult a canonical BotOps capability/job/approval/target/lease contract, allowlisttel es exact approval match szaballyal.
+- SQLite: bekerult a `botops_jobs` tabla es az idempotens `job_id` alapu job letrehozas, hogy ugyanaz a request ne inditson duplikalt futast.
+- Discord command surface: bekerult a `/ops status|jobs|approve|cancel|logs`, `/nas status|worker-status`, es `/windows status|helper-run`; ezek requestet/statuszt kezelnek, nem futtatnak kozvetlen shellt, restartot, deployt, commitot vagy pusht.
+- NAS worker slice: bekerult a lease alapu `nas.worker.check` pickup, heartbeat iras, public-safe result iras, es a `worker:nas:status|once|loop` npm script keszlet; a loop nem indul automatikusan.
+- Windows worker slice: bekerult a fix `status.read` es `audit.check` helper registry, dirty-worktree/config/bot-lock preflight, es a `worker:windows:status|once` npm script keszlet; `service.restart` tovabbra sem worker capability.
+- Approval expiry: a job approval most rogziti az approvert es a lejarati idot; worker pickup elott a lejart approval `stale` allapotba kerul es nem indul vegrehajtas.
+- BotOps event audit trail: bekerult a `botops_events` tabla es a job/approval/status/worker lifecycle esemenyek rogzites; a `/ops logs` most a job reszletek mellett a legutobbi public-safe event historyt is mutatja.
+- Worker heartbeat visibility: bekerult a `botops_worker_heartbeats` tabla; a NAS es Windows worker status/once utak public-safe heartbeatet irnak, a `/nas status` es `/windows status` pedig a legutobbi ismert worker jelentest mutatja.
+- Safety docs: frissult az `AGENTS.md`, `docs/STATE.md`, es az aktiv `botops-nas-windows-control-plane.md` terv a NAS-vs-Windows trust boundaryval es fail-closed folytatassal.
+- Version: `0.1.1-prerelease.6`.
+- Validacio: celzott BotOps/DB/worker tesztek, `npm run typecheck`, `worker:nas:status`, `worker:windows:status`, teljes `npm run check` (41 tesztfajl / 279 teszt), `git diff --check`, es `ggshield secret scan path --recursive --yes --use-gitignore .` zold.
+
 ## 2026-06-22
 
 - Release-readiness plan cleanup: az aktiv `cross-platform-source-parity-and-beyond.md` tervbol kikerultek a mar elkeszult implementacios fazisok mint hatralevo munka; a terv most a tenyleges Windows release acceptance, Discord live smoke, final validation es external-platform future-work pontokat tartja nyitva.

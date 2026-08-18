@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { APIApplicationCommandOptionChoice } from "discord.js";
-import { execute as executeHelp, data as helpData } from "./help.js";
-import { execute as executeSugo, data as sugoData } from "./sugo.js";
+import { execute as executeHelp, data as helpData, autocomplete as autocompleteHelp } from "./help.js";
+import { execute as executeSugo, data as sugoData, autocomplete as autocompleteSugo } from "./sugo.js";
 
 function makeInteraction(commandName: "help" | "sugo", selected: string | null = null) {
   return {
@@ -13,13 +12,8 @@ function makeInteraction(commandName: "help" | "sugo", selected: string | null =
   };
 }
 
-function firstChoice(commandJson: ReturnType<typeof helpData.toJSON>): APIApplicationCommandOptionChoice<string> | undefined {
-  const option = commandJson.options?.[0] as { choices?: APIApplicationCommandOptionChoice<string>[] } | undefined;
-  return option?.choices?.[0];
-}
-
 describe("/help and /sugo", () => {
-  it("registers the parancs option on both aliases", () => {
+  it("registers the parancs autocomplete option on both aliases", () => {
     const helpJson = helpData.toJSON();
     const sugoJson = sugoData.toJSON();
 
@@ -27,14 +21,38 @@ describe("/help and /sugo", () => {
     expect(sugoJson.name).toBe("sugo");
     expect(helpJson.options?.[0]?.name).toBe("parancs");
     expect(sugoJson.options?.[0]?.name).toBe("parancs");
-    expect(firstChoice(helpJson)).toMatchObject({
-      name: "kezdetek",
-      value: "kezdetek",
-    });
-    expect(firstChoice(sugoJson)).toMatchObject({
-      name: "kezdetek",
-      value: "kezdetek",
-    });
+    expect(helpJson.options?.[0]).toMatchObject({ autocomplete: true });
+    expect(sugoJson.options?.[0]).toMatchObject({ autocomplete: true });
+  });
+
+  it("responds with bounded autocomplete choices", async () => {
+    const interaction = {
+      options: {
+        getFocused: vi.fn(() => "win"),
+      },
+      respond: vi.fn(),
+    };
+
+    await autocompleteHelp(interaction as never);
+
+    const choices = interaction.respond.mock.calls[0][0];
+    expect(choices.length).toBeLessThanOrEqual(25);
+    expect(choices).toContainEqual({ name: "windows", value: "windows" });
+  });
+
+  it("keeps /sugo autocomplete bounded too", async () => {
+    const interaction = {
+      options: {
+        getFocused: vi.fn(() => "nas"),
+      },
+      respond: vi.fn(),
+    };
+
+    await autocompleteSugo(interaction as never);
+
+    const choices = interaction.respond.mock.calls[0][0];
+    expect(choices.length).toBeLessThanOrEqual(25);
+    expect(choices).toContainEqual({ name: "nas", value: "nas" });
   });
 
   it("lists known commands in Hungarian", async () => {

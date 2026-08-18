@@ -1,4 +1,5 @@
 import {
+  AutocompleteInteraction,
   ChatInputCommandInteraction,
   SlashCommandBuilder,
 } from "discord.js";
@@ -12,8 +13,13 @@ export const data = new SlashCommandBuilder()
       .setName("parancs")
       .setDescription("Melyik parancsrol kersz reszletesebb sugot?")
       .setRequired(false)
-      .addChoices(...commandChoices()),
+      .setAutocomplete(true),
   );
+
+export async function autocomplete(interaction: AutocompleteInteraction): Promise<void> {
+  const focused = interaction.options.getFocused();
+  await interaction.respond(commandChoices(String(focused)));
+}
 
 export async function execute(
   interaction: ChatInputCommandInteraction,

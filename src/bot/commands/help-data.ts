@@ -122,6 +122,29 @@ export const HELP_ENTRIES: HelpEntry[] = [
     ],
   },
   {
+    name: "nas",
+    category: "ops",
+    usage: "/nas status|worker-status",
+    short: "NAS control-plane allapotot mutat vagy fix worker check requestet keszit.",
+    details: [
+      "`status` megmutatja a NAS oldali BotOps hatarokat.",
+      "`worker-status` csak allowlistes `nas.worker.check` jobot hoz letre.",
+      "Nem futtat NAS shellt, nem ir source worktree-t, nem indit deployt vagy rebuildet.",
+    ],
+  },
+  {
+    name: "ops",
+    category: "ops",
+    usage: "/ops status|jobs|approve|cancel|logs",
+    short: "A staged BotOps jobok allapotat, jovahagyasat es public-safe reszleteit kezeli.",
+    details: [
+      "`status` es `jobs` olvaso attekintest ad.",
+      "`approve` csak a job approval allapotat rogziti, de nem indit vegrehajtast.",
+      "`cancel` megszakitja a jobot, ha meg nem futott le.",
+      "`logs` public-safe job reszleteket mutat.",
+    ],
+  },
+  {
     name: "logs",
     category: "ops",
     usage: "/logs source: bot|error|operator-tools|events|update lines: <1-30> contains: <opcionalis>",
@@ -231,6 +254,17 @@ export const HELP_ENTRIES: HelpEntry[] = [
       "A preflight a sajat MCP, Docker Desktop es Obsidian MCP elokeszitesere valo VS Code megnyitasa nelkul.",
       "`status` csak a helyi `operator-startup.log` rovid, public-safe allapot sorait mutatja.",
       "A parancs nem ir ki tokent, raw Discord ID-t vagy privat pathot Discordra.",
+    ],
+  },
+  {
+    name: "windows",
+    category: "ops",
+    usage: "/windows status|helper-run",
+    short: "Korlatozott Windows execution-plane statuszt mutat vagy fix helper requestet keszit.",
+    details: [
+      "`status` megmutatja, hogy arbitrary shell es automatikus restart/deploy tiltott.",
+      "`helper-run` csak elore ismert helper capabilityhez hoz letre BotOps jobot.",
+      "`restart` helper approval-koteles, es az approval sem indit kozvetlen vegrehajtast.",
     ],
   },
   {

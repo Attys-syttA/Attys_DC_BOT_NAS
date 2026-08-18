@@ -38,6 +38,9 @@ import * as healthCmd from "./commands/health.js";
 import * as eventsCmd from "./commands/events.js";
 import * as logsCmd from "./commands/logs.js";
 import * as botCmd from "./commands/bot.js";
+import * as opsCmd from "./commands/ops.js";
+import * as windowsCmd from "./commands/windows.js";
+import * as nasCmd from "./commands/nas.js";
 import * as sendToCodexCmd from "./commands/send-to-codex.js";
 
 const chatCommands = [
@@ -65,6 +68,9 @@ const chatCommands = [
   eventsCmd,
   logsCmd,
   botCmd,
+  opsCmd,
+  windowsCmd,
+  nasCmd,
 ];
 
 const messageCommands = [
